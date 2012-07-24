@@ -1,5 +1,6 @@
 build
 bin
+.settings
 .project
 *.pydevproject
 .cproject
