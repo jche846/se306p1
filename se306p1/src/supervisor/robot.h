@@ -9,33 +9,33 @@
 namespace se306p1 {
   class Robot {
   private:
-    ros::NodeHandle _nh;
-    ros::Publisher _doPublisher;
-    ros::Publisher _goPublisher;
+    ros::NodeHandle nh_;
+    ros::Publisher doPublisher_;
+    ros::Publisher goPublisher_;
 
   public:
     Robot(uint64_t n);
     virtual ~Robot();
 
-    uint64_t id;
+    uint64_t id_;
 
-    double x; //< Last known x.
-    double y; //< Last known y.
-    double theta; //< Last known theta.
+    double x_; //< Last known x.
+    double y_; //< Last known y.
+    double theta_; //< Last known theta.
 
     /**
      * Request the robot to go to a position via a child controller.
      */
-    void go(double x, double y, double theta, double lv, bool enqueue);
+    void Go(double x, double y, double theta, double lv, bool enqueue);
 
     /**
      * Request the robot to stop immediately.
      */
-    void stop();
+    void Stop();
 
     /**
      * Request the robot repeatedly does something.
      */
-    void do_(double lv, double av, bool enqueue);
+    void Do(double lv, double av, bool enqueue);
   };
 }
