@@ -2,12 +2,16 @@
 
 #include "ros/ros.h"
 
+#include <cstdint>
+
 #define ROBOT_DO_TOPIC(ROBOT) ROBOT "/do"
 #define ROBOT_GO_TOPIC(ROBOT) ROBOT "/go"
 
 namespace se306p1 {
   class Robot {
   private:
+    uint64_t _id;
+
     ros::Publisher _doPublisher;
     ros::Publisher _goPublisher;
 

@@ -15,9 +15,11 @@ namespace se306p1 {
   private:
     std::vector<Robot> _robots;
 
+    ros::NodeHandle _nh;
     ros::Subscriber _ansPosSubscriber;
     ros::Publisher _askPosPublisher;
 
+  protected:
     /**
      * The callback for the position answer, used to either:
      *
