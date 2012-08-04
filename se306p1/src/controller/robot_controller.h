@@ -12,6 +12,7 @@
 #include <se306p1/Position.h>
 #include <se306p1/Do.h>
 #include <se306p1/Go.h>
+#include <se306p1/command.h>
 #include <cstdint>
 #include <queue>
 
@@ -29,19 +30,23 @@ class RobotController {
 
 private:
   // Robot identification
-  int64_t robot_id;
+  int64_t robot_id_;
 
   // Position fields
-  double x; // x coordinate
-  double y; // y coordinate
-  double theta; // direction that the robot is facing, in radians counter clockwise, measured from "east".
+  double x_; // x coordinate
+  double y_; // y coordinate
+  double theta_; // direction that the robot is facing, in radians counter clockwise, measured from "east".
 
   // Movement fields
-  double linear; // Linear velocity
-  double angular; // Angular velocity (counter clockwise)
+  double lv_; // Linear velocity
+  double av_; // Angular velocity (counter clockwise)
+
+  // Loop control variables
+  bool moving_;
+  bool dequeuing_;
 
   // Command queue
-  std::queue<int> commands;
+  std::queue<Command> commands_;
 
   // ROS Node handler for pub/subbing to topics
   ros::NodeHandle nh_;
@@ -57,9 +62,9 @@ public:
   virtual ~RobotController();
   void MoveTo(double x, double y, double theta);
   void ContinuousMove(double lv, double av);
-  void go_callback(Go message);
-  void do_callback(Do message);
-  void askPosition_callback(AskPosition message);
+  void go_callback(Go msg);
+  void do_callback(Do msg);
+  void askPosition_callback(AskPosition msg);
   void AnswerPosition();
   void ResolveCollision();
 };

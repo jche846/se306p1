@@ -28,11 +28,14 @@ RobotController::RobotController() {
   // Publish our position when asked by the supervisor.
   this->ansPosPublisher_ = nh_.advertise<Position>(ANS_POS_TOPIC, 1000);
 
-  this->x = 0;
-  this->y = 0;
-  this->linear = 0;
-  this->theta = 0;
-  this->angular = 0;
+  this->x_ = 0;
+  this->y_ = 0;
+  this->theta_ = 0;
+  this->lv_ = 0;
+  this->av_ = 0;
+
+  this->moving_ = false;
+  this->dequeuing_ = true;
 }
 
 RobotController::~RobotController() {
@@ -60,9 +63,16 @@ void RobotController::MoveTo(double x, double y, double theta) {
 void RobotController::ContinuousMove(double lv, double av) {
 }
 
-void RobotController::go_callback(Go message) {
+void RobotController::go_callback(Go msg) {
 }
-void RobotController::do_callback(Do message) {
+void RobotController::do_callback(Do msg) {
+  this->lv_ = msg->lv;
+  this->av_ = msg->av;
+
+  if (msg->enqueue == true) {
+    this->commands_.
+  }
+
 }
 void RobotController::askPosition_callback(AskPosition message) {
 }
