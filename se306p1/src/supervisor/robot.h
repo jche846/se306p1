@@ -6,6 +6,8 @@
 
 #include "../macros.h"
 
+#include "../util/vector2.h"
+
 namespace se306p1 {
   class Robot {
   private:
@@ -19,14 +21,13 @@ namespace se306p1 {
 
     uint64_t id_;
 
-    double x_; //< Last known x.
-    double y_; //< Last known y.
-    double theta_; //< Last known theta.
+    Vector2 position_;
+    double theta_;
 
     /**
      * Request the robot to go to a position via a child controller.
      */
-    void Go(double x, double y, double theta, double lv, bool enqueue);
+    void Go(const Vector2 &position, double theta, double lv, bool enqueue);
 
     /**
      * Request the robot to stop immediately.

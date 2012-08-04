@@ -21,8 +21,9 @@ namespace se306p1 {
       if (robots_.find(msg.R_ID) != robots_.end()) {
         robot_ptr = robots_[msg.R_ID];
 
-        if (robot_ptr->x_ != msg.x || robot_ptr->y_ != msg.y ||
-           robot_ptr->theta_ != msg.theta) {
+        if (robot_ptr->position_.x_ != msg.x ||
+            robot_ptr->position_.y_ != msg.y ||
+            robot_ptr->theta_ != msg.theta) {
           ROS_WARN("Robot %ld changed its position during discovery.",
                    robots_[msg.R_ID]->id_);
         } else {
@@ -34,8 +35,7 @@ namespace se306p1 {
         ROS_INFO("Hello robot %ld!", robots_[msg.R_ID]->id_);
       }
 
-      robot_ptr->x_ = msg.x;
-      robot_ptr->y_ = msg.y;
+      robot_ptr->position_ = Vector2(msg.x, msg.y);
       robot_ptr->theta_ = msg.theta;
       robot_ptr->Stop();
     }

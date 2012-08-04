@@ -23,10 +23,10 @@ namespace se306p1 {
 
   Robot::~Robot() {}
 
-  void Robot::Go(double x, double y, double theta, double lv, bool enqueue) {
+  void Robot::Go(const Vector2 &position, double theta, double lv, bool enqueue) {
     se306p1::Go msg;
-    msg.x = x;
-    msg.y = y;
+    msg.x = position.x_;
+    msg.y = position.y_;
     msg.theta = theta;
     msg.lv = lv;
     msg.enqueue = enqueue;
