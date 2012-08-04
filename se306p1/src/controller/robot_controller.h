@@ -5,48 +5,51 @@
  *      Author: ahug048
  */
 
+#pragma once
+
+#include "ros/ros.h"
+#include <se306p1/AskPosition.h>
+#include <se306p1/Position.h>
+#include <se306p1/Do.h>
+#include <se306p1/Go.h>
 #include <cstdint>
 #include <queue>
-#include "ros/ros.h"
-#include "std_msgs/String.h"
-#include <geometry_msgs/Twist.h>
-#include <nav_msgs/Odometry.h>
-
-#pragma once
 
 /**
  * This header file defines the state variables and methods available to control a robot
  */
 namespace se306p1 {
-  class RobotController {
 
-  private:
+class RobotController {
 
-    // Robot identification
-    std::uint64_t robot_id;
+private:
 
-    // Position fields
-    double x; // x coordinate
-    double y; // y coordinate
-    double theta; // direction that the robot is facing, in radians counter clockwise, measured from "east".
+  // Robot identification
+  int64_t robot_id;
 
-    // Movement fields
-    double linear; // Linear velocity
-    double angular; // Angular velocity (counter clockwise)
+  // Position fields
+  double x; // x coordinate
+  double y; // y coordinate
+  double theta; // direction that the robot is facing, in radians counter clockwise, measured from "east".
 
-    // Command queue
-    std::queue commands;
+  // Movement fields
+  double linear; // Linear velocity
+  double angular; // Angular velocity (counter clockwise)
 
-  public:
-    RobotController();
-    virtual ~RobotController();
-    void MoveTo(double x, double y, double theta);
-    void ContinuousMove(double lv, double av);
-    void GoCallback(message);
-    void DoCallback(message);
-    void AskPositionCallback(message);
-    void AnswerPosition();
-    void ResolveCollision();
-  };
+  // Command queue
+  std::queue<int> commands;
+
+public:
+  RobotController();
+  virtual ~RobotController();
+  void MoveTo(double x, double y, double theta);
+  void ContinuousMove(double lv, double av);
+  void go_callback(Go message);
+  void do_callback(Do message);
+  void askPosition_callback(AskPosition message);
+  void AnswerPosition();
+  void ResolveCollision();
+};
+
 }
 
