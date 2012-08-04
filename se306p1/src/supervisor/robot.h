@@ -4,24 +4,24 @@
 
 #include <cstdint>
 
-#define ROBOT_DO_TOPIC(ROBOT) ROBOT "/do"
-#define ROBOT_GO_TOPIC(ROBOT) ROBOT "/go"
+#include "../macros.h"
 
 namespace se306p1 {
   class Robot {
   private:
-    uint64_t _id;
-
+    ros::NodeHandle _nh;
     ros::Publisher _doPublisher;
     ros::Publisher _goPublisher;
 
-    double _x; //< Last known x.
-    double _y; //< Last known y.
-    double _theta; //< Last known theta.
-
   public:
-    Robot();
+    Robot(uint64_t n);
     virtual ~Robot();
+
+    uint64_t id;
+
+    double x; //< Last known x.
+    double y; //< Last known y.
+    double theta; //< Last known theta.
 
     /**
      * Request the robot to go to a position via a child controller.
@@ -29,8 +29,13 @@ namespace se306p1 {
     void go(double x, double y, double theta, double lv, bool enqueue);
 
     /**
+     * Request the robot to stop immediately.
+     */
+    void stop();
+
+    /**
      * Request the robot repeatedly does something.
      */
-    void do_(double lv, double ev, bool enqueue);
+    void do_(double lv, double av, bool enqueue);
   };
 }

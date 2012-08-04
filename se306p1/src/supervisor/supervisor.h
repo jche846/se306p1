@@ -1,7 +1,8 @@
 #pragma once
 
 #include "ros/ros.h"
-#include <vector>
+#include <map>
+#include <memory>
 
 #include "robot.h"
 
@@ -12,8 +13,14 @@
 
 namespace se306p1 {
   class Supervisor {
+    enum State {
+      DISCOVERY,
+      CONTROLLING
+    };
+
   private:
-    std::vector<Robot> _robots;
+    State _state;
+    std::map<uint64_t, std::shared_ptr<Robot> > _robots;
 
     ros::NodeHandle _nh;
     ros::Subscriber _ansPosSubscriber;
@@ -36,16 +43,9 @@ namespace se306p1 {
     virtual ~Supervisor();
 
     /**
-     * Request positions of all robots and populate _robots.
+     * Request positions of all robots and discover _robots.
      */
-    void populate();
-
-    /**
-     * Reset the state of the supervisor.
-     *
-     * Used in the case of a late robot ans_pos.
-     */
-    void reset();
+    void discover(int timeout);
 
     /**
      * Run the supervisor.

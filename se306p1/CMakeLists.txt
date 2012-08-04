@@ -29,6 +29,9 @@ rosbuild_genmsg()
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 
-rosbuild_add_executable(circle_supervisor src/supervisor/circle_supervisor_main.cpp src/supervisor/supervisor.cpp)
+rosbuild_add_executable(circle_supervisor
+  src/supervisor/circle_supervisor_main.cpp
+  src/supervisor/supervisor.cpp
+  src/supervisor/robot.cpp)
 
 #target_link_libraries(example ${PROJECT_NAME})
