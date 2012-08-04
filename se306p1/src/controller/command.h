@@ -11,12 +11,10 @@
 #include <se306p1/Go.h>
 
 namespace se306p1 {
-
-class Command {
-public:
-  Command(Do msg);
-  Command(Go msg);
-  virtual ~Command();
-};
-
+  class Command {
+  public:
+    Command(Do msg);
+    Command(Go msg);
+    virtual ~Command();
+  };
 }

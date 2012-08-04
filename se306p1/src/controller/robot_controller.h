@@ -25,49 +25,46 @@
  * This header file defines the state variables and methods available to control a robot
  */
 namespace se306p1 {
+  class RobotController {
+  private:
+    // Robot identification
+    int64_t robot_id_;
 
-class RobotController {
+    // Position fields
+    double x_; // x coordinate
+    double y_; // y coordinate
+    double theta_; // direction that the robot is facing, in radians counter clockwise, measured from "east".
 
-private:
-  // Robot identification
-  int64_t robot_id_;
+    // Movement fields
+    double lv_; // Linear velocity
+    double av_; // Angular velocity (counter clockwise)
 
-  // Position fields
-  double x_; // x coordinate
-  double y_; // y coordinate
-  double theta_; // direction that the robot is facing, in radians counter clockwise, measured from "east".
+    // Loop control variables
+    bool moving_;
+    bool dequeuing_;
 
-  // Movement fields
-  double lv_; // Linear velocity
-  double av_; // Angular velocity (counter clockwise)
+    // Command queue
+    std::queue<Command> commands_;
 
-  // Loop control variables
-  bool moving_;
-  bool dequeuing_;
+    // ROS Node handler for pub/subbing to topics
+    ros::NodeHandle nh_;
 
-  // Command queue
-  std::queue<Command> commands_;
+    //Topic pub/subs
+    ros::Subscriber askPosSubscriber_;
+    ros::Subscriber doSubscriber_;
+    ros::Subscriber goSubscriber_;
+    ros::Publisher ansPosPublisher_;
 
-  // ROS Node handler for pub/subbing to topics
-  ros::NodeHandle nh_;
-
-  //Topic pub/subs
-  ros::Subscriber askPosSubscriber_;
-  ros::Subscriber doSubscriber_;
-  ros::Subscriber goSubscriber_;
-  ros::Publisher ansPosPublisher_;
-
-public:
-  RobotController();
-  virtual ~RobotController();
-  void MoveTo(double x, double y, double theta);
-  void ContinuousMove(double lv, double av);
-  void go_callback(Go msg);
-  void do_callback(Do msg);
-  void askPosition_callback(AskPosition msg);
-  void AnswerPosition();
-  void ResolveCollision();
-};
-
+  public:
+    RobotController();
+    virtual ~RobotController();
+    void MoveTo(double x, double y, double theta);
+    void ContinuousMove(double lv, double av);
+    void go_callback(Go msg);
+    void do_callback(Do msg);
+    void askPosition_callback(AskPosition msg);
+    void AnswerPosition();
+    void ResolveCollision();
+  };
 }
 
