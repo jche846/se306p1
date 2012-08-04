@@ -10,6 +10,24 @@
 
 namespace se306p1 {
 RobotController::RobotController() {
+  // We need to listen for the supervisor asking for our position.
+  this->askPosSubscriber_ = nh_.subscribe<AskPosition>(
+      ASK_POS_TOPIC, 1000, &RobotController::askPosition_callback, this,
+      ros::TransportHints.reliable());
+
+  // Subscribe to do messages in order to know when to move.
+  this->doSubscriber_ = nh_.subscribe<Do>(DO_TOPIC, 1000,
+                                          &RobotController::go_callback, this,
+                                          ros::TransportHints.reliable());
+
+  // Subscribe to go messages in order to know when to move.
+  this->goSubscriber_ = nh_.subscribe<Go>(GO_TOPIC, 1000,
+                                          &RobotController::do_callback, this,
+                                          ros::TransportHints.reliable());
+
+  // Publish our position when asked by the supervisor.
+  this->ansPosPublisher_ = nh_.advertise<Position>(ANS_POS_TOPIC, 1000);
+
   this->x = 0;
   this->y = 0;
   this->linear = 0;
@@ -58,6 +76,11 @@ void RobotController::ResolveCollision() {
 
 int main(int argc, char *argv[]) {
   ros::init(argc, argv, "robot_conroller");
+
+  while (ros::ok()) {
+    //do stuff
+    ros::spinOnce();
+  }
 
   return 0;
 }

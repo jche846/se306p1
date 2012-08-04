@@ -15,6 +15,11 @@
 #include <cstdint>
 #include <queue>
 
+#define ASK_POS_TOPIC "/supervisor/ask_pos"
+#define ANS_POS_TOPIC "/supervisor/ans_pos"
+#define DO_TOPIC "/se306p1/Do"
+#define GO_TOPIC "/se306p1/Go"
+
 /**
  * This header file defines the state variables and methods available to control a robot
  */
@@ -23,7 +28,6 @@ namespace se306p1 {
 class RobotController {
 
 private:
-
   // Robot identification
   int64_t robot_id;
 
@@ -38,6 +42,15 @@ private:
 
   // Command queue
   std::queue<int> commands;
+
+  // ROS Node handler for pub/subbing to topics
+  ros::NodeHandle nh_;
+
+  //Topic pub/subs
+  ros::Subscriber askPosSubscriber_;
+  ros::Subscriber doSubscriber_;
+  ros::Subscriber goSubscriber_;
+  ros::Publisher ansPosPublisher_;
 
 public:
   RobotController();
