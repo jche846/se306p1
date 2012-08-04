@@ -19,12 +19,12 @@ namespace se306p1 {
     };
 
   private:
-    State _state;
-    std::map<uint64_t, std::shared_ptr<Robot> > _robots;
+    State state_;
+    std::map<uint64_t, std::shared_ptr<Robot> > robots_;
 
-    ros::NodeHandle _nh;
-    ros::Subscriber _ansPosSubscriber;
-    ros::Publisher _askPosPublisher;
+    ros::NodeHandle nh_;
+    ros::Subscriber ansPosSubscriber_;
+    ros::Publisher askPosPublisher_;
 
   protected:
     /**
@@ -45,11 +45,11 @@ namespace se306p1 {
     /**
      * Request positions of all robots and discover _robots.
      */
-    void discover(int timeout);
+    void Discover(int timeout);
 
     /**
      * Run the supervisor.
      */
-    void run();
+    void Run();
   };
 }
