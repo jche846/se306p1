@@ -10,6 +10,6 @@ namespace se306p1 {
       position_(position), theta_(theta) { }
 
     inline Pose(Pose &from) :
-      position_(from.position), theta_(from.theta) { }
+      position_(from.position_), theta_(from.theta_) { }
   };
 }
