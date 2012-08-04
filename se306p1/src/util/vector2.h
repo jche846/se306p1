@@ -1,6 +1,6 @@
 #pragma once
 
-#include <math.h>
+#include <cmath>
 
 namespace se306p1
 {
@@ -74,6 +74,14 @@ namespace se306p1
     inline friend Vector2 operator/(T lhs, const Vector2 &rhs)
     {
       return Vector2(lhs / rhs.x_, lhs / rhs.y_);
+    }
+
+    inline double Length() {
+      return std::sqrt(this->LengthSquared());
+    }
+
+    inline double LengthSquared() {
+      return this->x_ * this->x_ + this->y_ * this->y_;
     }
   };
 }
