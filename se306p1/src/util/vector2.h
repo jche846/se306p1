@@ -2,10 +2,8 @@
 
 #include <cmath>
 
-namespace se306p1
-{
-  class Vector2
-  {
+namespace se306p1 {
+  class Vector2 {
   public:
     const double x_;
     const double y_;
