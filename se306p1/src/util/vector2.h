@@ -10,15 +10,9 @@ namespace se306p1
     const double x_;
     const double y_;
 
-    inline Vector2(double x = 0, double y = 0) {
-      this->x_ = x;
-      this->y_ = y;
-    }
+    inline Vector2(double x = 0.0, double y = 0.0) : x_(x), y_(y) { }
 
-    inline Vector2(const Vector &from) {
-      this->x_ = from.x_;
-      this->y_ = from.y_;
-    }
+    inline Vector2(const Vector2 &from) : x_(from.x_), y_(from.y_) { }
 
     ~Vector2() {}
 
@@ -82,6 +76,11 @@ namespace se306p1
 
     inline double LengthSquared() {
       return this->x_ * this->x_ + this->y_ * this->y_;
+    }
+
+    inline Vector2 Normalized() {
+      double len = this->Length();
+      return Vector2(this->x_ / len, this->y_ / len);
     }
   };
 }
