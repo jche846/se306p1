@@ -7,6 +7,11 @@
   <author>SOFTENG 306 Group</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
+  <depend package="std_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="roscpp"/>
+  <depend package="sensor_msgs"/>
+  <depend package="geometry_msgs"/>
   <url>http://github.com/rfw/se306p1</url>
 
 </package>
