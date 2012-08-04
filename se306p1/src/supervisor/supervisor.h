@@ -20,13 +20,14 @@ namespace se306p1 {
 
   private:
     State state_;
-    std::map<uint64_t, std::shared_ptr<Robot> > robots_;
 
     ros::NodeHandle nh_;
     ros::Subscriber ansPosSubscriber_;
     ros::Publisher askPosPublisher_;
 
   protected:
+    std::map<uint64_t, std::shared_ptr<Robot> > robots_;
+
     /**
      * The callback for the position answer, used to either:
      *
@@ -50,6 +51,11 @@ namespace se306p1 {
     /**
      * Run the supervisor.
      */
-    void Run();
+    virtual void Run();
+
+    /**
+     * 
+     */
+    void MoveNodesToDests(std::vector<std::shared_ptr<Robot> > &nodes, const std::vector<Pos> &pose, double lv);
   };
 }
