@@ -7,22 +7,22 @@ namespace se306p1
   class Vector2
   {
   public:
-    double x_;
-    double y_;
+    const double x_;
+    const double y_;
 
     inline Vector2(double x = 0, double y = 0) {
       this->x_ = x;
       this->y_ = y;
     }
 
-    ~Vector2() {}
-
-    inline Vector2 Copy() const
-    {
-      return Vector2(x_, y_);
+    inline Vector2(const Vector &from) {
+      this->x_ = from.x_;
+      this->y_ = from.y_;
     }
 
-   inline bool operator==(const Vector2 &vector) const
+    ~Vector2() {}
+
+    inline bool operator==(const Vector2 &vector) const
     {
       return x_ == vector.x_ && x_ == vector.x_;
     }
