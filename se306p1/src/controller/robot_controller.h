@@ -25,46 +25,49 @@
  * This header file defines the state variables and methods available to control a robot
  */
 namespace se306p1 {
-  class RobotController {
-  private:
-    // Robot identification
-    int64_t robot_id_;
+class RobotController {
+ private:
+  // Robot identification
+  int64_t robot_id_;
 
-    // Position fields
-    double x_; // x coordinate
-    double y_; // y coordinate
-    double theta_; // direction that the robot is facing, in degrees clockwise from north
+  // Position fields
+  double x_;  // x coordinate
+  double y_;  // y coordinate
+  double theta_;  // direction that the robot is facing, in degrees clockwise from north
 
-    // Movement fields
-    double lv_; // Linear velocity
-    double av_; // Angular velocity (counter clockwise)
+  // Movement fields
+  double lv_;  // Linear velocity
+  double av_;  // Angular velocity (counter clockwise)
 
-    // Loop control variables
-    bool moving_;
-    bool dequeuing_;
+  // Loop control variables
+  bool moving_;
+  bool dequeuing_;
 
-    // Command queue
-    std::queue<Command> commands_;
+  // Command queue
+  std::deque<Command> commands_;
 
-    // ROS Node handler for pub/subbing to topics
-    ros::NodeHandle nh_;
+  // ROS Node handler for pub/subbing to topics
+  ros::NodeHandle nh_;
 
-    //Topic pub/subs
-    ros::Subscriber askPosSubscriber_;
-    ros::Subscriber doSubscriber_;
-    ros::Subscriber goSubscriber_;
-    ros::Publisher ansPosPublisher_;
+  //Topic pub/subs
+  ros::Subscriber askPosSubscriber_;
+  ros::Subscriber doSubscriber_;
+  ros::Subscriber goSubscriber_;
+  ros::Publisher ansPosPublisher_;
 
-  public:
-    RobotController();
-    virtual ~RobotController();
-    void MoveTo(double x, double y, double theta);
-    void ContinuousMove(double lv, double av);
-    void go_callback(Go msg);
-    void do_callback(Do msg);
-    void askPosition_callback(AskPosition msg);
-    void AnswerPosition();
-    void ResolveCollision();
-  };
+ public:
+  RobotController(int64_t id);
+  virtual ~RobotController();
+  void MoveTo(double x, double y, double theta);
+  void Rotate(double phi);
+  void MoveForward(double distance);
+  void ContinuousMove(double lv, double av);
+  void go_callback(Go msg);
+  void do_callback(Do msg);
+  void askPosition_callback(AskPosition msg);
+  void AnswerPosition();
+  void ResolveCollision();
+  void ExecuteCommands();
+};
 }
 

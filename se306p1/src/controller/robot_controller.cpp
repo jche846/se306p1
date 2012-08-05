@@ -11,7 +11,9 @@
 #include "../util/vector2.h"
 
 namespace se306p1 {
-  RobotController::RobotController() {
+  RobotController::RobotController(int64_t id) {
+    this->robot_id_ = id;
+
     // We need to listen for the supervisor asking for our position.
     this->askPosSubscriber_ = nh_.subscribe<AskPosition>(
         ASK_POS_TOPIC, 1000, &RobotController::askPosition_callback, this,
@@ -91,16 +93,27 @@ namespace se306p1 {
   }
 
   void RobotController::go_callback(Go msg) {
-  }
-  void RobotController::do_callback(Do msg) {
-    this->lv_ = msg->lv;
-    this->av_ = msg->av;
-
     if (msg->enqueue == true) {
-      this->commands_.
-    }
+      // If the message is for the command queue, queue it.
+      this->commands_.push_back(Command(msg));
+    } else {
+      // Otherwise, interrupt the current action and execute the command.
+      this->dequeuing_ = false;
+      this->moving_ = false;
 
+    }
   }
+
+  void RobotController::do_callback(Do msg) {
+    if (msg->enqueue == true) {
+      // If the message is for the command queue, queue it.
+      this->commands_.push_back(Command(msg));
+    } else {
+      // Otherwise, interrupt the current action and execute the command.
+
+    }
+  }
+
   void RobotController::askPosition_callback(AskPosition message) {
   }
 
@@ -109,6 +122,16 @@ namespace se306p1 {
 
   void RobotController::ResolveCollision() {
   }
+  }
+
+  void RobotController::ExecuteCommands() {
+    while (this->dequeuing_ == true) {
+      // Get the next command
+      Command cmd = this->commands_.pop_front();
+
+      // Do the command
+
+    }
   }
 
   int main(int argc, char *argv[]) {
