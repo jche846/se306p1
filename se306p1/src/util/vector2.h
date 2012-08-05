@@ -5,8 +5,8 @@
 namespace se306p1 {
   class Vector2 {
   public:
-    const double x_;
-    const double y_;
+    double x_;
+    double y_;
 
     inline Vector2(double x = 0.0, double y = 0.0) : x_(x), y_(y) { }
 
