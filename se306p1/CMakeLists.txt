@@ -35,6 +35,7 @@ rosbuild_add_executable(robot_controller src/controller/robot_controller.cpp)
 
 rosbuild_add_executable(circle_supervisor
   src/supervisor/circle_supervisor_main.cpp
+  src/supervisor/circle_supervisor.cpp
   src/supervisor/supervisor.cpp
   src/supervisor/robot.cpp)
 

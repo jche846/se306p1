@@ -1,6 +1,7 @@
 build
 bin
 msg_gen
+docs
 .settings
 .project
 *.pydevproject
