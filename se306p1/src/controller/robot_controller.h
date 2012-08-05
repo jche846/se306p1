@@ -8,6 +8,9 @@
 #pragma once
 
 #include "ros/ros.h"
+#include <geometry_msgs/Twist.h>
+#include <nav_msgs/Odometry.h>
+#include <sensor_msgs/LaserScan.h>
 #include <se306p1/AskPosition.h>
 #include <se306p1/Position.h>
 #include <se306p1/Do.h>
@@ -30,10 +33,11 @@ class RobotController {
   // Robot identification
   int64_t robot_id_;
 
-  // Position fields
-  double x_;  // x coordinate
-  double y_;  // y coordinate
-  double theta_;  // direction that the robot is facing, in degrees clockwise from north
+  // Position
+  Pose position_;
+
+  // Where the robot is currently trying to end up after receiving a go.
+  Pose goal_;
 
   // Movement fields
   double lv_;  // Linear velocity
@@ -41,6 +45,7 @@ class RobotController {
 
   // Loop control variables
   bool moving_;
+  bool rotating_;
   bool dequeuing_;
 
   // Command queue
@@ -56,18 +61,18 @@ class RobotController {
   ros::Publisher ansPosPublisher_;
 
  public:
-  RobotController(int64_t id);
+  RobotController(int64_t id, Pose pose);
   virtual ~RobotController();
-  void MoveTo(double x, double y, double theta);
-  void Rotate(double phi);
-  void MoveForward(double distance);
-  void ContinuousMove(double lv, double av);
+  void Move();
+  void MoveTo(const Pose &pose, double lv);
+  void Rotate();
   void go_callback(Go msg);
   void do_callback(Do msg);
   void askPosition_callback(AskPosition msg);
   void AnswerPosition();
   void ResolveCollision();
-  void ExecuteCommands();
+  void DequeueCommand();
+  void Run();
 };
 }
 
