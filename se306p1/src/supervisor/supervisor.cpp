@@ -67,26 +67,29 @@ namespace se306p1 {
     }
   }
 
-  void Supervisor::MoveNodesToDests(std::vector<std::shared_ptr<Robot> > &nodes, std::vector<Pose> &poses, double lv) {
-    while(poses.size() != 0){
+  void Supervisor::MoveNodesToDests(const std::vector<std::shared_ptr<Robot> > &nodesIn,
+                                    const std::vector<Pose> &posesIn, double lv) {
+    std::vector<std::shared_ptr<Robot> > nodes = nodesIn;
+    std::vector<Pose> poses = posesIn;
+
+    while (poses.size()) {
       double longestDist = -1;
       int longestNodeIndex = 0;
       int longestPoseIndex = 0;
 
-      for(uint nodeIndex = 0; nodeIndex < nodes.size(); nodeIndex++){
-
+      for (size_t nodeIndex = 0; nodeIndex < nodes.size(); nodeIndex++) {
         double dist = std::numeric_limits<double>::max();
         int destIndex = 0;
         std::shared_ptr<Robot> node = nodes[nodeIndex];
         
-        for(uint posesIndex = 0; posesIndex < poses.size(); posesIndex++){
+        for (size_t posesIndex = 0; posesIndex < poses.size(); posesIndex++) {
           double testDist = abs((node->position_ - poses[posesIndex].position_).LengthSquared());
-          if(testDist < dist){
+          if (testDist < dist){
             dist = testDist;
             destIndex = posesIndex;
           }
         }
-        if(dist > longestDist){
+        if (dist > longestDist) {
           longestDist = dist;
           longestNodeIndex = nodeIndex;
           longestPoseIndex = destIndex;
