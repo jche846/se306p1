@@ -8,7 +8,7 @@ namespace se306p1 {
     void FindRobotDests();
     std::shared_ptr<Robot> clusterHead_;
     std::vector<std::shared_ptr<Robot>> nonHeadRobots_;
-    std::vector<Vector2> lineLocations_;
+    std::vector<Pose> lineLocations_;
 
   public:
     virtual ~CircleSupervisor();

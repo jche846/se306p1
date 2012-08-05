@@ -7,6 +7,7 @@
 #include "../macros.h"
 
 #include "../util/vector2.h"
+#include "../util/pose.h"
 
 namespace se306p1 {
   class Robot {
@@ -27,7 +28,7 @@ namespace se306p1 {
     /**
      * Request the robot to go to a position via a child controller.
      */
-    void Go(const Vector2 &position, double theta, double lv, bool enqueue);
+    void Go(const Pose &pos, double lv, bool enqueue);
 
     /**
      * Request the robot to stop immediately.

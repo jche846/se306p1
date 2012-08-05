@@ -2,6 +2,7 @@
 
 #include "../util/vector2.h"
 #define ROBOT_WIDTH 0.35
+#define DEFAULT_MOVE_SPEED 1
 
 namespace se306p1 {
   CircleSupervisor::~CircleSupervisor() {  }
@@ -14,7 +15,7 @@ namespace se306p1 {
 
     this->ElectHead();
 
-    this->
+    this->MoveNodesToDests(this->nonHeadRobots_, this->lineLocations_, DEFAULT_MOVE_SPEED);
 
   }
 
@@ -45,12 +46,15 @@ namespace se306p1 {
   void CircleSupervisor::FindRobotDests() {
     size_t numRobots = this->robots_.size();
 
-    
+    double theta = 0.5; //TODO: work out theta
+
     Vector2 lastLocation = this->clusterHead_->position_;
     Vector2 robotSep = lastLocation.Normalized() * ROBOT_WIDTH * 6;
     for(uint i = 1; i < numRobots; i++) {
+
       lastLocation = lastLocation + robotSep;
-      this->lineLocations_.push_back(lastLocation);
+
+      this->lineLocations_.push_back(Pose(lastLocation, theta));
     }
   }
 }
