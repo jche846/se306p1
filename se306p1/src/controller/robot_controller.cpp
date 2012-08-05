@@ -12,10 +12,6 @@
 #define FREQUENCY 10 // The number of ticks per second the robot will execute.
 namespace se306p1 {
 RobotController::RobotController(int64_t id, Pose pose) {
-
-  ros::CallbackQueue c = ros::getGlobalCallbackQueue();
-  c.reg
-
   // Initialise the robot as stationary with a given pose and ID.
   this->robot_id_ = id;
   this->position_ = pose;
@@ -68,7 +64,7 @@ RobotController::~RobotController() {
 }
 
 /**
- * Moves the robot every ROS spon according to it's linear velocity until it is in the desired position.
+ * Moves the robot every ROS spin according to it's linear velocity until it is in the desired position.
  */
 void RobotController::Move() {
   // Move linearly by lv / FREQUENCY.
@@ -194,4 +190,3 @@ int main(int argc, char *argv[]) {
   rc.Run();
   return 0;
 }
-
