@@ -6,7 +6,9 @@
  */
 
 #include "robot_controller.h"
-#include <math.h>
+#include <cmath>
+#include "../util/trig.h"
+#include "../util/vector2.h"
 
 namespace se306p1 {
   RobotController::RobotController() {
@@ -42,22 +44,47 @@ namespace se306p1 {
     // TODO Auto-generated destructor stub
   }
 
+  /**
+  * Moves the robot to a given position and aligns it so that it is facing the required direction
+  * Parameters: x - x coordinate of where we want the robot to move to
+  *             y - y coordinate of where we want the robot to move to
+  *             theta - direction that we want the robot to face after movement
+  */
   void RobotController::MoveTo(double x, double y, double theta) {
     // First get to position
     double dx = this->x - x;
     double dy = this->y - y;
+    double phi;
 
-    double a_tan = atan(dy / dx);
+    double a_tan = DegAtan(dy / dx);
+
     if (dx >= 0 && dy >= 0) {
-      // find theta
+      phi = a_tan;
     } else if (dx < 0 && dy >= 0) {
-
+      phi = 180.0 - a_tan;
     } else if (dx < 0 && dy < 0) {
-
+      phi = 180 + a_tan;
     } else {
-
+      phi = 360 - a_tan;
     }
-    //Rotate so that we are facing the right way
+
+    this->Rotate(phi);
+
+    double distance_to_move = (Vector2(dx,dy).Length;
+    this->MoveForward(distance_to_move);
+
+    this->Rotate(theta);
+  }
+
+  /**
+  * Rotates the robot so that it is facing a given direction
+  */
+  void RobotController::Rotate (double theta) {
+    // TODO
+  }
+
+  void RobotController::MoveForward (double dist) {
+    // TODO
   }
 
   void RobotController::ContinuousMove(double lv, double av) {

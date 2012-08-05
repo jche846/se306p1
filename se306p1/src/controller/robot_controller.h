@@ -33,7 +33,7 @@ namespace se306p1 {
     // Position fields
     double x_; // x coordinate
     double y_; // y coordinate
-    double theta_; // direction that the robot is facing, in radians counter clockwise, measured from "east".
+    double theta_; // direction that the robot is facing, in degrees clockwise from north
 
     // Movement fields
     double lv_; // Linear velocity
