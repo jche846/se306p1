@@ -66,6 +66,7 @@ namespace se306p1 {
       ros::spinOnce();
     }
   }
+
   void Supervisor::MoveNodesToDests(std::vector<std::shared_ptr<Robot> > &nodes, std::vector<Pose> &poses, double lv) {
     while(poses.size() != 0){
       double longestDist = -1;
@@ -75,7 +76,7 @@ namespace se306p1 {
       for(uint nodeIndex = 0; nodeIndex < nodes.size(); nodeIndex++){
 
         double dist = std::numeric_limits<double>::max();
-        int destIndex;
+        int destIndex = 0;
         std::shared_ptr<Robot> node = nodes[nodeIndex];
         
         for(uint posesIndex = 0; posesIndex < poses.size(); posesIndex++){
@@ -94,9 +95,6 @@ namespace se306p1 {
       nodes[longestNodeIndex]->Go(poses[longestPoseIndex], lv, false);
       nodes.erase(nodes.begin() + longestNodeIndex);
       poses.erase(poses.begin() + longestPoseIndex);
-
-
     }
-
   }
 }
