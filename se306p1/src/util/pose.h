@@ -7,7 +7,7 @@ namespace se306p1 {
     Vector2 position_;
     double theta_;
 
-    inline Pose(Vector2 position, double theta) :
+    inline Pose(Vector2 position=Vector2(0.0, 0.0), double theta=0.0) :
       position_(position), theta_(theta) { }
 
     inline Pose(const Pose &from) :

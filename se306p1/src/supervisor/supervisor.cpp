@@ -6,6 +6,7 @@
 #include <se306p1/AskPosition.h>
 #include <se306p1/Position.h>
 
+#include "../util/pose.h"
 
 namespace se306p1 {
   Supervisor::Supervisor() {
@@ -23,9 +24,9 @@ namespace se306p1 {
       if (robots_.find(msg.R_ID) != robots_.end()) {
         robot_ptr = robots_[msg.R_ID];
 
-        if (robot_ptr->position_.x_ != msg.x ||
-            robot_ptr->position_.y_ != msg.y ||
-            robot_ptr->theta_ != msg.theta) {
+        if (robot_ptr->pose_.position_.x_ != msg.x ||
+            robot_ptr->pose_.position_.y_ != msg.y ||
+            robot_ptr->pose_.theta_ != msg.theta) {
           ROS_WARN("Robot %ld changed its position during discovery.",
                    robots_[msg.R_ID]->id_);
         } else {
@@ -37,8 +38,7 @@ namespace se306p1 {
         ROS_INFO("Hello robot %ld!", robots_[msg.R_ID]->id_);
       }
 
-      robot_ptr->position_ = Vector2(msg.x, msg.y);
-      robot_ptr->theta_ = msg.theta;
+      robot_ptr->pose_ = Pose(Vector2(msg.x, msg.y), msg.theta);
       robot_ptr->Stop();
     }
   }
@@ -77,9 +77,8 @@ namespace se306p1 {
         double dist = std::numeric_limits<double>::max();
         int destIndex;
         std::shared_ptr<Robot> node = nodes[nodeIndex];
-        
         for(uint posesIndex = 0; posesIndex < poses.size(); posesIndex++){
-          double testDist = abs((node->position_ - poses[posesIndex].position_).LengthSquared());
+          double testDist = abs((node->pose_.position_ - poses[posesIndex].position_).LengthSquared());
           if(testDist < dist){
             dist = testDist;
             destIndex = posesIndex;

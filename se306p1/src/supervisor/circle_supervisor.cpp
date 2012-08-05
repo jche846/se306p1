@@ -28,7 +28,7 @@ namespace se306p1 {
       if (clusterHeadDist == -1) {
         this->clusterHead_ = robot_ptr;
       } else {
-        double distToOrig = robot_ptr->position_.Length();
+        double distToOrig = robot_ptr->pose_.position_.Length();
         if (distToOrig != 0 && distToOrig < clusterHeadDist) {
 
           this->nonHeadRobots_.push_back(this->clusterHead_);
@@ -41,14 +41,14 @@ namespace se306p1 {
       }
     }
 
-  } 
+  }
 
   void CircleSupervisor::FindRobotDests() {
     size_t numRobots = this->robots_.size();
 
     double theta = 0.5; //TODO: work out theta
 
-    Vector2 lastLocation = this->clusterHead_->position_;
+    Vector2 lastLocation = this->clusterHead_->pose_.position_;
     Vector2 robotSep = lastLocation.Normalized() * ROBOT_WIDTH * 6;
     for(uint i = 1; i < numRobots; i++) {
 
