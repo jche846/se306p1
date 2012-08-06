@@ -55,9 +55,9 @@ namespace se306p1 {
     virtual void Run();
 
     /**
-     * 
+     *
      */
     void MoveNodesToDests(const std::vector<std::shared_ptr<Robot> > &nodes,
-                          const std::vector<Pose> &poses, double lv);
+                          const std::vector<Pose> &poses);
   };
 }

@@ -2,8 +2,9 @@
 
 #include "supervisor.h"
 #include <vector>
+
 namespace se306p1 {
-  class CircleSupervisor : public Supervisor {
+  class RotateSupervisor : public Supervisor {
   private:
     void FindRobotDests();
     std::shared_ptr<Robot> clusterHead_;
@@ -11,7 +12,7 @@ namespace se306p1 {
     std::vector<Pose> lineLocations_;
 
   public:
-    virtual ~CircleSupervisor();
+    virtual ~RotateSupervisor();
     /**
     * Run the supervisor.
     */

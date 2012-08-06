@@ -22,13 +22,12 @@ namespace se306p1 {
 
     uint64_t id_;
 
-    Vector2 position_;
-    double theta_;
+    Pose pose_;
 
     /**
      * Request the robot to go to a position via a child controller.
      */
-    void Go(const Pose &pos, double lv, bool enqueue);
+    void Go(const Pose &pos, bool enqueue);
 
     /**
      * Request the robot to stop immediately.
