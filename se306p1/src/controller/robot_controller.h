@@ -60,9 +60,10 @@ namespace se306p1 {
 
       // Stage pub/subs
       ros::Subscriber odom_;
+      ros::Publisher twist_;
 
      public:
-      RobotController(ros::NodeHandle &nh, int64_t id, Pose pose);
+      RobotController(ros::NodeHandle &nh, int64_t id);
       virtual ~RobotController();
       void Move();
       void MoveTo(const Pose &pose, double lv);
@@ -74,6 +75,7 @@ namespace se306p1 {
       void askPosition_callback(AskPosition msg);
       void AnswerPosition();
       void odom_callback(nav_msgs::Odometry msg);
+      void Twist();
       void ResolveCollision();
       void DequeueCommand();
       void Run();

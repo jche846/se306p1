@@ -9,14 +9,11 @@
 
 #define FREQUENCY 100 // The number of ticks per second the robot will execute.
 namespace se306p1 {
-  RobotController::RobotController(ros::NodeHandle &nh, int64_t id = 0,
-                                   Pose pose = Pose(Vector2(0, 0), 0.0)) {
-
+  RobotController::RobotController(ros::NodeHandle &nh, int64_t id = 0) {
     this->nh_ = nh;
 
     // Initialise the robot as stationary with a given pose and ID.
     this->robot_id_ = id;
-    this->position_ = pose;
     this->lv_ = 0;
     this->av_ = 0;
 
@@ -51,12 +48,13 @@ namespace se306p1 {
     // Subscribe to pose messages from Stage
     std::stringstream odomss;
     odomss << "/robot_" << this->robot_id_ << "/base_pose_ground_truth";
-
     this->odom_ = nh_.subscribe<nav_msgs::Odometry>(
         odomss.str(), 1000, &RobotController::odom_callback, this);
 
-//    ros::Subscriber StageOdo_sub = nh_.subscribe<nav_msgs::Odometry>(
-//        "Robot0_odo", 1000, StageOdom_callback);
+    std::stringstream twistss;
+    twistss << "/robot_" << this->robot_id_ << "/cmd_vel";
+    this->twist_ = nh_.advertise<geometry_msgs::Twist>(
+        twistss.str(), 1000, &RobotController::Twist(), this);
 
     /** ROS sub/pubs from Chandan
      //advertise() function will tell ROS that you want to publish on a given topic_
@@ -173,6 +171,9 @@ namespace se306p1 {
   void RobotController::odom_callback(nav_msgs::Odometry msg) {
     ROS_INFO("Current x position is: %f", msg.pose.pose.position.x);
     ROS_INFO("Current y position is: %f", msg.pose.pose.position.y);
+
+    this->position_.position_.x_ = msg.pose.pose.position.x;
+    this->position_.position_.y_ = msg.pose.pose.position.y;
   }
 
   void RobotController::ResolveCollision() {
