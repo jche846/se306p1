@@ -1,0 +1,30 @@
+/*
+ * command.h
+ *
+ *  Created on: Aug 4, 2012
+ *      Author: ahug048
+ * 
+ */
+
+#pragma once
+
+#include <se306p1/Do.h>
+#include <se306p1/Go.h>
+
+namespace se306p1 {
+  class Command {
+  //change to make ws commit work
+    public:
+      bool enqueue;
+      bool isDo;
+      double lv;
+      double av;
+      double x;
+      double y;
+      double theta;
+
+      Command(Do msg);
+      Command(Go msg);
+      virtual ~Command();
+  };
+}
