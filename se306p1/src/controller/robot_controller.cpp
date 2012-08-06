@@ -9,7 +9,7 @@
 
 #define FREQUENCY 100 // The number of ticks per second the robot will execute.
 namespace se306p1 {
-  RobotController::RobotController(int64_t id, Pose pose) {
+  RobotController::RobotController(int64_t id=0, Pose pose = Pose(Vector2 (0, 0), 0.0)) {
     // Initialise the robot as stationary with a given pose and ID.
     this->robot_id_ = id;
     this->position_ = pose;
@@ -25,19 +25,21 @@ namespace se306p1 {
 
     // We need to listen for the supervisor asking for our position.
     this->askPosSubscriber_ = nh_.subscribe<AskPosition>(
-        ASK_POS_TOPIC, 1000, &RobotController::askPosition_callback);
+        ASK_POS_TOPIC, 1000, &RobotController::askPosition_callback, this);
 
     // Subscribe to do messages in order to know when to move.
     std::stringstream doss;
     doss << "/robot" << this->robot_id_ << "/do";
     this->doSubscriber_ = nh_.subscribe<Do>(doss.str(), 1000,
-                                            &RobotController::go_callback);
+                                            &RobotController::do_callback,
+                                            this);
 
     // Subscribe to go messages in order to know when to move.
     std::stringstream goss;
     goss << "/robot" << this->robot_id_ << "/go";
     this->goSubscriber_ = nh_.subscribe<Go>(goss.str(), 1000,
-                                            &RobotController::do_callback);
+                                            &RobotController::go_callback,
+                                            this);
 
     // Publish our position when asked by the supervisor.
     this->ansPosPublisher_ = nh_.advertise<Position>(ANS_POS_TOPIC, 1000);
@@ -47,7 +49,7 @@ namespace se306p1 {
     odomss << "/robot_" << this->robot_id_ << "/base_pose_ground_truth";
 
     this->odom_ = nh_.subscribe<nav_msgs::Odometry>(
-        odomss.str(), 1000, &RobotController::odom_callback);
+        odomss.str(), 1000, &RobotController::odom_callback, this);
 
 //    ros::Subscriber StageOdo_sub = nh_.subscribe<nav_msgs::Odometry>(
 //        "Robot0_odo", 1000, StageOdom_callback);
