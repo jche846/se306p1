@@ -36,7 +36,7 @@ namespace se306p1 {
         }
       }
     }
-  } 
+  }
 
   void RotateSupervisor::FindRobotDests() {
     size_t numRobots = this->robots_.size();
@@ -54,7 +54,7 @@ namespace se306p1 {
 
 #ifdef ROTATE_SUPERVISOR_MAIN
 int main(int argc, char *argv[]) {
-  ros::init(argc, argv, "rotate supervisor");
+  ros::init(argc, argv, "rotate_supervisor");
   se306p1::RotateSupervisor s;
   s.Run();
   return 0;
