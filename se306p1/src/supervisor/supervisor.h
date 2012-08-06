@@ -40,6 +40,11 @@ namespace se306p1 {
      */
     void ansPos_callback(Position msg);
 
+    /**
+     * Stuff for the supervisor to do.
+     */
+    virtual void Run() = 0;
+
   public:
     Supervisor();
     virtual ~Supervisor();
@@ -56,9 +61,9 @@ namespace se306p1 {
     void ElectHead();
 
     /**
-     * Run the supervisor.
+     * Start the supervisor.
      */
-    virtual void Run();
+    void Start();
 
     /**
      *

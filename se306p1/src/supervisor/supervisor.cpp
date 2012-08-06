@@ -62,14 +62,20 @@ namespace se306p1 {
     ROS_INFO("Discovered %zd robots.", robots_.size());
   }
 
-  void Supervisor::Run() {
+  void Supervisor::Start() {
     while (ros::Time::now().isZero());
 
     this->Discover(10);
     this->state_ = CONTROLLING;
-    while (ros::ok()) {
-      ros::spinOnce();
+
+    if (!this->robots_.size()) {
+      ROS_ERROR("No robots discovered.");
+      return;
     }
+
+    this->ElectHead();
+
+    this->Run();
   }
 
   void Supervisor::ElectHead() {

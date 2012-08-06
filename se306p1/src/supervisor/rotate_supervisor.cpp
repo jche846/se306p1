@@ -8,9 +8,8 @@ namespace se306p1 {
   RotateSupervisor::~RotateSupervisor() {  }
 
   void RotateSupervisor::Run() {
-    ROS_INFO("Starting Rotate Supervisor.");
-    this->Discover(10);
-    this->ElectHead();
+    ROS_INFO("Starting rotate supervisor.");
+    this->FindRobotDests();
     this->MoveNodesToDests(this->nonHeadRobots_, this->lineLocations_);
   }
 
@@ -32,7 +31,7 @@ namespace se306p1 {
 int main(int argc, char *argv[]) {
   ros::init(argc, argv, "rotate_supervisor");
   se306p1::RotateSupervisor s;
-  s.Run();
+  s.Start();
   return 0;
 }
 #endif
