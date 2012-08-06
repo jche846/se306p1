@@ -12,5 +12,13 @@ namespace se306p1 {
 
     inline Pose(const Pose &from) :
       position_(from.position_), theta_(from.theta_) { }
+
+    inline bool operator==(const Pose &pose) const {
+      return this->position_ == pose.theta_ && this->theta_ == pose.theta_;
+    }
+
+    inline bool operator!=(const Pose &pose) const {
+      return this->position_ != pose.theta_ || this->theta_ != pose.theta_;
+    }
   };
 }
