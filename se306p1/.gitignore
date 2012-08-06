@@ -5,3 +5,4 @@ msg_gen
 .project
 *.pydevproject
 .cproject
+docs

@@ -57,6 +57,6 @@ namespace se306p1 {
     /**
      * 
      */
-    void MoveNodesToDests(std::vector<std::shared_ptr<Robot> > &nodes, std::vector<Pose> &poses, double lv);
+    void MoveNodesToDests(std::vector<std::shared_ptr<Robot> > &nodes, std::vector<Pose> &poses);
   };
 }

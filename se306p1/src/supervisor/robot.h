@@ -27,7 +27,7 @@ namespace se306p1 {
     /**
      * Request the robot to go to a position via a child controller.
      */
-    void Go(const Pose &pos, double lv, bool enqueue);
+    void Go(const Pose &pos, bool enqueue);
 
     /**
      * Request the robot to stop immediately.
