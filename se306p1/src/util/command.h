@@ -12,9 +12,9 @@
 
 namespace se306p1 {
   class Command {
-    //public fields or something 
     public:
       bool enqueue;
+      bool isDo;
       double lv;
       double av;
       double x;

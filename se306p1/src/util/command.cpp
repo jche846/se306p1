@@ -8,17 +8,25 @@
 #include "command.h"
 
 namespace se306p1 {
-  // get go data and check what type of command it is.
   Command::Command(Do msg) {
-    // Constructor for do commands 
-    
+    // Constructor for Do commands 
+    this->lv = msg.lv;
+    this->av = msg.av;
+    //signifies if this->command is a Do or a Go.
+    this->isDo = true;
+    this->enqueue = msg.enqueue;
   }
 
   Command::Command(Go msg) {
     //Constructor for Go commands
+    this->x = msg.x;
+    this->y = msg.y;
+    this->theta = msg.theta;
+    this->isDo = false;
+    this->enqueue = msg.enqueue;
   }
 
   Command::~Command() {
-    // TODO Auto-generated destructor stub
+    //pass
   }
 } /* namespace se306p1 */
