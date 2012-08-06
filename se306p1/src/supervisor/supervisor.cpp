@@ -72,6 +72,30 @@ namespace se306p1 {
     }
   }
 
+  void Supervisor::ElectHead() {
+    std::map<uint64_t, std::shared_ptr<Robot> >::iterator it;
+
+    double clusterHeadDist = -1;
+
+    for (it = this->robots_.begin(); it != this->robots_.end(); it++) {
+      std::shared_ptr<Robot> robot_ptr = (*it).second;
+      if (clusterHeadDist == -1) {
+        this->clusterHead_ = robot_ptr;
+      } else {
+        double distToOrig = robot_ptr->pose_.position_.Length();
+        if (distToOrig != 0 && distToOrig < clusterHeadDist) {
+
+          this->nonHeadRobots_.push_back(this->clusterHead_);
+
+          this->clusterHead_ = robot_ptr;
+          clusterHeadDist = distToOrig;
+        } else {
+          this->nonHeadRobots_.push_back(robot_ptr);
+        }
+      }
+    }
+  }
+
   void Supervisor::MoveNodesToDests(const std::vector<std::shared_ptr<Robot> > &nodesIn,
                                     const std::vector<Pose> &posesIn) {
     std::vector<std::shared_ptr<Robot> > nodes = nodesIn;

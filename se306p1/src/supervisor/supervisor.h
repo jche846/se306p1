@@ -28,15 +28,15 @@ namespace se306p1 {
 
   protected:
     std::map<uint64_t, std::shared_ptr<Robot> > robots_;
+    std::shared_ptr<Robot> clusterHead_;
+    std::vector<std::shared_ptr<Robot>> nonHeadRobots_;
 
     /**
      * The callback for the position answer, used to either:
      *
      * * Initially register the position during the population phase.
      *
-     * * Accepting the position for queueing the next task.
-     *
-     * * Resetting in the case of a late robot ans_pos.
+     * * Accepting the position for queuing the next task.
      */
     void ansPos_callback(Position msg);
 
@@ -45,9 +45,15 @@ namespace se306p1 {
     virtual ~Supervisor();
 
     /**
-     * Request positions of all robots and discover _robots.
+     * Request positions of all robots to discover them.
      */
     void Discover(int timeout);
+
+
+    /**
+     * Elect a cluster head.
+     */
+    void ElectHead();
 
     /**
      * Run the supervisor.
