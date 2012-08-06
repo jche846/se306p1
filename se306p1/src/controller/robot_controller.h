@@ -62,7 +62,7 @@ namespace se306p1 {
       ros::Subscriber odom_;
 
      public:
-      RobotController(int64_t id, Pose pose);
+      RobotController(ros::NodeHandle &nh, int64_t id, Pose pose);
       virtual ~RobotController();
       void Move();
       void MoveTo(const Pose &pose, double lv);

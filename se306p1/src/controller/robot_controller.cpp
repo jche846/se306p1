@@ -9,8 +9,11 @@
 
 #define FREQUENCY 100 // The number of ticks per second the robot will execute.
 namespace se306p1 {
-  RobotController::RobotController(int64_t id = 0,
+  RobotController::RobotController(ros::NodeHandle &nh, int64_t id = 0,
                                    Pose pose = Pose(Vector2(0, 0), 0.0)) {
+
+    this->nh_ = nh;
+
     // Initialise the robot as stationary with a given pose and ID.
     this->robot_id_ = id;
     this->position_ = pose;
@@ -168,7 +171,8 @@ namespace se306p1 {
   }
 
   void RobotController::odom_callback(nav_msgs::Odometry msg) {
-
+    ROS_INFO("Current x position is: %f", msg.pose.pose.position.x);
+    ROS_INFO("Current y position is: %f", msg.pose.pose.position.y);
   }
 
   void RobotController::ResolveCollision() {
@@ -208,7 +212,15 @@ namespace se306p1 {
 
 int main(int argc, char *argv[]) {
   ros::init(argc, argv, "robot_controller");
-  se306p1::RobotController rc;
+
+  ros::NodeHandle nh ("~");
+
+  int r_id;
+  nh.getParam("rid", r_id);
+
+  ROS_INFO("Creating robot with id %d", r_id);
+
+  se306p1::RobotController rc(nh, r_id);
   rc.Run();
   return 0;
 }

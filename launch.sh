@@ -5,7 +5,7 @@
 #
 
 roscore &
-se306p1/bin/robot_controller &
-se306p1/bin/rotate_supervisor &
+se306p1/bin/robot_controller _rid:=54 &
+se306p1/bin/rotate_supervisor
 $1 &
 wait
