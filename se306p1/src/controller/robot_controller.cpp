@@ -6,9 +6,7 @@
  */
 
 #include "robot_controller.h"
-#include <cmath>
-#include "../util/trig.h"
-#include "../util/vector2.h"
+
 #define FREQUENCY 100 // The number of ticks per second the robot will execute.
 namespace se306p1 {
   RobotController::RobotController(int64_t id, Pose pose) {
@@ -27,22 +25,19 @@ namespace se306p1 {
 
     // We need to listen for the supervisor asking for our position.
     this->askPosSubscriber_ = nh_.subscribe<AskPosition>(
-        ASK_POS_TOPIC, 1000, &RobotController::askPosition_callback, this,
-        ros::TransportHints.reliable());
+        ASK_POS_TOPIC, 1000, &RobotController::askPosition_callback);
 
     // Subscribe to do messages in order to know when to move.
     std::stringstream doss;
     doss << "/robot" << this->robot_id_ << "/do";
     this->doSubscriber_ = nh_.subscribe<Do>(doss.str(), 1000,
-                                            &RobotController::go_callback, this,
-                                            ros::TransportHints.reliable());
+                                            &RobotController::go_callback);
 
     // Subscribe to go messages in order to know when to move.
     std::stringstream goss;
     goss << "/robot" << this->robot_id_ << "/go";
     this->goSubscriber_ = nh_.subscribe<Go>(goss.str(), 1000,
-                                            &RobotController::do_callback, this,
-                                            ros::TransportHints.reliable());
+                                            &RobotController::do_callback);
 
     // Publish our position when asked by the supervisor.
     this->ansPosPublisher_ = nh_.advertise<Position>(ANS_POS_TOPIC, 1000);
@@ -51,7 +46,8 @@ namespace se306p1 {
     std::stringstream odomss;
     odomss << "/robot_" << this->robot_id_ << "/base_pose_ground_truth";
 
-    this->odom_ = nh_.subscribe<nav_msgs::Odometry>(odomss.str(), 1000, &RobotController::odom_callback);
+    this->odom_ = nh_.subscribe<nav_msgs::Odometry>(
+        odomss.str(), 1000, &RobotController::odom_callback);
 
 //    ros::Subscriber StageOdo_sub = nh_.subscribe<nav_msgs::Odometry>(
 //        "Robot0_odo", 1000, StageOdom_callback);
@@ -108,28 +104,28 @@ namespace se306p1 {
    *             theta - direction that we want the robot to face after movement
    */
   void RobotController::MoveTo(const Pose &pose, double lv) {
-    // First get to position
-    double dx = pose.position_.x_;
-    double dy = pose.position_.y_;
-    double phi;
-
-    this->goal_ = *pose;
-
-    while (this->position_ != this->goal_) {
-      // continue to move
-    }
-
-    double a_tan = DegATan(dy / dx);
-
-    if (dx >= 0 && dy >= 0) {
-      phi = a_tan;
-    } else if (dx < 0 && dy >= 0) {
-      phi = 180.0 - a_tan;
-    } else if (dx < 0 && dy < 0) {
-      phi = 180 + a_tan;
-    } else {
-      phi = 360 - a_tan;
-    }
+//    // First get to position
+//    double dx = pose.position_.x_;
+//    double dy = pose.position_.y_;
+//    double phi;
+//
+//    this->goal_ = * pose;
+//
+//    while (this->position_ != this->goal_) {
+//      // continue to move
+//    }
+//
+//    double a_tan = DegATan(dy / dx);
+//
+//    if (dx >= 0 && dy >= 0) {
+//      phi = a_tan;
+//    } else if (dx < 0 && dy >= 0) {
+//      phi = 180.0 - a_tan;
+//    } else if (dx < 0 && dy < 0) {
+//      phi = 180 + a_tan;
+//    } else {
+//      phi = 360 - a_tan;
+//    }
   }
 
   void RobotController::go_callback(Go msg) {
@@ -140,7 +136,6 @@ namespace se306p1 {
       // Otherwise, interrupt the current action and execute the command.
       this->dequeuing_ = false;
       this->moving_ = false;
-
     }
   }
 
@@ -169,7 +164,9 @@ namespace se306p1 {
     this->ansPosPublisher_.publish(msg);
   }
 
-  void Robott
+  void RobotController::odom_callback(nav_msgs::Odometry msg) {
+
+  }
 
   void RobotController::ResolveCollision() {
   }

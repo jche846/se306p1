@@ -15,9 +15,10 @@
 #include <se306p1/Position.h>
 #include <se306p1/Do.h>
 #include <se306p1/Go.h>
-#include <se306p1/command.h>
-#include <cstdint>
-#include <queue>
+#include "../util/pose.h"
+#include "../util/command.h"
+#include <deque>
+
 
 #define ASK_POS_TOPIC "/supervisor/ask_pos"
 #define ANS_POS_TOPIC "/supervisor/ans_pos"

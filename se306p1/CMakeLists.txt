@@ -31,7 +31,7 @@ rosbuild_genmsg()
 
 rosbuild_add_executable(robot_controller
   src/controller/robot_controller.cpp
-  src/controller/command.cpp)
+  src/util/pose.h)
 
 rosbuild_add_executable(rotate_supervisor
   src/supervisor/rotate_supervisor.cpp
