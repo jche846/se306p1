@@ -6,7 +6,6 @@
  */
 
 #include "robot_controller.h"
-
 #define FREQUENCY 100 // The number of ticks per second the robot will execute.
 namespace se306p1 {
   RobotController::RobotController(ros::NodeHandle &nh, int64_t id = 0) {
@@ -53,8 +52,7 @@ namespace se306p1 {
 
     std::stringstream twistss;
     twistss << "/robot_" << this->robot_id_ << "/cmd_vel";
-    this->twist_ = nh_.advertise<geometry_msgs::Twist>(
-        twistss.str(), 1000, &RobotController::Twist(), this);
+    this->twist_ = nh_.advertise<geometry_msgs::Twist>(twistss.str(), 1000);
 
     /** ROS sub/pubs from Chandan
      //advertise() function will tell ROS that you want to publish on a given topic_
@@ -174,6 +172,10 @@ namespace se306p1 {
 
     this->position_.position_.x_ = msg.pose.pose.position.x;
     this->position_.position_.y_ = msg.pose.pose.position.y;
+  }
+
+  void RobotController::Twist() {
+
   }
 
   void RobotController::ResolveCollision() {
