@@ -6,4 +6,7 @@ docs
 .project
 *.pydevproject
 .cproject
+*~
+*.sublime*
 docs
+

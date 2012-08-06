@@ -12,6 +12,7 @@
   <depend package="roscpp"/>
   <depend package="sensor_msgs"/>
   <depend package="geometry_msgs"/>
+  <depend package="tf"/>
   <url>http://github.com/rfw/se306p1</url>
 
 </package>

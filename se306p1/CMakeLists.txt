@@ -29,11 +29,19 @@ rosbuild_genmsg()
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 
+rosbuild_add_executable(robot_controller
+  src/util/pose.h
+  src/util/command.cpp
+  src/controller/robot_controller.cpp)
+
 rosbuild_add_executable(rotate_supervisor
   src/supervisor/rotate_supervisor.cpp
   src/supervisor/supervisor.cpp
   src/supervisor/robot.cpp)
 set_target_properties(rotate_supervisor PROPERTIES COMPILE_DEFINITIONS ROTATE_SUPERVISOR_MAIN)
+
+rosbuild_add_executable(robot_controller
+  src/controller/robot_controller.cpp)
 
 rosbuild_add_gtest(test_supervisor
     test/supervisor.cpp)

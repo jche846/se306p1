@@ -5,10 +5,9 @@
 #
 
 roscore &
-se306p1/bin/robot_controller r0 &
-#se306p1/bin/robot_controller r1 &
-#se306p1/bin/robot_controller r2 &
-#se306p1/bin/robot_controller r3 &
-#se306p1/bin/robot_controller r4 &
+exec -a robot_controller_${RANDOM} se306p1/bin/robot_controller _rid:=54 &
+exec -a robot_controller_${RANDOM} se306p1/bin/robot_controller _rid:=55 &
+exec -a robot_controller_${RANDOM} se306p1/bin/robot_controller _rid:=56 &
+se306p1/bin/rotate_supervisor &
 $1 &
 wait
