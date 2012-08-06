@@ -35,4 +35,7 @@ rosbuild_add_executable(rotate_supervisor
   src/supervisor/robot.cpp)
 set_target_properties(rotate_supervisor PROPERTIES COMPILE_DEFINITIONS ROTATE_SUPERVISOR_MAIN)
 
+rosbuild_add_gtest(test_supervisor
+    test/supervisor.cpp)
+
 #target_link_libraries(example ${PROJECT_NAME})
