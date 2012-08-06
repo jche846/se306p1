@@ -1,0 +1,10 @@
+<launch>
+  <node name="rotate_supervisor" pkg="se306p1" type="rotate_supervisor" />
+
+  <test test-name="hztest_test" pkg="rostest" type="hztest" name="hztest1">
+    <param name="topic" value="/supervisor/ask_pos" />
+    <param name="hz" value="100.0" />
+    <param name="hzerror" value="0.5" />
+    <param name="test_duration" value="5.0" />
+  </test>
+</launch>

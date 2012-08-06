@@ -37,5 +37,6 @@ set_target_properties(rotate_supervisor PROPERTIES COMPILE_DEFINITIONS ROTATE_SU
 
 rosbuild_add_gtest(test_supervisor
     test/supervisor.cpp)
+rosbuild_add_rostest(test/supervisor.test)
 
 #target_link_libraries(example ${PROJECT_NAME})

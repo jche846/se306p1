@@ -8,6 +8,8 @@
 
 #include "../util/pose.h"
 
+#define FREQUENCY 100
+
 namespace se306p1 {
   Supervisor::Supervisor() {
     // create publishers and subscribers
@@ -45,12 +47,15 @@ namespace se306p1 {
 
   void Supervisor::Discover(int timeout) {
     ROS_INFO("Discovering robots for %d seconds.", timeout);
+    ros::Rate r(FREQUENCY);
+
     this->state_ = DISCOVERY;
 
     ros::Time end = ros::Time::now() + ros::Duration(timeout, 0);
 
     while (ros::ok() && ros::Time::now() <= end) {
       this->askPosPublisher_.publish(AskPosition());
+      r.sleep();
       ros::spinOnce();
     }
 
