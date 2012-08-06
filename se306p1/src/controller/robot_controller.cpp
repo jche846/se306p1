@@ -9,7 +9,7 @@
 #include <cmath>
 #include "../util/trig.h"
 #include "../util/vector2.h"
-#define FREQUENCY 10 // The number of ticks per second the robot will execute.
+#define FREQUENCY 100 // The number of ticks per second the robot will execute.
 namespace se306p1 {
   RobotController::RobotController(int64_t id, Pose pose) {
     // Initialise the robot as stationary with a given pose and ID.
@@ -47,8 +47,14 @@ namespace se306p1 {
     // Publish our position when asked by the supervisor.
     this->ansPosPublisher_ = nh_.advertise<Position>(ANS_POS_TOPIC, 1000);
 
-    ros::Subscriber StageOdo_sub = nh_.subscribe<nav_msgs::Odometry>(
-        "Robot0_odo", 1000, StageOdom_callback);
+    // Subscribe to pose messages from Stage
+    std::stringstream odomss;
+    odomss << "/robot_" << this->robot_id_ << "/base_pose_ground_truth";
+
+    this->odom_ = nh_.subscribe<nav_msgs::Odometry>(odomss.str(), 1000, &RobotController::odom_callback);
+
+//    ros::Subscriber StageOdo_sub = nh_.subscribe<nav_msgs::Odometry>(
+//        "Robot0_odo", 1000, StageOdom_callback);
 
     /** ROS sub/pubs from Chandan
      //advertise() function will tell ROS that you want to publish on a given topic_
@@ -162,6 +168,8 @@ namespace se306p1 {
 
     this->ansPosPublisher_.publish(msg);
   }
+
+  void Robott
 
   void RobotController::ResolveCollision() {
   }
