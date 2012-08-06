@@ -211,14 +211,14 @@ namespace se306p1 {
 }
 
 int main(int argc, char *argv[]) {
-  ros::init(argc, argv, "robot_controller");
+  ros::init(argc, argv, argv[0]);
 
-  ros::NodeHandle nh ("~");
+  ros::NodeHandle nh("~");
 
   int r_id;
   nh.getParam("rid", r_id);
 
-  ROS_INFO("Creating robot with id %d", r_id);
+  ROS_INFO("Creating robot %s with id %d", argv[0], r_id);
 
   se306p1::RobotController rc(nh, r_id);
   rc.Run();
