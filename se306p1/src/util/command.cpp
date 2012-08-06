@@ -8,25 +8,26 @@
 #include "command.h"
 
 namespace se306p1 {
-  Command::Command(Do msg) {
-    // Constructor for Do commands 
+  //change to make ws commit work
+  Command::Command(Do msg) {
+    // Constructor for Do commands 
     this->lv = msg.lv;
     this->av = msg.av;
     //signifies if this->command is a Do or a Go.
     this->isDo = true;
     this->enqueue = msg.enqueue;
-  }
+  }
 
-  Command::Command(Go msg) {
+  Command::Command(Go msg) {
     //Constructor for Go commands
     this->x = msg.x;
     this->y = msg.y;
     this->theta = msg.theta;
     this->isDo = false;
     this->enqueue = msg.enqueue;
-  }
+  }
 
-  Command::~Command() {
+  Command::~Command() {
     //pass
-  }
+  }
 } /* namespace se306p1 */
