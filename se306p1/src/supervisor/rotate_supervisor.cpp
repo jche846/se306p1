@@ -1,6 +1,8 @@
 #include "rotate_supervisor.h"
 
 #include "../util/vector2.h"
+#include "../util/trig.h"
+
 #define ROBOT_WIDTH 0.35
 #define DEFAULT_MOVE_SPEED 1
 

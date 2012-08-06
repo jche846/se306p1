@@ -1,10 +1,11 @@
 #pragma once
 
 #include <cmath>
+#include <geometry_msgs/Quaternion.h>
 
-#define _USE_MATH_DEFINES
+#include <tf/transform_datatypes.h>
 
-namespace se306p1 
+namespace se306p1
 {
   /**
   * Converts a given double from degrees to radians,
@@ -12,7 +13,7 @@ namespace se306p1
   * Returns:  the same angle measured in radians
   */
   inline double DegreesToRadians (double degrees) {
-    return radians = degrees * (M_PI / 180.0);
+    return degrees * (M_PI / 180.0);
   }
 
   /**
@@ -21,7 +22,7 @@ namespace se306p1
   * Returns: the same angle measured in degress
   */
   inline double RadiansToDegrees (double radians) {
-    return degrees = radians * (180.0 / M_PI);
+    return radians * (180.0 / M_PI);
   }
 
   /**
@@ -30,8 +31,7 @@ namespace se306p1
   * Returns: the sine of that angle in degres
   */
   inline double DegSin (double degrees) {
-    double radians = RadiansToDegrees(degrees);
-    return RadiansToDegrees(sin(radians));
+    return RadiansToDegrees(sin(DegreesToRadians(degrees)));
   }
 
   /**
@@ -40,8 +40,7 @@ namespace se306p1
   * Returns: the Cosine of that angle in degres
   */
   inline double DegCos (double degrees) {
-    double radians = DegreesToRadians(degrees);
-    return RadiansToDegrees(cos(radians));
+    return RadiansToDegrees(cos(DegreesToRadians(degrees)));
   }
 
   /**
@@ -50,8 +49,7 @@ namespace se306p1
   * Returns: the tan of that angle in degres
   */
   inline double DegTan (double degrees) {
-    double radians = DegreesToRadians(degrees);
-    return RadiansToDegrees(tan(radians));
+    return RadiansToDegrees(tan(DegreesToRadians(degrees)));
   }
 
   /**
@@ -60,8 +58,16 @@ namespace se306p1
   * Returns: the sine of that angle in degres
   */
   inline double DegATan (double degrees) {
-    double radians = DegreesToRadians(degrees);
-    return RadiansToDegrees(atan(radians));
+    return RadiansToDegrees(atan(DegreesToRadians(degrees)));
   }
 
+  /**
+  * Convert quaternion message to RPY (roll, pitch, yaw).
+  */
+  inline void QuaternionMsgToRPY(const geometry_msgs::Quaternion &q,
+                                 double &roll, double &pitch, double &yaw) {
+    btQuaternion tq;
+    tf::quaternionMsgToTF(q, tq);
+    btMatrix3x3(tq).getRPY(roll, pitch, yaw);
+  }
 }
