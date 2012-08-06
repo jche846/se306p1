@@ -9,7 +9,8 @@
 
 #define FREQUENCY 100 // The number of ticks per second the robot will execute.
 namespace se306p1 {
-  RobotController::RobotController(int64_t id=0, Pose pose = Pose(Vector2 (0, 0), 0.0)) {
+  RobotController::RobotController(int64_t id = 0,
+                                   Pose pose = Pose(Vector2(0, 0), 0.0)) {
     // Initialise the robot as stationary with a given pose and ID.
     this->robot_id_ = id;
     this->position_ = pose;
