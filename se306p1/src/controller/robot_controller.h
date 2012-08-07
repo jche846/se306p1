@@ -70,7 +70,7 @@ namespace se306p1 {
       void askPosition_callback(AskPosition msg);
       void AnswerPosition();
       void odom_callback(nav_msgs::Odometry msg);
-      void Twist();
+      void Move();
       void SetGoing(Go msg);
       void SetDoing(Do msg);
       void ExecuteCommand(Command cmd);

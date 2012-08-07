@@ -184,7 +184,7 @@ namespace se306p1 {
   /**
    * Tell stage to drive the robot at the current linear and angular velocity.
    */
-  void RobotController::Twist() {
+  void RobotController::Move() {
     geometry_msgs::Twist msg;
     msg.angular.z = this->av_;
     msg.linear.x = this->lv_;
@@ -314,7 +314,7 @@ namespace se306p1 {
             this->av_ = angle_to_goal;
           }
 
-          this->Twist();
+          this->Move();
 
           if (this->pose_.theta_ == this->goal_.theta_) {
             rotating = false;
@@ -332,14 +332,14 @@ namespace se306p1 {
             lv_ = distance_to_goal;
           }
 
-          this->Twist();
+          this->Move();
 
           if ((this->goal_.position_ - this->pose_.position_).Length() == 0.0) {
             // do nothing
           }
         }
       } else if (this->doing_) { // If the robot is doing, keep doing.
-        this->Twist();
+        this->Move();
       } else { // Otherwise, get the next command.
         this->DequeCommand();
       }
