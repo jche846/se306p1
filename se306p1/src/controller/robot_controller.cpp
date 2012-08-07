@@ -7,13 +7,13 @@
 
 #include "robot_controller.h"
 #include "../util/trig.h"
-#include <cassert>
+
 #define FREQUENCY 100 // The number of ticks per second the robot will execute.
 #define DEFAULT_LV 2.0
 #define DEFAULT_AV 2.0
 
 namespace se306p1 {
-  RobotController::RobotController(ros::NodeHandle &nh, int64_t id = 0) {
+  RobotController::RobotController(ros::NodeHandle &nh, uint64_t id = 0) {
     // Node handler ti talk to ROS.
     this->nh_ = nh;
 
@@ -30,19 +30,10 @@ namespace se306p1 {
         ASK_POS_TOPIC, 1000, &RobotController::askPosition_callback, this,
         ros::TransportHints().reliable());
 
-    // Subscribe to Do messages in order to know when to move.
-    std::stringstream doss;
-    doss << "/robot" << this->robot_id_ << "/do";
-    this->doSubscriber_ = nh_.subscribe<Do>(doss.str(), 1000,
-                                            &RobotController::do_callback, this,
-                                            ros::TransportHints().reliable());
-
-    // Subscribe to Go messages in order to know when to move.
-    std::stringstream goss;
-    goss << "/robot" << this->robot_id_ << "/go";
-    this->goSubscriber_ = nh_.subscribe<Go>(goss.str(), 1000,
-                                            &RobotController::go_callback, this,
-                                            ros::TransportHints().reliable());
+    // We need to wait for the supervisor to offer an association.
+    this->assocSubscriber_ = nh_.subscribe<Associate>(
+        ASSOCIATE_TOPIC, 1000, &RobotController::assoc_callback, this,
+        ros::TransportHints().reliable());
 
     // Publish our position when asked by the supervisor.
     this->ansPosPublisher_ = nh_.advertise<Position>(ANS_POS_TOPIC, 1000);
@@ -51,7 +42,8 @@ namespace se306p1 {
     std::stringstream odomss;
     odomss << "/robot_" << this->robot_id_ << "/base_pose_ground_truth";
     this->odom_ = nh_.subscribe<nav_msgs::Odometry>(
-        odomss.str(), 1000, &RobotController::odom_callback, this);
+        odomss.str(), 1000, &RobotController::odom_callback, this,
+        ros::TransportHints().reliable());
 
     // Tell stage that we are going to advertise commands to our robot.
     std::stringstream twistss;
@@ -131,6 +123,26 @@ namespace se306p1 {
    */
   void RobotController::askPosition_callback(AskPosition msg) {
     this->AnswerPosition();
+  }
+
+  void RobotController::assoc_callback(Associate msg) {
+    if (msg.R_ID != this->robot_id_) return;
+
+    // Subscribe to Do messages in order to know when to move.
+    std::stringstream doss;
+    doss << "/robot_" << this->robot_id_ << "/do";
+    this->doSubscriber_ = nh_.subscribe<Do>(doss.str(), 1000,
+                                            &RobotController::do_callback, this,
+                                            ros::TransportHints().reliable());
+
+    // Subscribe to Go messages in order to know when to move.
+    std::stringstream goss;
+    goss << "/robot_" << this->robot_id_ << "/go";
+    this->goSubscriber_ = nh_.subscribe<Go>(goss.str(), 1000,
+                                            &RobotController::go_callback, this,
+                                            ros::TransportHints().reliable());
+    ROS_INFO("Controller for robot %" PRId64 " associated. Hello supervisor!",
+      this->robot_id_);
   }
 
   /**
@@ -346,12 +358,6 @@ namespace se306p1 {
 
   void RobotController::Run() {
     ros::Rate r(FREQUENCY);  // Run FREQUENCY times a second
-
-    // HARDCODED STUFF FOR TESTING
-    Do msg;
-    msg.lv = 2.0;
-    msg.av = 2.0;
-    this->SetDoing(msg);
 
     while (ros::ok()) {
       if (this->state_ == RobotState::GOING) {  // If the robot is going somewhere, keep trying to go there

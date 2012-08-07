@@ -7,11 +7,15 @@
 
 #pragma once
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 #include "ros/ros.h"
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/LaserScan.h>
 #include <se306p1/AskPosition.h>
+#include <se306p1/Associate.h>
 #include <se306p1/Position.h>
 #include <se306p1/Do.h>
 #include <se306p1/Go.h>
@@ -19,6 +23,7 @@
 #include "../util/command.h"
 #include <deque>
 
+#define ASSOCIATE_TOPIC "/supervisor/associate"
 #define ASK_POS_TOPIC "/supervisor/ask_pos"
 #define ANS_POS_TOPIC "/supervisor/ans_pos"
 
@@ -42,7 +47,7 @@ namespace se306p1 {
   class RobotController {
      private:
       // Robot identification
-      int64_t robot_id_;
+      uint64_t robot_id_;
 
       // Position
       Pose pose_;
@@ -70,6 +75,7 @@ namespace se306p1 {
       ros::Subscriber askPosSubscriber_;
       ros::Subscriber doSubscriber_;
       ros::Subscriber goSubscriber_;
+      ros::Subscriber assocSubscriber_;
       ros::Publisher ansPosPublisher_;
 
       // Stage pub/subs
@@ -77,12 +83,13 @@ namespace se306p1 {
       ros::Publisher twist_;
 
      public:
-      RobotController(ros::NodeHandle &nh, int64_t id);
+      RobotController(ros::NodeHandle &nh, uint64_t id);
       virtual ~RobotController();
       double AngleToGoal();
       void go_callback(Go msg);
       void do_callback(Do msg);
       void askPosition_callback(AskPosition msg);
+      void assoc_callback(Associate msg);
       void odom_callback(nav_msgs::Odometry msg);
       void AnswerPosition();
       void Move();

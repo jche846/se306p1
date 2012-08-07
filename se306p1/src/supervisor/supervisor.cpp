@@ -3,18 +3,22 @@
 #include "supervisor.h"
 #include "robot.h"
 
+#include <se306p1/Associate.h>
 #include <se306p1/AskPosition.h>
 #include <se306p1/Position.h>
 
 #include "../util/pose.h"
 
-#define FREQUENCY 100
+#define FREQUENCY 1
 
 namespace se306p1 {
   Supervisor::Supervisor() {
     // create publishers and subscribers
-    ansPosSubscriber_ = nh_.subscribe<Position>(ANS_POS_TOPIC, 1000, &Supervisor::ansPos_callback, this, ros::TransportHints().reliable());
+    ansPosSubscriber_ = nh_.subscribe<Position>(ANS_POS_TOPIC, 1000,
+                                                &Supervisor::ansPos_callback, this,
+                                                ros::TransportHints().reliable());
     askPosPublisher_ = nh_.advertise<AskPosition>(ASK_POS_TOPIC, 1000);
+    assocPublisher_ = nh_.advertise<Associate>(ASSOCIATE_TOPIC, 1000);
   }
 
   Supervisor::~Supervisor() { }
@@ -40,7 +44,7 @@ namespace se306p1 {
       } else {
         robots_[msg.R_ID] = std::shared_ptr<Robot>(new Robot(msg.R_ID));
         robot_ptr = robots_[msg.R_ID];
-        ROS_INFO("Hello robot %" PRId64 "!", robots_[msg.R_ID]->id_);
+        this->AssociateRobot(*robot_ptr);
       }
     }
 
@@ -70,10 +74,17 @@ namespace se306p1 {
     ROS_INFO("Discovered %zd robots.", robots_.size());
   }
 
+  void Supervisor::AssociateRobot(const Robot &robot) {
+    ROS_INFO("Supervisor associating with robot %" PRId64 ".", robot.id_);
+    Associate msg;
+    msg.R_ID = robot.id_;
+    this->assocPublisher_.publish(msg);
+  }
+
   void Supervisor::Start() {
     while (ros::Time::now().isZero());
 
-    this->Discover(10);
+    this->Discover(5);
     this->state_ = State::CONTROLLING;
 
     if (!this->robots_.size()) {

@@ -19,6 +19,8 @@ namespace se306p1 {
     std::stringstream goss;
     goss << "/robot_" << n << "/go";
     goPublisher_ = nh_.advertise<se306p1::Go>(goss.str(), 1000);
+
+    ROS_INFO("Supervisor advertising Do and Go for robot %" PRId64 ".", this->id_);
   }
 
   Robot::~Robot() {}
