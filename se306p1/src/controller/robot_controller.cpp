@@ -9,6 +9,9 @@
 #include "../util/trig.h"
 #include <cassert>
 #define FREQUENCY 100 // The number of ticks per second the robot will execute.
+#define DEFAULT_LV 2.0
+#define DEFAULT_AV 2.0
+
 namespace se306p1 {
   RobotController::RobotController(ros::NodeHandle &nh, int64_t id = 0) {
     this->nh_ = nh;
@@ -198,6 +201,10 @@ namespace se306p1 {
    * should try and reach.
    */
   void RobotController::SetGoing(Go msg) {
+    // Set the av and lv to some default values.
+    this->lv_ = DEFAULT_LV;
+    this->av_ = DEFAULT_AV;
+
     this->doing_ = false;
     this->going_ = true;
 
