@@ -181,15 +181,12 @@ namespace se306p1 {
   }
 
   /**
-   * Tell stage to drive the robot at the given linear and angular velocity.
-   *
-   * @param lv Linear velocity
-   * @param av Angular velocity
+   * Tell stage to drive the robot at the current linear and angular velocity.
    */
-  void RobotController::Twist(double lv = 0, double av = 0) {
+  void RobotController::Twist() {
     geometry_msgs::Twist msg;
-    msg.angular.z = av;
-    msg.linear.x = lv;
+    msg.angular.z = this->av_;
+    msg.linear.x = this->lv_;
     this->twist_.publish(msg);
   }
 
@@ -256,7 +253,7 @@ namespace se306p1 {
    * angular velocity.
    */
   void RobotController::DequeCommand() {
-    if (this->commands_.empty()) {
+    if (this->commands_.empty()) { // Do nothing if there are no more commands.
       Do msg;
       msg.lv = 0;
       msg.av = 0;
@@ -277,6 +274,12 @@ namespace se306p1 {
   void RobotController::InterruptCommandQueue(Command cmd) {
     // Clear the current command queue.
     this->commands_.clear();
+
+    // Stop Going and Doing.
+    this->going_ = false;
+    this->doing_ = false;
+
+    // Execute the interrupting command.
     this->ExecuteCommand(cmd);
   }
 
@@ -293,13 +296,16 @@ namespace se306p1 {
       // If the robot is not at it's goal position, go to the position.
       if (this->goal_ != this->position_) {
         if (rotating) {
+          // If we aren't moving forward, set the lv to 0.
+          this->lv_ = 0.0;
+
           double angle_to_goal = this->AngleToGoal();
 
           if (angle_to_goal < this->av_) {
             this->av_ = angle_to_goal;
           }
 
-          this->Twist(0.0, this->av_);
+          this->Twist();
 
           if (this->position_.theta_ == this->goal_.theta_) {
             rotating = false;
@@ -307,6 +313,9 @@ namespace se306p1 {
         }
 
         if (!rotating) {
+          // If we aren't rotating, set the av to 0.
+          this->av_ = 0.0;
+
           double distance_to_goal = (this->goal_.position_
               - this->position_.position_).Length();
 
@@ -314,7 +323,7 @@ namespace se306p1 {
             lv_ = distance_to_goal;
           }
 
-          this->Twist(this->lv_, 0.0);
+          this->Twist();
 
           if ((this->goal_.position_ - this->position_.position_).Length()
               == 0.0) {
