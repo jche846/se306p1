@@ -44,6 +44,8 @@ namespace se306p1 {
       // Loop control variables
       bool doing_;
       bool going_;
+      bool moving_;
+      bool aiming_;
 
       // Command queue
       std::deque<Command> commands_;

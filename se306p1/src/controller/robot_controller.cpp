@@ -24,6 +24,8 @@ namespace se306p1 {
     // Initialise as stationary.
     this->doing_ = false;
     this->going_ = false;
+    this->aiming_ = false;
+    this->moving_ = false;
 
     // We need to listen for the supervisor asking for our position.
     this->askPosSubscriber_ = nh_.subscribe<AskPosition>(
@@ -205,8 +207,12 @@ namespace se306p1 {
     this->lv_ = DEFAULT_LV;
     this->av_ = DEFAULT_AV;
 
+    // Set the robot state to going.
     this->doing_ = false;
     this->going_ = true;
+
+    // The go starts by pointing at the destination.
+    this->aiming_ = true;
 
     Pose p;
 
@@ -298,7 +304,6 @@ namespace se306p1 {
     ros::Rate r(FREQUENCY);  // Run FREQUENCY times a second
 
     // HARDCODED STUFF FOR TESTING
-    bool rotating = true;
     Do msg;
     msg.lv = 2.0;
     msg.av = 2.0;
@@ -306,12 +311,13 @@ namespace se306p1 {
 
     while (ros::ok()) {
       // Make sure the robot isn't in the state where it is trying to both Go
-      // and do.
+      // and do or move and aim.
       assert(this->doing_!= true && this->going_!= true);
+      assert(this->moving_ != true && this->aiming_ != true);
 
       // If the robot is trying to go to a position, keep moving towards it.
       if (this->going_) {
-        if (rotating) {
+        if (this->aiming_) {
           // If we aren't moving forward, set the lv to 0.
           this->lv_ = 0.0;
 
@@ -324,11 +330,10 @@ namespace se306p1 {
           this->Move();
 
           if (this->pose_.theta_ == this->goal_.theta_) {
-            rotating = false;
+            this->aiming_ = false;
+            this->moving_ = true;
           }
-        }
-
-        if (!rotating) {
+        } else if (this->moving_) {
           // If we aren't rotating, set the av to 0.
           this->av_ = 0.0;
 
@@ -342,9 +347,27 @@ namespace se306p1 {
           this->Move();
 
           if ((this->goal_.position_ - this->pose_.position_).Length() == 0.0) {
-            // do nothing
+            this->moving_ = false;
+            this->av_ = DEFAULT_AV;
+          }
+        } else if (!this->aiming_ && !this->moving_) {
+          // Rotate to goal theta.
+          this->lv_ = 0.0;
+
+          double left_to_rotate = this->pose_.theta_ - this->goal_.theta_;
+
+          if (left_to_rotate < this->av_) {
+            this->av_ = left_to_rotate;
+          }
+
+          this->Move();
+
+          if (this->pose_.theta_ == this->goal_.theta_) {
+            this->aiming_ = false;
+            this->moving_ = true;
           }
         }
+
       } else if (this->doing_) { // If the robot is doing, keep doing.
         this->Move();
       } else { // Otherwise, get the next command.
