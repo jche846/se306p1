@@ -21,7 +21,7 @@ namespace se306p1 {
     virtual ~Robot();
 
     uint64_t id_;
-
+    bool executing_;
     Pose pose_;
 
     /**
