@@ -71,8 +71,8 @@ namespace se306p1 {
       void AnswerPosition();
       void odom_callback(nav_msgs::Odometry msg);
       void Twist(double lv, double av);
-      void SetGo(Go msg);
-      void SetDo(Do msg);
+      void SetGoing(Go msg);
+      void SetDoing(Do msg);
       void ExecuteCommand(Command cmd);
       void DequeCommand();
       void InterruptCommandQueue(Command cmd);

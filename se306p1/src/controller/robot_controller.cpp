@@ -199,7 +199,7 @@ namespace se306p1 {
    * @param msg The message containing the x, y, and theta values the robot
    * should try and reach.
    */
-  void RobotController::SetGo(Go msg) {
+  void RobotController::SetGoing(Go msg) {
     this->doing_ = false;
     this->going_ = true;
 
@@ -218,7 +218,7 @@ namespace se306p1 {
    * @param msg The message containing the linear and angular velocity values
    * that the robot should continuously move at.
    */
-  void RobotController::SetDo(Do msg) {
+  void RobotController::SetDoing(Do msg) {
     this->going_ = false;
     this->doing_ = true;
 
@@ -238,7 +238,7 @@ namespace se306p1 {
       msg.lv = cmd.lv;
       msg.av = cmd.av;
 
-      this->SetDo(msg);
+      this->SetDoing(msg);
     } else {
       Go msg;
 
@@ -246,7 +246,7 @@ namespace se306p1 {
       msg.y = cmd.y;
       msg.theta = cmd.theta;
 
-      this->SetGo(msg);
+      this->SetGoing(msg);
     }
   }
 
@@ -261,7 +261,7 @@ namespace se306p1 {
       msg.lv = 0;
       msg.av = 0;
 
-      SetDo(msg);
+      SetDoing(msg);
     } else {
       Command cmd = this->commands_.front();
       this->commands_.pop_front();
