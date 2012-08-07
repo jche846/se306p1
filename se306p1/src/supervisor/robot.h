@@ -2,6 +2,9 @@
 
 #include "ros/ros.h"
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 #include <cstdint>
 
 #include "../macros.h"

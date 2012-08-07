@@ -32,7 +32,7 @@ namespace se306p1 {
         if (robot_ptr->pose_.position_.x_ != msg.x ||
             robot_ptr->pose_.position_.y_ != msg.y ||
             robot_ptr->pose_.theta_ != msg.theta) {
-          ROS_WARN("Robot %ld changed its position during discovery.",
+          ROS_WARN("Robot %" PRId64 " changed its position during discovery.",
                    robots_[msg.R_ID]->id_);
         } else {
           return;
@@ -40,7 +40,7 @@ namespace se306p1 {
       } else {
         robots_[msg.R_ID] = std::shared_ptr<Robot>(new Robot(msg.R_ID));
         robot_ptr = robots_[msg.R_ID];
-        ROS_INFO("Hello robot %ld!", robots_[msg.R_ID]->id_);
+        ROS_INFO("Hello robot %" PRId64 "!", robots_[msg.R_ID]->id_);
       }
     }
 
