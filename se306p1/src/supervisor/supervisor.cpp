@@ -74,6 +74,32 @@ namespace se306p1 {
     ROS_INFO("Discovered %zd robots.", robots_.size());
   }
 
+  void Supervisor::WaitForReady() {
+    ROS_INFO("Waiting for robots to become ready.");
+    ros::Rate r(FREQUENCY);
+
+    this->state_ = State::WAITING;
+
+    while (ros::ok()) {
+      bool ready = true;
+      for (std::pair<const uint64_t, std::shared_ptr<Robot>> &pair : this->robots_) {
+        if (pair.second->readiness_ != Robot::Readiness::READY) {
+          ready = false;
+          break;
+        }
+      }
+      if (!ready) {
+        r.sleep();
+        ros::spinOnce();
+        continue;
+      }
+      break;
+    }
+
+    ROS_INFO("Robots ready.");
+  }
+
+
   void Supervisor::AssociateRobot(const Robot &robot) {
     ROS_INFO("Supervisor associating with robot %" PRId64 ".", robot.id_);
     Associate msg;
@@ -91,6 +117,8 @@ namespace se306p1 {
       ROS_ERROR("No robots discovered.");
       return;
     }
+
+    this->WaitForReady();
 
     this->ElectHead();
 

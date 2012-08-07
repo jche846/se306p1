@@ -1,5 +1,7 @@
 #include "robot.h"
 
+#include <functional>
+
 #include <string>
 #include <iostream>
 
@@ -9,18 +11,32 @@
 namespace se306p1 {
   Robot::Robot(uint64_t n) {
     this->id_ = n;
+    this->readiness_ = Readiness::NOT_READY;
+
+     ros::SubscriberStatusCallback statusCb = [this](const ros::SingleSubscriberPublisher& pub) -> void {
+      switch(this->readiness_) {
+        case Readiness::NOT_READY:
+          this->readiness_ = Readiness::HALF_READY;
+          return;
+        default:
+          this->readiness_ = Readiness::READY;
+          ROS_INFO("Controller for robot %" PRId64 " ready.", this->id_);
+          return;
+      }
+    };
 
     // create publishers and subscribers
     std::stringstream doss;
     doss << "/robot_" << n << "/do";
-
-    doPublisher_ = nh_.advertise<se306p1::Do>(doss.str(), 1000, true);
+    doPublisher_ = nh_.advertise<se306p1::Do>(doss.str(), 1000, statusCb,
+                                              ros::SubscriberStatusCallback(),
+                                              ros::VoidConstPtr(), true);
 
     std::stringstream goss;
     goss << "/robot_" << n << "/go";
-    goPublisher_ = nh_.advertise<se306p1::Go>(goss.str(), 1000, true);
-
-    ROS_INFO("Supervisor advertising Do and Go for robot %" PRId64 ".", this->id_);
+    goPublisher_ = nh_.advertise<se306p1::Go>(goss.str(), 1000, statusCb,
+                                              ros::SubscriberStatusCallback(),
+                                              ros::VoidConstPtr(), true);
   }
 
   Robot::~Robot() {}

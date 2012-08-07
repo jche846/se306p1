@@ -23,9 +23,16 @@ namespace se306p1 {
     Robot(uint64_t n);
     virtual ~Robot();
 
+    enum class Readiness {
+        NOT_READY,
+        HALF_READY,
+        READY
+    };
+
     uint64_t id_;
     bool executing_;
     Pose pose_;
+    Readiness readiness_;
 
     /**
      * Request the robot to go to a position via a child controller.

@@ -17,7 +17,8 @@ namespace se306p1 {
   class Supervisor {
     enum class State {
       DISCOVERY,
-      CONTROLLING
+      WAITING,
+      CONTROLLING,
     };
 
   private:
@@ -57,7 +58,7 @@ namespace se306p1 {
      * Request positions of all robots to discover them.
      */
     void Discover(int timeout);
-
+    void WaitForReady();
 
     /**
      * Elect a cluster head.
