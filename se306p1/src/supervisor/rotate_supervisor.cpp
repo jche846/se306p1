@@ -13,6 +13,14 @@ namespace se306p1 {
     ROS_INFO("Starting rotate supervisor.");
     this->FindRobotDests();
     this->MoveNodesToDests(this->nonHeadRobots_, this->lineLocations_);
+
+    //wait for robots to arrive in line
+
+    // start cluster head moving
+
+    // Go other 5 to cluster head
+
+    // Queue Do on other 5 to move in circle 
   }
 
   void RotateSupervisor::FindRobotDests() {

@@ -20,12 +20,14 @@ namespace se306p1 {
   Supervisor::~Supervisor() { }
 
   void Supervisor::ansPos_callback(Position msg) {
+    std::shared_ptr<Robot> robot_ptr;
+    if (robots_.find(msg.R_ID) != robots_.end()) {
+      robot_ptr = robots_[msg.R_ID];
+    } else {
+      robot_ptr = NULL;
+    }
     if (this->state_ == DISCOVERY) {
-      std::shared_ptr<Robot> robot_ptr;
-
-      if (robots_.find(msg.R_ID) != robots_.end()) {
-        robot_ptr = robots_[msg.R_ID];
-
+      if (robot_ptr != NULL) {
         if (robot_ptr->pose_.position_.x_ != msg.x ||
             robot_ptr->pose_.position_.y_ != msg.y ||
             robot_ptr->pose_.theta_ != msg.theta) {
@@ -39,10 +41,14 @@ namespace se306p1 {
         robot_ptr = robots_[msg.R_ID];
         ROS_INFO("Hello robot %ld!", robots_[msg.R_ID]->id_);
       }
-
       robot_ptr->pose_ = Pose(Vector2(msg.x, msg.y), msg.theta);
-      robot_ptr->Stop();
     }
+
+    if(robot_ptr == NULL){
+      return; // must not be in discovery mode so don't accept new robots
+    }
+    robot_ptr->Stop();
+    robot_ptr->executing_ = false;
   }
 
   void Supervisor::Discover(int timeout) {
