@@ -42,9 +42,6 @@ namespace se306p1 {
       double av_;  // Angular velocity (counter clockwise)
 
       // Loop control variables
-      bool moving_;
-      bool rotating_;
-      bool dequeuing_;
       bool doing_;
       bool going_;
 

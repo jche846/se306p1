@@ -12,17 +12,14 @@ namespace se306p1 {
   RobotController::RobotController(ros::NodeHandle &nh, int64_t id = 0) {
     this->nh_ = nh;
 
-    // Initialise the robot as stationary with a given pose and ID.
+    // Initialise the robot as stationary with a given ID.
     this->robot_id_ = id;
     this->lv_ = 0;
     this->av_ = 0;
 
     // Initialise as stationary.
-    this->moving_ = false;
-    this->rotating_ = false;
-
-    // Initially the robot is attempting to execute it's command queue.
-    this->dequeuing_ = true;
+    this->doing_ = false;
+    this->going_ = false;
 
     // We need to listen for the supervisor asking for our position.
     this->askPosSubscriber_ = nh_.subscribe<AskPosition>(
@@ -75,6 +72,13 @@ namespace se306p1 {
     // TODO Auto-generated destructor stub
   }
 
+  /**
+   * Work out the angle in degrees counter clockwise from North that the robot
+   * needs to turn in order to point at it's goal coordinates.
+   *
+   * @return Degrees representing the angle between the robot's current theta
+   * and the goal coordinates.
+   */
   double RobotController::AngleToGoal() {
 
     double dx = this->goal_.position_.x_ - this->position_.position_.x_;
@@ -96,6 +100,14 @@ namespace se306p1 {
     return phi;
   }
 
+  /**
+   * Called when the supervisor publishes a Go message for this robot. If the
+   * message is to be enqueued, the message is put on the queue. Otherwise, the
+   * command queue is interrupted and thrown away and the Go message is executed
+   * immediately.
+   *
+   * @param msg A Go message containing a location for the robot to move to.
+   */
   void RobotController::go_callback(Go msg) {
     if (msg.enqueue) {
       this->commands_.push_back(Command(msg));
@@ -104,6 +116,14 @@ namespace se306p1 {
     }
   }
 
+  /**
+   * Called when the supervisor publishes a Do message for this robot. If the
+   * message is to be enqueued, the message is put on the queue. Otherwise, the
+   * command queue is interrupted and thrown away and the Do message is executed
+   * immediately.
+   *
+   * @param msg A Do message containing linear and angular velocity information.
+   */
   void RobotController::do_callback(Do msg) {
     if (msg.enqueue) {
       this->commands_.push_back(Command(msg));
@@ -112,10 +132,19 @@ namespace se306p1 {
     }
   }
 
-  void RobotController::askPosition_callback(AskPosition message) {
+  /**
+   * Called when the supervisor publishes a request for robots to call home.
+   * Calls the AnswerPosition() method in response.
+   *
+   * @param msg A blank message.
+   */
+  void RobotController::askPosition_callback(AskPosition msg) {
     this->AnswerPosition();
   }
 
+  /**
+   * Publish this robot's position to the ans_position topic.
+   */
   void RobotController::AnswerPosition() {
     se306p1::Position msg;
 
@@ -127,6 +156,11 @@ namespace se306p1 {
     this->ansPosPublisher_.publish(msg);
   }
 
+  /**
+   * Called when stage publishes an odometry message.
+   *
+   * @param msg The odometry message containing position data for this robot.
+   */
   void RobotController::odom_callback(nav_msgs::Odometry msg) {
 
     double roll;
@@ -146,6 +180,12 @@ namespace se306p1 {
     ROS_INFO("Current theta is: %f", this->position_.theta_);
   }
 
+  /**
+   * Tell stage to drive the robot at the given linear and angular velocity.
+   *
+   * @param lv Linear velocity
+   * @param av Angular velocity
+   */
   void RobotController::Twist(double lv = 0, double av = 0) {
     geometry_msgs::Twist msg;
     msg.angular.z = av;
@@ -153,6 +193,12 @@ namespace se306p1 {
     this->twist_.publish(msg);
   }
 
+  /**
+   * Set the robot to Go as per to Go message.
+   *
+   * @param msg The message containing the x, y, and theta values the robot
+   * should try and reach.
+   */
   void RobotController::SetGo(Go msg) {
     this->doing_ = false;
     this->going_ = true;
@@ -166,6 +212,12 @@ namespace se306p1 {
     this->goal_ = p;
   }
 
+  /**
+   * Set the robot to Do as per the Do message.
+   *
+   * @param msg The message containing the linear and angular velocity values
+   * that the robot should continuously move at.
+   */
   void RobotController::SetDo(Do msg) {
     this->going_ = false;
     this->doing_ = true;
@@ -174,6 +226,11 @@ namespace se306p1 {
     this->av_ = msg.av;
   }
 
+  /**
+   * Execute a Do or Go command.
+   *
+   * @param cmd The Do or Go command to be executed.
+   */
   void RobotController::ExecuteCommand(Command cmd) {
     if (cmd.isDo) {
       Do msg;
