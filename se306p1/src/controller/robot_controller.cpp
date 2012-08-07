@@ -81,8 +81,8 @@ namespace se306p1 {
    */
   double RobotController::AngleToGoal() {
 
-    double dx = this->goal_.position_.x_ - this->position_.position_.x_;
-    double dy = this->goal_.position_.y_ - this->position_.position_.y_;
+    double dx = this->goal_.position_.x_ - this->pose_.position_.x_;
+    double dy = this->goal_.position_.y_ - this->pose_.position_.y_;
     double phi;
 
     double a_tan = DegATan(dy / dx);
@@ -149,9 +149,9 @@ namespace se306p1 {
     se306p1::Position msg;
 
     msg.R_ID = this->robot_id_;
-    msg.x = this->position_.position_.x_;
-    msg.y = this->position_.position_.y_;
-    msg.theta = this->position_.theta_;
+    msg.x = this->pose_.position_.x_;
+    msg.y = this->pose_.position_.y_;
+    msg.theta = this->pose_.theta_;
 
     this->ansPosPublisher_.publish(msg);
   }
@@ -168,16 +168,16 @@ namespace se306p1 {
     double yaw;
 
     // Set the position in 2D space
-    this->position_.position_.x_ = msg.pose.pose.position.x;
-    this->position_.position_.y_ = msg.pose.pose.position.y;
+    this->pose_.position_.x_ = msg.pose.pose.position.x;
+    this->pose_.position_.y_ = msg.pose.pose.position.y;
 
     // Set the rotation
     QuaternionMsgToRPY(msg.pose.pose.orientation, roll, pitch, yaw);
-    this->position_.theta_ = yaw;
+    this->pose_.theta_ = RadiansToDegrees(yaw);
 
-    //  ROS_INFO("Current x position is: %f", msg.pose.pose.position.x);
-    //  ROS_INFO("Current y position is: %f", msg.pose.pose.position.y);
-    ROS_INFO("Current theta is: %f", this->position_.theta_);
+    ROS_INFO("Current x position is: %f", msg.pose.pose.position.x);
+    ROS_INFO("Current y position is: %f", msg.pose.pose.position.y);
+    ROS_INFO("Current theta is: %f", this->pose_.theta_);
   }
 
   /**
@@ -293,8 +293,8 @@ namespace se306p1 {
     this->av_ = 1.0;
 
     while (ros::ok()) {
-      // If the robot is not at it's goal position, go to the position.
-      if (this->goal_ != this->position_) {
+      // If the robot is trying to go to a position, keep moving towards it.
+      if (this->going_) {
         if (rotating) {
           // If we aren't moving forward, set the lv to 0.
           this->lv_ = 0.0;
@@ -307,7 +307,7 @@ namespace se306p1 {
 
           this->Twist();
 
-          if (this->position_.theta_ == this->goal_.theta_) {
+          if (this->pose_.theta_ == this->goal_.theta_) {
             rotating = false;
           }
         }
@@ -317,7 +317,7 @@ namespace se306p1 {
           this->av_ = 0.0;
 
           double distance_to_goal = (this->goal_.position_
-              - this->position_.position_).Length();
+              - this->pose_.position_).Length();
 
           if (!(distance_to_goal >= (lv_ / FREQUENCY))) {
             lv_ = distance_to_goal;
@@ -325,12 +325,14 @@ namespace se306p1 {
 
           this->Twist();
 
-          if ((this->goal_.position_ - this->position_.position_).Length()
+          if ((this->goal_.position_ - this->pose_.position_).Length()
               == 0.0) {
             // do nothing
           }
         }
-      } else {
+      } else if (this->doing_) { // If the robot is doing, keep doing.
+        this->Twist();
+      } else { // Otherwise, get the next command.
         this->DequeCommand();
       }
 
@@ -352,5 +354,6 @@ int main(int argc, char *argv[]) {
 
   se306p1::RobotController rc(nh, r_id);
   rc.Run();
+
   return 0;
 }

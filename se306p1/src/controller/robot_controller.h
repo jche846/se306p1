@@ -32,7 +32,7 @@ namespace se306p1 {
       int64_t robot_id_;
 
       // Position
-      Pose position_;
+      Pose pose_;
 
       // Where the robot is currently trying to end up after receiving a go.
       Pose goal_;
