@@ -93,10 +93,11 @@ namespace se306p1 {
 
     for (it = this->robots_.begin(); it != this->robots_.end(); it++) {
       std::shared_ptr<Robot> robot_ptr = (*it).second;
+      double distToOrig = robot_ptr->pose_.position_.Length();
       if (clusterHeadDist == -1) {
         this->clusterHead_ = robot_ptr;
+        clusterHeadDist = distToOrig;
       } else {
-        double distToOrig = robot_ptr->pose_.position_.Length();
         if (distToOrig != 0 && distToOrig < clusterHeadDist) {
 
           this->nonHeadRobots_.push_back(this->clusterHead_);
