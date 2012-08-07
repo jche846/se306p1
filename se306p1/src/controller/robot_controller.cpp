@@ -66,21 +66,36 @@ namespace se306p1 {
 
     double dx = this->goal_.position_.x_ - this->pose_.position_.x_;
     double dy = this->goal_.position_.y_ - this->pose_.position_.y_;
-    double phi;
+    double goal_theta;
+    double robot_theta = this->pose_.theta;
 
     double a_tan = DegATan(dy / dx);
 
-    if (dx >= 0 && dy >= 0) {
-      phi = a_tan;
-    } else if (dx < 0 && dy >= 0) {
-      phi = 180.0 - a_tan;
-    } else if (dx < 0 && dy < 0) {
-      phi = 180 + a_tan;
+    if (dy >= 0 and dx >= 0){
+      //sector 1
+      goal_theta = -1*(90-a_tan);
+    } else if (dy >= 0 and dx < 0) {
+      //sector 2
+      goal_theta = (90-a_tan);
+    } else if (dy < 0 and dx < 0) {
+      //sector 3
+      goal_theta = 90 + a_tan;
+    } else if (dy < 0 and dx >= 0) {
+      //sector 4
+      goal_theta = -1*(90 + a_tan);
     } else {
-      phi = 360 - a_tan;
+      //pass
+      ROS_WARNING("Can not calculate angle to destination.");
     }
 
-    return phi;
+    double change =  goal_theta - robot_theta
+
+    if (change > 180) {
+        change = change - 360;
+    } else if (change < -180) {
+        change = 360 + change;
+    }
+    return change;
   }
 
   /**
