@@ -2,6 +2,9 @@
 
 #include "ros/ros.h"
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 #include <cstdint>
 
 #include "../macros.h"
@@ -21,7 +24,7 @@ namespace se306p1 {
     virtual ~Robot();
 
     uint64_t id_;
-
+    bool executing_;
     Pose pose_;
 
     /**

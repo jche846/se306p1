@@ -30,6 +30,8 @@ namespace se306p1 {
     msg.theta = pos.theta_;
     msg.enqueue = enqueue;
 
+    this->executing_ = true;
+
     goPublisher_.publish(msg);
   }
 
@@ -42,6 +44,8 @@ namespace se306p1 {
     msg.lv = lv;
     msg.av = av;
     msg.enqueue = enqueue;
+
+    this->executing_ = true;
 
     doPublisher_.publish(msg);
   }

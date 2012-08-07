@@ -20,16 +20,19 @@ namespace se306p1 {
   Supervisor::~Supervisor() { }
 
   void Supervisor::ansPos_callback(Position msg) {
-    if (this->state_ == DISCOVERY) {
-      std::shared_ptr<Robot> robot_ptr;
+    std::shared_ptr<Robot> robot_ptr;
+    if (robots_.find(msg.R_ID) != robots_.end()) {
+      robot_ptr = robots_[msg.R_ID];
+    } else {
+      robot_ptr = NULL;
+    }
 
-      if (robots_.find(msg.R_ID) != robots_.end()) {
-        robot_ptr = robots_[msg.R_ID];
-
+    if (this->state_ == State::DISCOVERY) {
+      if (robot_ptr != NULL) {
         if (robot_ptr->pose_.position_.x_ != msg.x ||
             robot_ptr->pose_.position_.y_ != msg.y ||
             robot_ptr->pose_.theta_ != msg.theta) {
-          ROS_WARN("Robot %ld changed its position during discovery.",
+          ROS_WARN("Robot %" PRId64 " changed its position during discovery.",
                    robots_[msg.R_ID]->id_);
         } else {
           return;
@@ -37,19 +40,24 @@ namespace se306p1 {
       } else {
         robots_[msg.R_ID] = std::shared_ptr<Robot>(new Robot(msg.R_ID));
         robot_ptr = robots_[msg.R_ID];
-        ROS_INFO("Hello robot %ld!", robots_[msg.R_ID]->id_);
+        ROS_INFO("Hello robot %" PRId64 "!", robots_[msg.R_ID]->id_);
       }
-
-      robot_ptr->pose_ = Pose(Vector2(msg.x, msg.y), msg.theta);
-      robot_ptr->Stop();
     }
+
+    if(robot_ptr == NULL){
+      return; // must not be in discovery mode so don't accept new robots
+    }
+
+    robot_ptr->Stop();
+    robot_ptr->pose_ = Pose(Vector2(msg.x, msg.y), msg.theta);
+    robot_ptr->executing_ = false;
   }
 
   void Supervisor::Discover(int timeout) {
     ROS_INFO("Discovering robots for %d seconds.", timeout);
     ros::Rate r(FREQUENCY);
 
-    this->state_ = DISCOVERY;
+    this->state_ = State::DISCOVERY;
 
     ros::Time end = ros::Time::now() + ros::Duration(timeout, 0);
 
@@ -66,7 +74,7 @@ namespace se306p1 {
     while (ros::Time::now().isZero());
 
     this->Discover(10);
-    this->state_ = CONTROLLING;
+    this->state_ = State::CONTROLLING;
 
     if (!this->robots_.size()) {
       ROS_ERROR("No robots discovered.");
