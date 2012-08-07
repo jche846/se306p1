@@ -24,6 +24,8 @@ namespace se306p1 {
   private:
     State state_;
 
+    std::map<uint64_t, std::shared_ptr<Robot>>::iterator dispatchIt_;
+
     ros::NodeHandle nh_;
     ros::Subscriber ansPosSubscriber_;
     ros::Publisher askPosPublisher_;
@@ -32,7 +34,7 @@ namespace se306p1 {
     void AssociateRobot(const Robot &robot);
 
   protected:
-    std::map<uint64_t, std::shared_ptr<Robot> > robots_;
+    std::map<uint64_t, std::shared_ptr<Robot>> robots_;
     std::shared_ptr<Robot> clusterHead_;
     std::vector<std::shared_ptr<Robot>> nonHeadRobots_;
 
@@ -49,6 +51,8 @@ namespace se306p1 {
      * Stuff for the supervisor to do.
      */
     virtual void Run() = 0;
+
+    void DispatchMessages();
 
   public:
     Supervisor();

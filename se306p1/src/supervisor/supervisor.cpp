@@ -98,7 +98,6 @@ namespace se306p1 {
     ROS_INFO("Robots ready.");
   }
 
-
   void Supervisor::AssociateRobot(const Robot &robot) {
     ROS_INFO("Supervisor associating with robot %" PRId64 ".", robot.id_);
     Associate msg;
@@ -119,8 +118,9 @@ namespace se306p1 {
 
     this->WaitForReady();
 
-    this->ElectHead();
+    this->dispatchIt_ = robots_.begin();
 
+    this->ElectHead();
     this->Run();
   }
 
@@ -146,6 +146,13 @@ namespace se306p1 {
         }
       }
     }
+  }
+
+  void Supervisor::DispatchMessages() {
+    dispatchIt_++;
+    if (dispatchIt_ == robots_.end()) dispatchIt_ = robots_.begin();
+    dispatchIt_->second->DispatchCommand();
+    ROS_INFO("Dispatched command for robot %" PRId64 ".", dispatchIt_->first);
   }
 
   void Supervisor::MoveNodesToDests(const std::vector<std::shared_ptr<Robot> > &nodesIn,

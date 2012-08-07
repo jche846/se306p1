@@ -15,12 +15,14 @@ namespace se306p1 {
 
     // TODO: remove this code!
     for(std::pair<const uint64_t, std::shared_ptr<Robot>> &pair : this->robots_) {
-      ROS_INFO("Sending Do to %" PRId64 ".", pair.first);
       pair.second->Do(2.0, 2.0, false);
-      r.sleep();
-      ROS_INFO("Sent Do to %" PRId64 ".", pair.first);
     }
-    ros::spinOnce();
+
+    while (ros::ok()) {
+      this->DispatchMessages();
+      r.sleep();
+      ros::spinOnce();
+    }
 
     //this->FindRobotDests();
     //this->MoveNodesToDests(this->nonHeadRobots_, this->lineLocations_);

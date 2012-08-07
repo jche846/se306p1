@@ -1,7 +1,5 @@
 #include "robot.h"
 
-#include <functional>
-
 #include <string>
 #include <iostream>
 
@@ -37,16 +35,44 @@ namespace se306p1 {
 
   Robot::~Robot() {}
 
+  void Robot::EnqueueCommand(Command c) {
+    this->commands_.push_back(c);
+  }
+
+  void Robot::DispatchCommand() {
+    if (this->commands_.empty()) return;
+
+    Command c = this->commands_.front();
+    this->commands_.pop_front();
+
+    if (c.isDo) {
+      se306p1::Do msg;
+      msg.lv = c.lv;
+      msg.av = c.av;
+      msg.enqueue = c.enqueue;
+
+      this->doPublisher_.publish(msg);
+    } else {
+      se306p1::Go msg;
+      msg.x = c.x;
+      msg.y = c.y;
+      msg.theta = c.theta;
+      msg.enqueue = c.enqueue;
+
+      this->goPublisher_.publish(msg);
+    }
+  }
+
   void Robot::Go(const Pose &pos, bool enqueue) {
-    se306p1::Go msg;
-    msg.x = pos.position_.x_;
-    msg.y = pos.position_.y_;
-    msg.theta = pos.theta_;
-    msg.enqueue = enqueue;
+    Command c;
+    c.enqueue = enqueue;
+    c.isDo = false;
+    c.x = pos.position_.x_;
+    c.y = pos.position_.y_;
+    c.theta = pos.theta_;
+    this->EnqueueCommand(c);
 
     this->executing_ = true;
-
-    goPublisher_.publish(msg);
   }
 
   void Robot::Stop() {
@@ -54,13 +80,13 @@ namespace se306p1 {
   }
 
   void Robot::Do(double lv, double av, bool enqueue) {
-    se306p1::Do msg;
-    msg.lv = lv;
-    msg.av = av;
-    msg.enqueue = enqueue;
+    Command c;
+    c.enqueue = enqueue;
+    c.isDo = true;
+    c.lv = lv;
+    c.av = av;
+    this->EnqueueCommand(c);
 
     this->executing_ = true;
-
-    doPublisher_.publish(msg);
   }
 }
