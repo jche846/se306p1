@@ -26,8 +26,21 @@
  * This header file defines the state variables and methods available to control a robot
  */
 namespace se306p1 {
+  enum class RobotState {
+    FINISHED,
+    IDLE,
+    DOING,
+    GOING
+  };
+
+  enum class GoStep {
+    AIMING,
+    MOVING,
+    ROTATING
+  };
+
   class RobotController {
-    private:
+     private:
       // Robot identification
       int64_t robot_id_;
 
@@ -41,11 +54,11 @@ namespace se306p1 {
       double lv_;  // Linear velocity
       double av_;  // Angular velocity (counter clockwise)
 
-      // Loop control variables
-      bool doing_;
-      bool going_;
-      bool moving_;
-      bool aiming_;
+      // Robot state
+      RobotState state_;
+
+      // Current step of Go command
+      GoStep gostep_;
 
       // Command queue
       std::deque<Command> commands_;
@@ -63,16 +76,17 @@ namespace se306p1 {
       ros::Subscriber odom_;
       ros::Publisher twist_;
 
-    public:
+     public:
       RobotController(ros::NodeHandle &nh, int64_t id);
       virtual ~RobotController();
       double AngleToGoal();
       void go_callback(Go msg);
       void do_callback(Do msg);
       void askPosition_callback(AskPosition msg);
-      void AnswerPosition();
       void odom_callback(nav_msgs::Odometry msg);
+      void AnswerPosition();
       void Move();
+      void MoveTowardsGoal();
       void SetGoing(Go msg);
       void SetDoing(Do msg);
       void ExecuteCommand(Command cmd);

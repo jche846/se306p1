@@ -14,6 +14,7 @@
 
 namespace se306p1 {
   RobotController::RobotController(ros::NodeHandle &nh, int64_t id = 0) {
+    // Node handler ti talk to ROS.
     this->nh_ = nh;
 
     // Initialise the robot as stationary with a given ID.
@@ -21,25 +22,22 @@ namespace se306p1 {
     this->lv_ = 0;
     this->av_ = 0;
 
-    // Initialise as stationary.
-    this->doing_ = false;
-    this->going_ = false;
-    this->aiming_ = false;
-    this->moving_ = false;
+    // Initialise as doing nothing.
+    this->state_ = RobotState::IDLE;
 
     // We need to listen for the supervisor asking for our position.
     this->askPosSubscriber_ = nh_.subscribe<AskPosition>(
         ASK_POS_TOPIC, 1000, &RobotController::askPosition_callback, this,
         ros::TransportHints().reliable());
 
-    // Subscribe to do messages in order to know when to move.
+    // Subscribe to Do messages in order to know when to move.
     std::stringstream doss;
     doss << "/robot" << this->robot_id_ << "/do";
     this->doSubscriber_ = nh_.subscribe<Do>(doss.str(), 1000,
                                             &RobotController::do_callback, this,
                                             ros::TransportHints().reliable());
 
-    // Subscribe to go messages in order to know when to move.
+    // Subscribe to Go messages in order to know when to move.
     std::stringstream goss;
     goss << "/robot" << this->robot_id_ << "/go";
     this->goSubscriber_ = nh_.subscribe<Go>(goss.str(), 1000,
@@ -55,23 +53,10 @@ namespace se306p1 {
     this->odom_ = nh_.subscribe<nav_msgs::Odometry>(
         odomss.str(), 1000, &RobotController::odom_callback, this);
 
+    // Tell stage that we are going to advertise commands to our robot.
     std::stringstream twistss;
     twistss << "/robot_" << this->robot_id_ << "/cmd_vel";
     this->twist_ = nh_.advertise<geometry_msgs::Twist>(twistss.str(), 1000);
-
-    /** ROS sub/pubs from Chandan
-     //advertise() function will tell ROS that you want to publish on a given topic_
-     //for other robots
-     ros::Publisher RobotNode_pub = n.advertise<Project2Sample::R_ID>("Robot0_msg",1000);
-     //to stage
-     ros::Publisher RobotNode_stage_pub = n.advertise<geometry_msgs::Twist>("/robot_0/cmd_vel",1000);
-
-     //subscribe to listen to messages of other robots
-     ros::Subscriber RobotNode1_sub = n.subscribe<Project2Sample::R_ID>("Robot1_msg",1000, RobotNode1_callback);
-
-     //subscribe to listen to messages coming from stage
-     ros::Subscriber StageLaser_sub = n.subscribe<sensor_msgs::LaserScan>("Robot0_laser",1000,StageLaser_callback);
-     **/
   }
 
   RobotController::~RobotController() {
@@ -149,6 +134,30 @@ namespace se306p1 {
   }
 
   /**
+   * Called when stage publishes an odometry message.
+   *
+   * @param msg The odometry message containing position data for this robot.
+   */
+  void RobotController::odom_callback(nav_msgs::Odometry msg) {
+    double roll;
+    double pitch;
+    double yaw;
+
+    // Set the position in 2D space.
+    this->pose_.position_.x_ = msg.pose.pose.position.x;
+    this->pose_.position_.y_ = msg.pose.pose.position.y;
+
+    // Set the rotation.
+    QuaternionMsgToRPY(msg.pose.pose.orientation, roll, pitch, yaw);
+    this->pose_.theta_ = RadiansToDegrees(yaw);
+
+    // Diagnostic information
+//    ROS_INFO("Current x position is: %f", msg.pose.pose.position.x);
+//    ROS_INFO("Current y position is: %f", msg.pose.pose.position.y);
+//    ROS_INFO("Current theta is: %f", this->pose_.theta_);
+  }
+
+  /**
    * Publish this robot's position to the ans_position topic.
    */
   void RobotController::AnswerPosition() {
@@ -163,30 +172,6 @@ namespace se306p1 {
   }
 
   /**
-   * Called when stage publishes an odometry message.
-   *
-   * @param msg The odometry message containing position data for this robot.
-   */
-  void RobotController::odom_callback(nav_msgs::Odometry msg) {
-
-    double roll;
-    double pitch;
-    double yaw;
-
-    // Set the position in 2D space
-    this->pose_.position_.x_ = msg.pose.pose.position.x;
-    this->pose_.position_.y_ = msg.pose.pose.position.y;
-
-    // Set the rotation
-    QuaternionMsgToRPY(msg.pose.pose.orientation, roll, pitch, yaw);
-    this->pose_.theta_ = RadiansToDegrees(yaw);
-
-//    ROS_INFO("Current x position is: %f", msg.pose.pose.position.x);
-//    ROS_INFO("Current y position is: %f", msg.pose.pose.position.y);
-//    ROS_INFO("Current theta is: %f", this->pose_.theta_);
-  }
-
-  /**
    * Tell stage to drive the robot at the current linear and angular velocity.
    */
   void RobotController::Move() {
@@ -197,22 +182,78 @@ namespace se306p1 {
   }
 
   /**
-   * Set the robot to Go as per to Go message.
+   * Execute the next tick of movement when attempting to reach a goal position
+   * while executing a Go command. When executing a Go command, the robot will
+   * first rotate to point at it's destination. Next, the robot will begin to
+   * move towards it's destination. Once it has reached the destination, the
+   * robot will rotate to the specified angle.
+   */
+  void RobotController::MoveTowardsGoal() {
+    if (this->gostep_ == GoStep::AIMING) {
+      // We aren't moving forward, set the lv to 0.
+      this->av_ = DEFAULT_AV;
+      this->lv_ = 0.0;
+
+      double angle_to_goal = this->AngleToGoal();
+
+      if (angle_to_goal < this->av_) {
+        this->av_ = angle_to_goal;
+      }
+
+      this->Move();
+
+      if (this->pose_.theta_ == this->goal_.theta_) {
+        this->gostep_ = GoStep::MOVING;
+      }
+    } else if (GoStep::MOVING) {
+      // If we aren't rotating, set the av to 0.
+      this->lv_ = DEFAULT_LV;
+      this->av_ = 0.0;
+
+      double distance_to_goal = (this->goal_.position_ - this->pose_.position_)
+          .Length();
+
+      if (!(distance_to_goal >= (lv_ / FREQUENCY))) {
+        lv_ = distance_to_goal;
+      }
+
+      this->Move();
+
+      if ((this->goal_.position_ - this->pose_.position_).Length() == 0.0) {
+        this->gostep_ = GoStep::ROTATING;
+      }
+    } else if (this->gostep_ == GoStep::ROTATING) {
+      // Rotate to goal theta.
+      this->lv_ = 0.0;
+      this->av_ = DEFAULT_AV;
+
+      double left_to_rotate = this->pose_.theta_ - this->goal_.theta_;
+
+      if (left_to_rotate < this->av_) {
+        this->av_ = left_to_rotate;
+      }
+
+      this->Move();
+
+      if (this->pose_.theta_ == this->goal_.theta_) {
+        this->state_ = RobotState::FINISHED;
+      }
+    }
+  }
+
+  /**
+   * Set the robot to Go as per to Go message. Resets the robot lv and av to
+   * their default values.
    *
    * @param msg The message containing the x, y, and theta values the robot
    * should try and reach.
    */
   void RobotController::SetGoing(Go msg) {
-    // Set the av and lv to some default values.
-    this->lv_ = DEFAULT_LV;
-    this->av_ = DEFAULT_AV;
-
     // Set the robot state to going.
-    this->doing_ = false;
-    this->going_ = true;
+    this->state_ = RobotState::GOING;
 
     // The go starts by pointing at the destination.
-    this->aiming_ = true;
+    this->gostep_ = GoStep::AIMING;
 
     Pose p;
 
@@ -224,14 +265,18 @@ namespace se306p1 {
   }
 
   /**
-   * Set the robot to Do as per the Do message.
+   * Set the robot to Do as per the Do message. If the Do msg contains lv and av
+   * 0, the robot state is set to idle.
    *
    * @param msg The message containing the linear and angular velocity values
    * that the robot should continuously move at.
    */
   void RobotController::SetDoing(Do msg) {
-    this->going_ = false;
-    this->doing_ = true;
+    if (msg.lv == 0.0 && msg.av == 0.0) {
+      this->state_ = RobotState::IDLE;
+    } else {
+      this->state_ = RobotState::DOING;
+    }
 
     this->lv_ = msg.lv;
     this->av_ = msg.av;
@@ -267,7 +312,7 @@ namespace se306p1 {
    * angular velocity.
    */
   void RobotController::DequeCommand() {
-    if (this->commands_.empty()) { // Do nothing if there are no more commands.
+    if (this->commands_.empty()) {  // Do nothing if there are no more commands.
       Do msg;
       msg.lv = 0;
       msg.av = 0;
@@ -290,8 +335,7 @@ namespace se306p1 {
     this->commands_.clear();
 
     // Stop Going and Doing.
-    this->going_ = false;
-    this->doing_ = false;
+    this->state_ = RobotState::IDLE;
 
     // Tell the supervisor where the robot is after being interrupted.
     this->AnswerPosition();
@@ -310,67 +354,11 @@ namespace se306p1 {
     this->SetDoing(msg);
 
     while (ros::ok()) {
-      // Make sure the robot isn't in the state where it is trying to both Go
-      // and do or move and aim.
-      assert(this->doing_!= true && this->going_!= true);
-      assert(this->moving_ != true && this->aiming_ != true);
-
-      // If the robot is trying to go to a position, keep moving towards it.
-      if (this->going_) {
-        if (this->aiming_) {
-          // If we aren't moving forward, set the lv to 0.
-          this->lv_ = 0.0;
-
-          double angle_to_goal = this->AngleToGoal();
-
-          if (angle_to_goal < this->av_) {
-            this->av_ = angle_to_goal;
-          }
-
-          this->Move();
-
-          if (this->pose_.theta_ == this->goal_.theta_) {
-            this->aiming_ = false;
-            this->moving_ = true;
-          }
-        } else if (this->moving_) {
-          // If we aren't rotating, set the av to 0.
-          this->av_ = 0.0;
-
-          double distance_to_goal = (this->goal_.position_
-              - this->pose_.position_).Length();
-
-          if (!(distance_to_goal >= (lv_ / FREQUENCY))) {
-            lv_ = distance_to_goal;
-          }
-
-          this->Move();
-
-          if ((this->goal_.position_ - this->pose_.position_).Length() == 0.0) {
-            this->moving_ = false;
-            this->av_ = DEFAULT_AV;
-          }
-        } else if (!this->aiming_ && !this->moving_) {
-          // Rotate to goal theta.
-          this->lv_ = 0.0;
-
-          double left_to_rotate = this->pose_.theta_ - this->goal_.theta_;
-
-          if (left_to_rotate < this->av_) {
-            this->av_ = left_to_rotate;
-          }
-
-          this->Move();
-
-          if (this->pose_.theta_ == this->goal_.theta_) {
-            this->aiming_ = false;
-            this->moving_ = true;
-          }
-        }
-
-      } else if (this->doing_) { // If the robot is doing, keep doing.
+      if (this->state_ == RobotState::GOING) {  // If the robot is going somewhere, keep trying to go there
+        this->MoveTowardsGoal();
+      } else if (this->state_ == RobotState::DOING) {  // If the robot is doing, keep doing.
         this->Move();
-      } else { // Otherwise, get the next command.
+      } else if (this->state_ == RobotState::FINISHED) {  // Get the next command.
         this->DequeCommand();
       }
 
