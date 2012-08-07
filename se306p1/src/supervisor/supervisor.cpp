@@ -8,6 +8,8 @@
 
 #include "../util/pose.h"
 
+#define FREQUENCY 100
+
 namespace se306p1 {
   Supervisor::Supervisor() {
     // create publishers and subscribers
@@ -45,25 +47,58 @@ namespace se306p1 {
 
   void Supervisor::Discover(int timeout) {
     ROS_INFO("Discovering robots for %d seconds.", timeout);
+    ros::Rate r(FREQUENCY);
+
     this->state_ = DISCOVERY;
 
     ros::Time end = ros::Time::now() + ros::Duration(timeout, 0);
 
     while (ros::ok() && ros::Time::now() <= end) {
       this->askPosPublisher_.publish(AskPosition());
+      r.sleep();
       ros::spinOnce();
     }
 
     ROS_INFO("Discovered %zd robots.", robots_.size());
   }
 
-  void Supervisor::Run() {
+  void Supervisor::Start() {
     while (ros::Time::now().isZero());
 
     this->Discover(10);
     this->state_ = CONTROLLING;
-    while (ros::ok()) {
-      ros::spinOnce();
+
+    if (!this->robots_.size()) {
+      ROS_ERROR("No robots discovered.");
+      return;
+    }
+
+    this->ElectHead();
+
+    this->Run();
+  }
+
+  void Supervisor::ElectHead() {
+    std::map<uint64_t, std::shared_ptr<Robot> >::iterator it;
+
+    double clusterHeadDist = -1;
+
+    for (it = this->robots_.begin(); it != this->robots_.end(); it++) {
+      std::shared_ptr<Robot> robot_ptr = (*it).second;
+      if (clusterHeadDist == -1) {
+        this->clusterHead_ = robot_ptr;
+      } else {
+        double distToOrig = robot_ptr->pose_.position_.Length();
+        if (distToOrig != 0 && distToOrig < clusterHeadDist) {
+
+          this->nonHeadRobots_.push_back(this->clusterHead_);
+
+          this->clusterHead_ = robot_ptr;
+          clusterHeadDist = distToOrig;
+        } else {
+          this->nonHeadRobots_.push_back(robot_ptr);
+        }
+      }
     }
   }
 

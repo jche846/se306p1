@@ -45,5 +45,6 @@ rosbuild_add_executable(robot_controller
 
 rosbuild_add_gtest(test_supervisor
     test/supervisor.cpp)
+rosbuild_add_rostest(test/supervisor.test)
 
 #target_link_libraries(example ${PROJECT_NAME})
