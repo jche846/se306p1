@@ -27,7 +27,7 @@
  */
 namespace se306p1 {
   class RobotController {
-     private:
+    private:
       // Robot identification
       int64_t robot_id_;
 
@@ -45,6 +45,8 @@ namespace se306p1 {
       bool moving_;
       bool rotating_;
       bool dequeuing_;
+      bool doing_;
+      bool going_;
 
       // Command queue
       std::deque<Command> commands_;
@@ -62,22 +64,21 @@ namespace se306p1 {
       ros::Subscriber odom_;
       ros::Publisher twist_;
 
-     public:
+    public:
       RobotController(ros::NodeHandle &nh, int64_t id);
       virtual ~RobotController();
-      void Move();
-      void MoveTo(const Pose &pose, double lv);
-      void Rotate();
-//      void Go(Pose pose);
-//      void Do(double lv, double av);
+      double AngleToGoal();
       void go_callback(Go msg);
       void do_callback(Do msg);
       void askPosition_callback(AskPosition msg);
       void AnswerPosition();
       void odom_callback(nav_msgs::Odometry msg);
-      void Twist();
-      void ResolveCollision();
-      void DequeueCommand();
+      void Twist(double lv, double av);
+      void SetGo(Go msg);
+      void SetDo(Do msg);
+      void ExecuteCommand(Command cmd);
+      void DequeCommand();
+      void InterruptCommandQueue(Command cmd);
       void Run();
   };
 }

@@ -31,6 +31,7 @@ rosbuild_genmsg()
 
 rosbuild_add_executable(robot_controller
   src/util/pose.h
+  src/util/trig.h
   src/util/command.cpp
   src/controller/robot_controller.cpp)
 
