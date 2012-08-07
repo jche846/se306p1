@@ -205,7 +205,7 @@ namespace se306p1 {
       if (this->pose_.theta_ == this->goal_.theta_) {
         this->gostep_ = GoStep::MOVING;
       }
-    } else if (GoStep::MOVING) {
+    } else if (this->gostep_ == GoStep::MOVING) {
       // If we aren't rotating, set the av to 0.
       this->lv_ = DEFAULT_LV;
       this->av_ = 0.0;
