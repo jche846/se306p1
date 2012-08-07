@@ -92,11 +92,12 @@ namespace se306p1 {
    */
   void RobotController::Rotate() {
     // Rotate angularly by av / FREQUENCY.
+	  this->Twist();
 
     // If the right theta is reached, stop rotating.
-    if (this->position_.theta_ == this->goal_.theta_) {
-      this->rotating_ = false;
-    }
+//    if (this->position_.theta_ == this->goal_.theta_) {
+//      this->rotating_ = false;
+//    }
   }
 
   /**
@@ -175,7 +176,11 @@ namespace se306p1 {
   }
 
   void RobotController::Twist() {
-
+	  geometry_msgs::Twist msg;
+//	  ROS_INFO("TWISTING");
+	  msg.angular.z = 4;
+	  msg.linear.x = 4;
+	  this->twist_.publish(msg);
   }
 
   void RobotController::ResolveCollision() {
@@ -191,6 +196,7 @@ namespace se306p1 {
 
   void RobotController::Run() {
     ros::Rate r(FREQUENCY);  // Run FREQUENCY times a second
+	  this->rotating_ = true;
 
     while (ros::ok()) {
       // Move each tick
