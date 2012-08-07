@@ -17,8 +17,8 @@ namespace se306p1 {
     ansPosSubscriber_ = nh_.subscribe<Position>(ANS_POS_TOPIC, 1000,
                                                 &Supervisor::ansPos_callback, this,
                                                 ros::TransportHints().reliable());
-    askPosPublisher_ = nh_.advertise<AskPosition>(ASK_POS_TOPIC, 1000);
-    assocPublisher_ = nh_.advertise<Associate>(ASSOCIATE_TOPIC, 1000);
+    askPosPublisher_ = nh_.advertise<AskPosition>(ASK_POS_TOPIC, 1000, true);
+    assocPublisher_ = nh_.advertise<Associate>(ASSOCIATE_TOPIC, 1000, true);
   }
 
   Supervisor::~Supervisor() { }

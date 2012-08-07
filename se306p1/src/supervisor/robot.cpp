@@ -14,11 +14,11 @@ namespace se306p1 {
     std::stringstream doss;
     doss << "/robot_" << n << "/do";
 
-    doPublisher_ = nh_.advertise<se306p1::Do>(doss.str(), 1000);
+    doPublisher_ = nh_.advertise<se306p1::Do>(doss.str(), 1000, true);
 
     std::stringstream goss;
     goss << "/robot_" << n << "/go";
-    goPublisher_ = nh_.advertise<se306p1::Go>(goss.str(), 1000);
+    goPublisher_ = nh_.advertise<se306p1::Go>(goss.str(), 1000, true);
 
     ROS_INFO("Supervisor advertising Do and Go for robot %" PRId64 ".", this->id_);
   }
