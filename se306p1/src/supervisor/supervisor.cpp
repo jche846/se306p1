@@ -26,6 +26,7 @@ namespace se306p1 {
     } else {
       robot_ptr = NULL;
     }
+
     if (this->state_ == DISCOVERY) {
       if (robot_ptr != NULL) {
         if (robot_ptr->pose_.position_.x_ != msg.x ||
@@ -41,13 +42,14 @@ namespace se306p1 {
         robot_ptr = robots_[msg.R_ID];
         ROS_INFO("Hello robot %ld!", robots_[msg.R_ID]->id_);
       }
-      robot_ptr->pose_ = Pose(Vector2(msg.x, msg.y), msg.theta);
     }
 
     if(robot_ptr == NULL){
       return; // must not be in discovery mode so don't accept new robots
     }
+
     robot_ptr->Stop();
+    robot_ptr->pose_ = Pose(Vector2(msg.x, msg.y), msg.theta);
     robot_ptr->executing_ = false;
   }
 
