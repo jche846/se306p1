@@ -14,7 +14,7 @@
 
 namespace se306p1 {
   class Supervisor {
-    enum State {
+    enum class State {
       DISCOVERY,
       CONTROLLING
     };

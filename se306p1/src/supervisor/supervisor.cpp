@@ -20,7 +20,7 @@ namespace se306p1 {
   Supervisor::~Supervisor() { }
 
   void Supervisor::ansPos_callback(Position msg) {
-    if (this->state_ == DISCOVERY) {
+    if (this->state_ == State::DISCOVERY) {
       std::shared_ptr<Robot> robot_ptr;
 
       if (robots_.find(msg.R_ID) != robots_.end()) {
@@ -49,7 +49,7 @@ namespace se306p1 {
     ROS_INFO("Discovering robots for %d seconds.", timeout);
     ros::Rate r(FREQUENCY);
 
-    this->state_ = DISCOVERY;
+    this->state_ = State::DISCOVERY;
 
     ros::Time end = ros::Time::now() + ros::Duration(timeout, 0);
 
@@ -66,7 +66,7 @@ namespace se306p1 {
     while (ros::Time::now().isZero());
 
     this->Discover(10);
-    this->state_ = CONTROLLING;
+    this->state_ = State::CONTROLLING;
 
     if (!this->robots_.size()) {
       ROS_ERROR("No robots discovered.");
