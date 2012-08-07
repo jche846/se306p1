@@ -51,7 +51,6 @@ namespace se306p1 {
     if(robot_ptr == nullptr){
       return; // must not be in discovery mode so don't accept new robots
     }
-
     robot_ptr->Stop();
     robot_ptr->pose_ = Pose(Vector2(msg.x, msg.y), msg.theta);
     robot_ptr->executing_ = false;

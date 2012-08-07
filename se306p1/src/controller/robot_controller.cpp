@@ -349,9 +349,6 @@ namespace se306p1 {
     // Stop Going and Doing.
     this->state_ = RobotState::IDLE;
 
-    // Tell the supervisor where the robot is after being interrupted.
-    this->AnswerPosition();
-
     // Execute the interrupting command.
     this->ExecuteCommand(cmd);
   }
