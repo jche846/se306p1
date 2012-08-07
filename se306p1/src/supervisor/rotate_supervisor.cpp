@@ -16,6 +16,7 @@ namespace se306p1 {
     for(std::pair<const uint64_t, std::shared_ptr<Robot>> &pair : this->robots_) {
       pair.second->Do(2.0, 2.0, false);
     }
+    ros::spinOnce();
 
     //this->FindRobotDests();
     //this->MoveNodesToDests(this->nonHeadRobots_, this->lineLocations_);

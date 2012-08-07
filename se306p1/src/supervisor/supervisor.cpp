@@ -17,8 +17,8 @@ namespace se306p1 {
     ansPosSubscriber_ = nh_.subscribe<Position>(ANS_POS_TOPIC, 1000,
                                                 &Supervisor::ansPos_callback, this,
                                                 ros::TransportHints().reliable());
-    askPosPublisher_ = nh_.advertise<AskPosition>(ASK_POS_TOPIC, 1000, true);
-    assocPublisher_ = nh_.advertise<Associate>(ASSOCIATE_TOPIC, 1000, true);
+    askPosPublisher_ = nh_.advertise<AskPosition>(ASK_POS_TOPIC, 1000);
+    assocPublisher_ = nh_.advertise<Associate>(ASSOCIATE_TOPIC, 1000);
   }
 
   Supervisor::~Supervisor() { }
@@ -28,11 +28,11 @@ namespace se306p1 {
     if (robots_.find(msg.R_ID) != robots_.end()) {
       robot_ptr = robots_[msg.R_ID];
     } else {
-      robot_ptr = NULL;
+      robot_ptr = nullptr;
     }
 
     if (this->state_ == State::DISCOVERY) {
-      if (robot_ptr != NULL) {
+      if (robot_ptr != nullptr) {
         if (robot_ptr->pose_.position_.x_ != msg.x ||
             robot_ptr->pose_.position_.y_ != msg.y ||
             robot_ptr->pose_.theta_ != msg.theta) {
@@ -48,7 +48,7 @@ namespace se306p1 {
       }
     }
 
-    if(robot_ptr == NULL){
+    if(robot_ptr == nullptr){
       return; // must not be in discovery mode so don't accept new robots
     }
 
