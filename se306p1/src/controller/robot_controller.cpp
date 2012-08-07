@@ -7,7 +7,8 @@
 
 #include "robot_controller.h"
 #include "../util/trig.h"
-#define FREQUENCY 20 // The number of ticks per second the robot will execute.
+#include <cassert>
+#define FREQUENCY 100 // The number of ticks per second the robot will execute.
 namespace se306p1 {
   RobotController::RobotController(ros::NodeHandle &nh, int64_t id = 0) {
     this->nh_ = nh;
@@ -175,9 +176,9 @@ namespace se306p1 {
     QuaternionMsgToRPY(msg.pose.pose.orientation, roll, pitch, yaw);
     this->pose_.theta_ = RadiansToDegrees(yaw);
 
-    ROS_INFO("Current x position is: %f", msg.pose.pose.position.x);
-    ROS_INFO("Current y position is: %f", msg.pose.pose.position.y);
-    ROS_INFO("Current theta is: %f", this->pose_.theta_);
+//    ROS_INFO("Current x position is: %f", msg.pose.pose.position.x);
+//    ROS_INFO("Current y position is: %f", msg.pose.pose.position.y);
+//    ROS_INFO("Current theta is: %f", this->pose_.theta_);
   }
 
   /**
@@ -279,20 +280,28 @@ namespace se306p1 {
     this->going_ = false;
     this->doing_ = false;
 
+    // Tell the supervisor where the robot is after being interrupted.
+    this->AnswerPosition();
+
     // Execute the interrupting command.
     this->ExecuteCommand(cmd);
   }
 
   void RobotController::Run() {
     ros::Rate r(FREQUENCY);  // Run FREQUENCY times a second
+
+    // HARDCODED STUFF FOR TESTING
     bool rotating = true;
-    this->goal_.position_.x_ = 2.0;
-    this->goal_.position_.y_ = 2.0;
-    this->goal_.theta_ = 45.0;
-    this->lv_ = 1.0;
-    this->av_ = 1.0;
+    Do msg;
+    msg.lv = 2.0;
+    msg.av = 2.0;
+    this->SetDoing(msg);
 
     while (ros::ok()) {
+      // Make sure the robot isn't in the state where it is trying to both Go
+      // and do.
+      assert(this->doing_!= true && this->going_!= true);
+
       // If the robot is trying to go to a position, keep moving towards it.
       if (this->going_) {
         if (rotating) {
@@ -325,8 +334,7 @@ namespace se306p1 {
 
           this->Twist();
 
-          if ((this->goal_.position_ - this->pose_.position_).Length()
-              == 0.0) {
+          if ((this->goal_.position_ - this->pose_.position_).Length() == 0.0) {
             // do nothing
           }
         }
