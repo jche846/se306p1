@@ -19,11 +19,6 @@ namespace se306p1 {
     this->FindRobotDests();
     this->MoveNodesToDests(this->nonHeadRobots_, this->lineLocations_);
 
-  // Scotts Instructions for Sam and Luey:
-  // * start cluster head moving
-  // * Go other 5 to cluster head
-  // * Queue Do on other 5 to move in circle
-
     bool rotating = false;
 
     while (ros::ok()) {
@@ -56,49 +51,6 @@ namespace se306p1 {
 
     }
   }
-
-  //    // Wait for robots to arrive in line and be rotated in the correct direction
-  //    map<uint64_t, std::shared_ptr<Robot>>robots_::iterator rit;   // Iterate through all the robots
-  //
-  //    while(rit != rit.end()) {
-  //      if (rit->location != lineLocations_ || rit->direction != pointtowardsorigin) {
-  //        continue;
-  //      } else {
-  //        rit++;
-  //      }
-  //    }
-
-
-  //std::map<uint64_t, std::shared_ptr<Robot> >::iterator it;
-  //
-  //for (it = this->robots_.begin(); it != this->robots_.end(); it++) {
-  //
-  //  std::shared_ptr<Robot> robot_ptr = (*it).second;
-  //
-  //  executing_
-  //
-  //  while (robot_ptr->pose_.theta_ != theta) {
-  //    //wait
-  //    continue;
-  //  }
-
-  //      double distToOrig = robot_ptr->pose_.position_.Length();
-  //      if (clusterHeadDist == -1) {
-  //        this->clusterHead_ = robot_ptr;
-  //        clusterHeadDist = distToOrig;
-  //      } else {
-  //        if (distToOrig != 0 && distToOrig < clusterHeadDist) {
-  //
-  //          this->nonHeadRobots_.push_back(this->clusterHead_);
-  //
-  //          this->clusterHead_ = robot_ptr;
-  //          clusterHeadDist = distToOrig;
-  //        } else {
-  //          this->nonHeadRobots_.push_back(robot_ptr);
-  //        }
-  //      }
-
-
 
   void RotateSupervisor::FindRobotDests() {
     size_t numRobots = this->robots_.size();
