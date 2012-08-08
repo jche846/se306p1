@@ -217,7 +217,6 @@ namespace se306p1 {
    * robot will rotate to the specified angle.
    */
   void RobotController::MoveTowardsGoal() {
-
     if (this->gostep_ == GoStep::AIMING) {
       // We aren't moving forward, set the lv to 0.
       this->av_ = DEFAULT_AV;
@@ -234,7 +233,7 @@ namespace se306p1 {
 
       this->Move();
 
-      if (this->pose_.theta_ == angle_to_goal) {
+      if (angle_to_goal == 0.0) {
         this->gostep_ = GoStep::MOVING;
       }
     } else if (this->gostep_ == GoStep::MOVING) {
