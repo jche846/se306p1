@@ -29,7 +29,7 @@ namespace se306p1 {
         bool exec_done = true;
         // iterate through all robots and see if they have finished executing
         for (auto &cur_robot: this->robots_) {
-          if (cur_robot.second->executing) {
+          if (cur_robot.second->executing_) {
             // if any of the robots are executing wait
             exec_done = false;
             break;
