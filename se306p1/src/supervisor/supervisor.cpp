@@ -153,7 +153,7 @@ namespace se306p1 {
     dispatchIt_++;
     if (dispatchIt_ == robots_.end()) dispatchIt_ = robots_.begin();
     dispatchIt_->second->DispatchCommand();
-    ROS_INFO("Dispatched command for robot %" PRId64 ".", dispatchIt_->first);
+//    ROS_INFO("Dispatched command for robot %" PRId64 ".", dispatchIt_->first);
   }
 
   void Supervisor::MoveNodesToDests(const std::vector<std::shared_ptr<Robot> > &nodesIn,
