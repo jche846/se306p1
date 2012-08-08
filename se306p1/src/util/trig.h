@@ -31,7 +31,7 @@ namespace se306p1
   * Returns: the sine of that angle in degres
   */
   inline double DegSin (double degrees) {
-    return RadiansToDegrees(sin(DegreesToRadians(degrees)));
+    return sin(DegreesToRadians(degrees));
   }
 
   /**
@@ -40,7 +40,7 @@ namespace se306p1
   * Returns: the Cosine of that angle in degres
   */
   inline double DegCos (double degrees) {
-    return RadiansToDegrees(cos(DegreesToRadians(degrees)));
+    return cos(DegreesToRadians(degrees));
   }
 
   /**
@@ -49,7 +49,7 @@ namespace se306p1
   * Returns: the tan of that angle in degres
   */
   inline double DegTan (double degrees) {
-    return RadiansToDegrees(tan(DegreesToRadians(degrees)));
+    return tan(DegreesToRadians(degrees));
   }
 
   /**
@@ -57,8 +57,8 @@ namespace se306p1
   * Parameters: degrees - the angle whose sine is to be computed in degrees
   * Returns: the sine of that angle in degres
   */
-  inline double DegATan (double degrees) {
-    return RadiansToDegrees(atan(DegreesToRadians(degrees)));
+  inline double DegATan (double x) {
+    return RadiansToDegrees(atan(x));
   }
 
   /**
