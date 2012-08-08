@@ -35,76 +35,34 @@ floorplan
   name "swarm"
   bitmap "swarm_world.pgm"
   size [ 54.0 58.7 0.5 ]
-  pose [ -29.350 27.000 0 90.000 ]
+  pose [ 0.0 0.0 0.0 0.0 ]
 )
 
 myrobot
 (
   name "r0"
-  pose [ 20 -29 0 0 ]
+  pose [ 24 12 0 0 ]
   color "blue"
 )
 
 myrobot
 (
   name "r1"
-  pose [ -27 14 0 0 ]
+  pose [ -1 13 0 0 ]
   color "green"
 )
 
 myrobot
 (
   name "r2"
-  pose [ 6 -9 0 0 ]
+  pose [ 1 5 0 0 ]
   color "black"
 )
 
 myrobot
 (
   name "r3"
-  pose [ -29 -15 0 0 ]
-  color "yellow"
-)
-
-myrobot
-(
-  name "r4"
-  pose [ -1 -20 0 0 ]
-  color "red"
-)
-
-myrobot
-(
-  name "r5"
-  pose [ 4 -17 0 0 ]
-  color "brown"
-)
-
-myrobot
-(
-  name "r6"
-  pose [ 0 -4 0 0 ]
-  color "blue"
-)
-
-myrobot
-(
-  name "r7"
-  pose [ 19 -24 0 0 ]
-  color "green"
-)
-
-myrobot
-(
-  name "r8"
-  pose [ 3 -3 0 0 ]
-  color "black"
-)
-
-myrobot
-(
-  name "r9"
-  pose [ 5 -24 0 0 ]
+  pose [ 27 15 0 0 ]
   color "yellow"
 )
 

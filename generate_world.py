@@ -43,7 +43,7 @@ floorplan
   name "swarm"
   bitmap "swarm_world.pgm"
   size [ 54.0 58.7 0.5 ]
-  pose [ -29.350 27.000 0 90.000 ]
+  pose [ 0.0 0.0 0.0 0.0 ]
 )
 
 """
