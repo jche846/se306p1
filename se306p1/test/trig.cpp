@@ -6,7 +6,7 @@ using namespace se306p1;
 namespace {
 class TrigTest : public testing::Test {
    public:
-    
+
     TrigTest() {
     }
 
@@ -22,27 +22,25 @@ class TrigTest : public testing::Test {
 
   TEST_F(TrigTest, testDegreesToRadians) {
     double result = M_PI/4;
-    ASSERT_EQ(result, DegreesToRadians(45));
+    ASSERT_NEAR(result, DegreesToRadians(45), 0.0001);
   }
-  
+
   TEST_F(TrigTest, testRadiansToDegrees) {
     double input = M_PI/10;
     double result = 18;
-    ASSERT_EQ(result, RadiansToDegrees(input));
+    ASSERT_NEAR(result, RadiansToDegrees(input), 0.0001);
   }
   TEST_F(TrigTest, testDegSin) {
-    ASSERT_EQ(0.5, DegSin(30));
+    ASSERT_NEAR(0.5, DegSin(30), 0.0001);
   }
   TEST_F(TrigTest, testDegCos) {
-    double input = 60;
-    double result = 90/M_PI;
-    ASSERT_EQ(result, DegCos(input));
+    ASSERT_NEAR(0.0, DegCos(90), 0.0001);
   }
   TEST_F(TrigTest, testDegTan) {
-    ASSERT_EQ(1, DegTan(45));
+    ASSERT_NEAR(1, DegTan(45), 0.0001);
   }
   TEST_F(TrigTest, testDegATan) {
-    ASSERT_EQ(45, DegATan(1));
+    ASSERT_NEAR(45, DegATan(1), 0.0001);
   }
 }//namespace
 
