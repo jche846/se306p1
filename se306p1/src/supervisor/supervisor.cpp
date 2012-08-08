@@ -3,18 +3,22 @@
 #include "supervisor.h"
 #include "robot.h"
 
+#include <se306p1/Associate.h>
 #include <se306p1/AskPosition.h>
 #include <se306p1/Position.h>
 
 #include "../util/pose.h"
 
-#define FREQUENCY 100
+#define FREQUENCY 1
 
 namespace se306p1 {
   Supervisor::Supervisor() {
     // create publishers and subscribers
-    ansPosSubscriber_ = nh_.subscribe<Position>(ANS_POS_TOPIC, 1000, &Supervisor::ansPos_callback, this, ros::TransportHints().reliable());
+    ansPosSubscriber_ = nh_.subscribe<Position>(ANS_POS_TOPIC, 1000,
+                                                &Supervisor::ansPos_callback, this,
+                                                ros::TransportHints().reliable());
     askPosPublisher_ = nh_.advertise<AskPosition>(ASK_POS_TOPIC, 1000);
+    assocPublisher_ = nh_.advertise<Associate>(ASSOCIATE_TOPIC, 1000);
   }
 
   Supervisor::~Supervisor() { }
@@ -24,11 +28,11 @@ namespace se306p1 {
     if (robots_.find(msg.R_ID) != robots_.end()) {
       robot_ptr = robots_[msg.R_ID];
     } else {
-      robot_ptr = NULL;
+      robot_ptr = nullptr;
     }
 
     if (this->state_ == State::DISCOVERY) {
-      if (robot_ptr != NULL) {
+      if (robot_ptr != nullptr) {
         if (robot_ptr->pose_.position_.x_ != msg.x ||
             robot_ptr->pose_.position_.y_ != msg.y ||
             robot_ptr->pose_.theta_ != msg.theta) {
@@ -40,14 +44,13 @@ namespace se306p1 {
       } else {
         robots_[msg.R_ID] = std::shared_ptr<Robot>(new Robot(msg.R_ID));
         robot_ptr = robots_[msg.R_ID];
-        ROS_INFO("Hello robot %" PRId64 "!", robots_[msg.R_ID]->id_);
+        this->AssociateRobot(*robot_ptr);
       }
     }
 
-    if(robot_ptr == NULL){
+    if(robot_ptr == nullptr){
       return; // must not be in discovery mode so don't accept new robots
     }
-
     robot_ptr->Stop();
     robot_ptr->pose_ = Pose(Vector2(msg.x, msg.y), msg.theta);
     robot_ptr->executing_ = false;
@@ -70,10 +73,42 @@ namespace se306p1 {
     ROS_INFO("Discovered %zd robots.", robots_.size());
   }
 
+  void Supervisor::WaitForReady() {
+    ROS_INFO("Waiting for robots to become ready.");
+    ros::Rate r(FREQUENCY);
+
+    this->state_ = State::WAITING;
+
+    while (ros::ok()) {
+      bool ready = true;
+      for (std::pair<const uint64_t, std::shared_ptr<Robot>> &pair : this->robots_) {
+        if (pair.second->readiness_ != Robot::Readiness::READY) {
+          ready = false;
+          break;
+        }
+      }
+      if (!ready) {
+        r.sleep();
+        ros::spinOnce();
+        continue;
+      }
+      break;
+    }
+
+    ROS_INFO("Robots ready.");
+  }
+
+  void Supervisor::AssociateRobot(const Robot &robot) {
+    ROS_INFO("Supervisor associating with robot %" PRId64 ".", robot.id_);
+    Associate msg;
+    msg.R_ID = robot.id_;
+    this->assocPublisher_.publish(msg);
+  }
+
   void Supervisor::Start() {
     while (ros::Time::now().isZero());
 
-    this->Discover(10);
+    this->Discover(5);
     this->state_ = State::CONTROLLING;
 
     if (!this->robots_.size()) {
@@ -81,8 +116,11 @@ namespace se306p1 {
       return;
     }
 
-    this->ElectHead();
+    this->WaitForReady();
 
+    this->dispatchIt_ = robots_.begin();
+
+    this->ElectHead();
     this->Run();
   }
 
@@ -109,6 +147,13 @@ namespace se306p1 {
         }
       }
     }
+  }
+
+  void Supervisor::DispatchMessages() {
+    dispatchIt_++;
+    if (dispatchIt_ == robots_.end()) dispatchIt_ = robots_.begin();
+    dispatchIt_->second->DispatchCommand();
+    ROS_INFO("Dispatched command for robot %" PRId64 ".", dispatchIt_->first);
   }
 
   void Supervisor::MoveNodesToDests(const std::vector<std::shared_ptr<Robot> > &nodesIn,

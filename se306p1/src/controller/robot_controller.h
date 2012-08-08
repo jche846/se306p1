@@ -7,11 +7,15 @@
 
 #pragma once
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 #include "ros/ros.h"
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/LaserScan.h>
 #include <se306p1/AskPosition.h>
+#include <se306p1/Associate.h>
 #include <se306p1/Position.h>
 #include <se306p1/Do.h>
 #include <se306p1/Go.h>
@@ -19,6 +23,7 @@
 #include "../util/command.h"
 #include <deque>
 
+#define ASSOCIATE_TOPIC "/supervisor/associate"
 #define ASK_POS_TOPIC "/supervisor/ask_pos"
 #define ANS_POS_TOPIC "/supervisor/ans_pos"
 
@@ -26,13 +31,26 @@
  * This header file defines the state variables and methods available to control a robot
  */
 namespace se306p1 {
+  enum class RobotState {
+    FINISHED,
+    IDLE,
+    DOING,
+    GOING
+  };
+
+  enum class GoStep {
+    AIMING,
+    MOVING,
+    ROTATING
+  };
+
   class RobotController {
      private:
       // Robot identification
-      int64_t robot_id_;
+      uint64_t robot_id_;
 
       // Position
-      Pose position_;
+      Pose pose_;
 
       // Where the robot is currently trying to end up after receiving a go.
       Pose goal_;
@@ -41,10 +59,11 @@ namespace se306p1 {
       double lv_;  // Linear velocity
       double av_;  // Angular velocity (counter clockwise)
 
-      // Loop control variables
-      bool moving_;
-      bool rotating_;
-      bool dequeuing_;
+      // Robot state
+      RobotState state_;
+
+      // Current step of Go command
+      GoStep gostep_;
 
       // Command queue
       std::deque<Command> commands_;
@@ -56,26 +75,30 @@ namespace se306p1 {
       ros::Subscriber askPosSubscriber_;
       ros::Subscriber doSubscriber_;
       ros::Subscriber goSubscriber_;
+      ros::Subscriber assocSubscriber_;
       ros::Publisher ansPosPublisher_;
 
       // Stage pub/subs
       ros::Subscriber odom_;
+      ros::Publisher twist_;
 
      public:
-      RobotController(ros::NodeHandle &nh, int64_t id, Pose pose);
+      RobotController(ros::NodeHandle &nh, uint64_t id);
       virtual ~RobotController();
-      void Move();
-      void MoveTo(const Pose &pose, double lv);
-      void Rotate();
-//      void Go(Pose pose);
-//      void Do(double lv, double av);
+      double AngleToGoal();
       void go_callback(Go msg);
       void do_callback(Do msg);
       void askPosition_callback(AskPosition msg);
-      void AnswerPosition();
+      void assoc_callback(Associate msg);
       void odom_callback(nav_msgs::Odometry msg);
-      void ResolveCollision();
-      void DequeueCommand();
+      void AnswerPosition();
+      void Move();
+      void MoveTowardsGoal();
+      void SetGoing(Go msg);
+      void SetDoing(Do msg);
+      void ExecuteCommand(Command cmd);
+      void DequeCommand();
+      void InterruptCommandQueue(Command cmd);
       void Run();
   };
 }

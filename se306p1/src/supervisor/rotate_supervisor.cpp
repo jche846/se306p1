@@ -11,8 +11,21 @@ namespace se306p1 {
 
   void RotateSupervisor::Run() {
     ROS_INFO("Starting rotate supervisor.");
-    this->FindRobotDests();
-    this->MoveNodesToDests(this->nonHeadRobots_, this->lineLocations_);
+    ros::Rate r(100);
+
+    // TODO: remove this code!
+    for(std::pair<const uint64_t, std::shared_ptr<Robot>> &pair : this->robots_) {
+      pair.second->Do(2.0, 2.0, false);
+    }
+
+    while (ros::ok()) {
+      this->DispatchMessages();
+      r.sleep();
+      ros::spinOnce();
+    }
+
+    //this->FindRobotDests();
+    //this->MoveNodesToDests(this->nonHeadRobots_, this->lineLocations_);
 
     //wait for robots to arrive in line
 
@@ -20,7 +33,7 @@ namespace se306p1 {
 
     // Go other 5 to cluster head
 
-    // Queue Do on other 5 to move in circle 
+    // Queue Do on other 5 to move in circle
   }
 
   void RotateSupervisor::FindRobotDests() {

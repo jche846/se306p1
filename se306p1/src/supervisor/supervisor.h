@@ -9,6 +9,7 @@
 #include <se306p1/Position.h>
 #include "../util/pose.h"
 
+#define ASSOCIATE_TOPIC "/supervisor/associate"
 #define ASK_POS_TOPIC "/supervisor/ask_pos"
 #define ANS_POS_TOPIC "/supervisor/ans_pos"
 
@@ -16,18 +17,24 @@ namespace se306p1 {
   class Supervisor {
     enum class State {
       DISCOVERY,
-      CONTROLLING
+      WAITING,
+      CONTROLLING,
     };
 
   private:
     State state_;
 
+    std::map<uint64_t, std::shared_ptr<Robot>>::iterator dispatchIt_;
+
     ros::NodeHandle nh_;
     ros::Subscriber ansPosSubscriber_;
     ros::Publisher askPosPublisher_;
+    ros::Publisher assocPublisher_;
+
+    void AssociateRobot(const Robot &robot);
 
   protected:
-    std::map<uint64_t, std::shared_ptr<Robot> > robots_;
+    std::map<uint64_t, std::shared_ptr<Robot>> robots_;
     std::shared_ptr<Robot> clusterHead_;
     std::vector<std::shared_ptr<Robot>> nonHeadRobots_;
 
@@ -45,6 +52,8 @@ namespace se306p1 {
      */
     virtual void Run() = 0;
 
+    void DispatchMessages();
+
   public:
     Supervisor();
     virtual ~Supervisor();
@@ -53,7 +62,7 @@ namespace se306p1 {
      * Request positions of all robots to discover them.
      */
     void Discover(int timeout);
-
+    void WaitForReady();
 
     /**
      * Elect a cluster head.

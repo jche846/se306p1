@@ -30,8 +30,6 @@ rosbuild_genmsg()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 
 rosbuild_add_executable(robot_controller
-  src/util/pose.h
-  src/util/command.cpp
   src/controller/robot_controller.cpp)
 
 rosbuild_add_executable(rotate_supervisor
