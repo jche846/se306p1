@@ -43,6 +43,8 @@ rosbuild_add_executable(robot_controller
 
 rosbuild_add_gtest(test_command
     test/command.cpp)
+rosbuild_add_gtest(test_trig
+    test/trig.cpp)
 rosbuild_add_gtest(test_supervisor
     test/supervisor.cpp)
 rosbuild_add_rostest(test/supervisor.test)

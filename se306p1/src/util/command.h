@@ -1,4 +1,4 @@
-/*
+/**
  * command.h
  *
  *  Created on: Aug 4, 2012
@@ -13,7 +13,6 @@
 
 namespace se306p1 {
   class Command {
-  //change to make ws commit work
     public:
       bool enqueue;
       bool isDo;
@@ -24,6 +23,9 @@ namespace se306p1 {
       double theta;
 
     Command() {
+      /**
+      * Set the default values to 0 and make the command a Go command
+      */
       this->enqueue = false;
       this->isDo = false;
       this->x = 0.0;
@@ -32,19 +34,23 @@ namespace se306p1 {
       this->lv = 0.0;
       this->av = 0.0;
     }
-
-    //change to make ws commit work
     Command(Do msg) {
-      // Constructor for Do commands 
+      /**
+      * Constructor for Do commands 
+      */
       this->lv = msg.lv;
       this->av = msg.av;
-      //signifies if this->command is a Do or a Go.
+      /**
+      * isDo signifies if this->command is a Do or a Go.
+      */
       this->isDo = true;
       this->enqueue = msg.enqueue;
     }
 
     Command(Go msg) {
-      //Constructor for Go commands
+      /**
+      * Constructor for Go commands
+      */
       this->x = msg.x;
       this->y = msg.y;
       this->theta = msg.theta;
@@ -53,7 +59,9 @@ namespace se306p1 {
     }
 
     virtual ~Command() {
-      //pass
+      /**
+      * Deconstrucot
+      */
     }
   };
 }
