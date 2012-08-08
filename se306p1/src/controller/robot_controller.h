@@ -45,7 +45,7 @@ namespace se306p1 {
   };
 
   class RobotController {
-     private:
+    private:
       // Robot identification
       uint64_t robot_id_;
 
@@ -82,7 +82,7 @@ namespace se306p1 {
       ros::Subscriber odom_;
       ros::Publisher twist_;
 
-     public:
+    public:
       RobotController(ros::NodeHandle &nh, uint64_t id);
       virtual ~RobotController();
       double AngleToGoal();
@@ -94,6 +94,7 @@ namespace se306p1 {
       void AnswerPosition();
       void Move();
       void MoveTowardsGoal();
+      inline bool WithinTolerance(double num, double min, double max);
       void SetGoing(Go msg);
       void SetDoing(Do msg);
       void ExecuteCommand(Command cmd);

@@ -66,36 +66,33 @@ namespace se306p1 {
 
     double dx = this->goal_.position_.x_ - this->pose_.position_.x_;
     double dy = this->goal_.position_.y_ - this->pose_.position_.y_;
-    double goal_theta = 0;
-    double robot_theta = this->pose_.theta_;
+    double phi = 0;
+//    double theta = this->pose_.theta_;
 
     double a_tan = DegATan(dy / dx);
 
-    if (dy >= 0 and dx >= 0) {
+    if (dy >= 0 && dx >= 0) {
       //sector 1
-      goal_theta = -1 * (90 - a_tan);
-    } else if (dy >= 0 and dx < 0) {
+      phi = -1 * (90 - a_tan);
+    } else if (dy >= 0 && dx < 0) {
       //sector 2
-      goal_theta = (90 - a_tan);
-    } else if (dy < 0 and dx < 0) {
+      phi = (90 - a_tan);
+    } else if (dy < 0 && dx < 0) {
       //sector 3
-      goal_theta = 90 + a_tan;
-    } else if (dy < 0 and dx >= 0) {
+      phi = 90 + a_tan;
+    } else if (dy < 0 && dx >= 0) {
       //sector 4
-      goal_theta = -1 * (90 + a_tan);
-    } else {
-      //pass
-      ROS_WARN("Can not calculate angle to destination.");
+      phi = -1 * (90 + a_tan);
     }
 
-    double change = goal_theta - robot_theta;
-
-    if (change > 180) {
-      change = change - 360;
-    } else if (change < -180) {
-      change = 360 + change;
-    }
-    return change;
+//    double change = phi - theta;
+//
+//    if (change > 180) {
+//      change = change - 360;
+//    } else if (change < -180) {
+//      change = 360 + change;
+//    }
+    return phi;
   }
 
   /**
@@ -209,6 +206,11 @@ namespace se306p1 {
     this->twist_.publish(msg);
   }
 
+  inline bool RobotController::WithinTolerance(double num, double min,
+                                               double max) {
+    return (num > min && num < max);
+  }
+
   /**
    * Execute the next tick of movement when attempting to reach a goal position
    * while executing a Go command. When executing a Go command, the robot will
@@ -219,21 +221,22 @@ namespace se306p1 {
   void RobotController::MoveTowardsGoal() {
     if (this->gostep_ == GoStep::AIMING) {
       // We aren't moving forward, set the lv to 0.
-      this->av_ = DEFAULT_AV;
+      this->av_ = 0.1;
       this->lv_ = 0.0;
 
       double angle_to_goal = this->AngleToGoal();
+      double diff = this->pose_.theta_ - angle_to_goal;
 
-//      ROS_INFO(
-//          "Angle to goal for robot %ld: %f", this->robot_id_, angle_to_goal);
-
-      if (DegreesToRadians(angle_to_goal) < this->av_) {
+      if (diff < this->av_) {
         this->av_ = DegreesToRadians(angle_to_goal);
       }
 
       this->Move();
 
-      if (angle_to_goal == 0.0) {
+      ROS_INFO(
+          "Robot %ld : av=%f theta=%f a2g=%f", this->robot_id_, this->av_, this->pose_.theta_, angle_to_goal);
+
+      if (diff == 0) {
         this->gostep_ = GoStep::MOVING;
       }
     } else if (this->gostep_ == GoStep::MOVING) {

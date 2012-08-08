@@ -15,7 +15,7 @@ namespace se306p1 {
 
     // TODO: remove this code!
     for(std::pair<const uint64_t, std::shared_ptr<Robot>> &pair : this->robots_) {
-      pair.second->Do(2.0, 2.0, false);
+      pair.second->Go(Pose(Vector2(5.0, 5.0), 180), false);
     }
 
     while (ros::ok()) {
