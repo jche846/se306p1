@@ -1,0 +1,4 @@
+.cproject
+.project
+.settings/
+cmake_install.cmake
