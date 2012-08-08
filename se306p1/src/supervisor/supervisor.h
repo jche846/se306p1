@@ -48,7 +48,7 @@ namespace se306p1 {
     void ansPos_callback(Position msg);
 
     /**
-     * Stuff for the supervisor to do.
+     * Stuff for the supervisor to do. This is an abstract method.
      */
     virtual void Run() = 0;
 
