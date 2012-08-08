@@ -32,11 +32,9 @@ namespace se306p1 {
       if (!rotating) {
         // iterate through all robots and see if they have finished executing
         bool allFinishedExecuting = true;
-        std::map<uint64_t, std::shared_ptr<Robot> >::iterator it;
         //if any robot is executing, set allFinishedExecuting to false
-        for (it = this->robots_.begin(); it != this->robots_.end(); it++) {
-          std::shared_ptr<Robot> robot_ptr = it->second;
-          if (robot_ptr->executing_ == true) {
+        for (auto &cur_robot: this->robots_) {
+          if (cur_robot.second->executing) {
             allFinishedExecuting = false;
             break;
           }
@@ -45,10 +43,9 @@ namespace se306p1 {
         // tell all robots to move to clusterHeadPosition
         // and enqueue them moving in a circle.
         if (allFinishedExecuting) {
-          for (it = this->robots_.begin(); it != this->robots_.end(); it++) {
-            std::shared_ptr<Robot> robot_ptr = it->second;
-            robot_ptr->Go(this->clusterHead_->pose_, false); //moveTocluster head position
-            robot_ptr->Do(CIRCLE_LV, CIRCLE_AV, true); //queue circling
+          for (auto &cur_robot: this->robots_) {
+            cur_robot.second->Go(this->clusterHead_->pose_, false); //moveTocluster head position
+            cur_robot.second->Do(CIRCLE_LV, CIRCLE_AV, true); //queue circling
           }
           rotating = true;
         }
