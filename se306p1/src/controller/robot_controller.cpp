@@ -64,34 +64,38 @@ namespace se306p1 {
    */
   double RobotController::AngleToGoal() {
 
-    double dx = this->goal_.position_.x_ - this->pose_.position_.x_;
-    double dy = this->goal_.position_.y_ - this->pose_.position_.y_;
+    double dx = this->pose_.position_.x_ - this->goal_.position_.x_;
+    double dy = this->pose_.position_.y_ - this->goal_.position_.y_;
     double phi = 0;
-//    double theta = this->pose_.theta_;
 
-    double a_tan = DegATan(dy / dx);
+    ROS_INFO(
+        "x: %f, y: %f, gx: %f, gy: %f, dx: %f, dy: %f", this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, dx, dy);
 
-    if (dy >= 0 && dx >= 0) {
+    double a_tan = abs(DegATan(dy / dx));
+
+    if (dy == 0 && dx == 0) {
+      phi = 0;
+    } else if (dy >= 0 && dx >= 0) {
+      ROS_INFO("Sector 1");
       //sector 1
-      phi = -1 * (90 - a_tan);
+      phi = 180 - a_tan;
     } else if (dy >= 0 && dx < 0) {
+      ROS_INFO("Sector 2");
+
       //sector 2
-      phi = (90 - a_tan);
+      phi = -180 + a_tan;
     } else if (dy < 0 && dx < 0) {
+      ROS_INFO("Sector 3");
+
       //sector 3
-      phi = 90 + a_tan;
+      phi = -1 * a_tan;
     } else if (dy < 0 && dx >= 0) {
+      ROS_INFO("Sector 4");
+
       //sector 4
-      phi = -1 * (90 + a_tan);
+      phi = a_tan;
     }
 
-//    double change = phi - theta;
-//
-//    if (change > 180) {
-//      change = change - 360;
-//    } else if (change < -180) {
-//      change = 360 + change;
-//    }
     return phi;
   }
 
@@ -169,8 +173,8 @@ namespace se306p1 {
     double yaw;
 
     // Set the position in 2D space.
-    this->pose_.position_.x_ = msg.pose.pose.position.x;
-    this->pose_.position_.y_ = msg.pose.pose.position.y;
+    this->pose_.position_.x_ = -1 * msg.pose.pose.position.y;
+    this->pose_.position_.y_ = msg.pose.pose.position.x;
 
     // Set the rotation.
     QuaternionMsgToRPY(msg.pose.pose.orientation, roll, pitch, yaw);
@@ -244,8 +248,8 @@ namespace se306p1 {
       this->lv_ = DEFAULT_LV;
       this->av_ = 0.0;
 
-      double distance_to_goal =
-          (this->goal_.position_ - this->pose_.position_).Length();
+      double distance_to_goal = (this->goal_.position_ - this->pose_.position_)
+          .Length();
 
       if (!(distance_to_goal >= (lv_ / FREQUENCY))) {
         lv_ = distance_to_goal;
@@ -379,11 +383,11 @@ namespace se306p1 {
     ros::Rate r(FREQUENCY);  // Run FREQUENCY times a second
 
     while (ros::ok()) {
-      if (this->state_ == RobotState::GOING) { // If the robot is going somewhere, keep trying to go there
+      if (this->state_ == RobotState::GOING) {  // If the robot is going somewhere, keep trying to go there
         this->MoveTowardsGoal();
-      } else if (this->state_ == RobotState::DOING) { // If the robot is doing, keep doing.
+      } else if (this->state_ == RobotState::DOING) {  // If the robot is doing, keep doing.
         this->Move();
-      } else if (this->state_ == RobotState::FINISHED) { // Get the next command.
+      } else if (this->state_ == RobotState::FINISHED) {  // Get the next command.
         this->DequeCommand();
         this->AnswerPosition();
       }
