@@ -385,6 +385,7 @@ namespace se306p1 {
         this->Move();
       } else if (this->state_ == RobotState::FINISHED) { // Get the next command.
         this->DequeCommand();
+        this->AnswerPosition();
       }
 
       r.sleep();
