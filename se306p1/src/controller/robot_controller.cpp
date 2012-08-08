@@ -71,29 +71,29 @@ namespace se306p1 {
 
     double a_tan = DegATan(dy / dx);
 
-    if (dy >= 0 and dx >= 0){
+    if (dy >= 0 and dx >= 0) {
       //sector 1
-      goal_theta = -1*(90-a_tan);
+      goal_theta = -1 * (90 - a_tan);
     } else if (dy >= 0 and dx < 0) {
       //sector 2
-      goal_theta = (90-a_tan);
+      goal_theta = (90 - a_tan);
     } else if (dy < 0 and dx < 0) {
       //sector 3
       goal_theta = 90 + a_tan;
     } else if (dy < 0 and dx >= 0) {
       //sector 4
-      goal_theta = -1*(90 + a_tan);
+      goal_theta = -1 * (90 + a_tan);
     } else {
       //pass
       ROS_WARN("Can not calculate angle to destination.");
     }
 
-    double change =  goal_theta - robot_theta;
+    double change = goal_theta - robot_theta;
 
     if (change > 180) {
-        change = change - 360;
+      change = change - 360;
     } else if (change < -180) {
-        change = 360 + change;
+      change = 360 + change;
     }
     return change;
   }
@@ -141,7 +141,8 @@ namespace se306p1 {
   }
 
   void RobotController::assoc_callback(Associate msg) {
-    if (msg.R_ID != this->robot_id_) return;
+    if (msg.R_ID != this->robot_id_)
+      return;
 
     // Subscribe to Do messages in order to know when to move.
     std::stringstream doss;
@@ -156,8 +157,8 @@ namespace se306p1 {
     this->goSubscriber_ = nh_.subscribe<Go>(goss.str(), 1000,
                                             &RobotController::go_callback, this,
                                             ros::TransportHints().reliable());
-    ROS_INFO("Controller for robot %" PRId64 " associated. Hello supervisor!",
-      this->robot_id_);
+    ROS_INFO(
+        "Controller for robot %" PRId64 " associated. Hello supervisor!", this->robot_id_);
   }
 
   /**
@@ -216,6 +217,7 @@ namespace se306p1 {
    * robot will rotate to the specified angle.
    */
   void RobotController::MoveTowardsGoal() {
+
     if (this->gostep_ == GoStep::AIMING) {
       // We aren't moving forward, set the lv to 0.
       this->av_ = DEFAULT_AV;
@@ -223,13 +225,16 @@ namespace se306p1 {
 
       double angle_to_goal = this->AngleToGoal();
 
-      if (angle_to_goal < this->av_) {
-        this->av_ = angle_to_goal;
+//      ROS_INFO(
+//          "Angle to goal for robot %ld: %f", this->robot_id_, angle_to_goal);
+
+      if (DegreesToRadians(angle_to_goal) < this->av_) {
+        this->av_ = DegreesToRadians(angle_to_goal);
       }
 
       this->Move();
 
-      if (this->pose_.theta_ == this->goal_.theta_) {
+      if (this->pose_.theta_ == angle_to_goal) {
         this->gostep_ = GoStep::MOVING;
       }
     } else if (this->gostep_ == GoStep::MOVING) {
@@ -237,8 +242,8 @@ namespace se306p1 {
       this->lv_ = DEFAULT_LV;
       this->av_ = 0.0;
 
-      double distance_to_goal = (this->goal_.position_ - this->pose_.position_)
-          .Length();
+      double distance_to_goal =
+          (this->goal_.position_ - this->pose_.position_).Length();
 
       if (!(distance_to_goal >= (lv_ / FREQUENCY))) {
         lv_ = distance_to_goal;
@@ -372,11 +377,11 @@ namespace se306p1 {
     ros::Rate r(FREQUENCY);  // Run FREQUENCY times a second
 
     while (ros::ok()) {
-      if (this->state_ == RobotState::GOING) {  // If the robot is going somewhere, keep trying to go there
+      if (this->state_ == RobotState::GOING) { // If the robot is going somewhere, keep trying to go there
         this->MoveTowardsGoal();
-      } else if (this->state_ == RobotState::DOING) {  // If the robot is doing, keep doing.
+      } else if (this->state_ == RobotState::DOING) { // If the robot is doing, keep doing.
         this->Move();
-      } else if (this->state_ == RobotState::FINISHED) {  // Get the next command.
+      } else if (this->state_ == RobotState::FINISHED) { // Get the next command.
         this->DequeCommand();
       }
 
