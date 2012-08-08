@@ -19,28 +19,29 @@ namespace se306p1 {
     this->FindRobotDests();
     this->MoveNodesToDests(this->nonHeadRobots_, this->lineLocations_);
 
+    // rotating ensures that the robots are only told to rotate once
     bool rotating = false;
 
     while (ros::ok()) {
       this->DispatchMessages();
 
       if (!rotating) {
+        bool exec_done = true;
         // iterate through all robots and see if they have finished executing
-        bool allFinishedExecuting = true;
-        //if any robot is executing, set allFinishedExecuting to false
         for (auto &cur_robot: this->robots_) {
           if (cur_robot.second->executing) {
-            allFinishedExecuting = false;
+            // if any of the robots are executing wait
+            exec_done = false;
             break;
           }
         }
 
-        // tell all robots to move to clusterHeadPosition
-        // and enqueue them moving in a circle.
-        if (allFinishedExecuting) {
+        if (exec_done) {
           for (auto &cur_robot: this->robots_) {
-            cur_robot.second->Go(this->clusterHead_->pose_, false); //moveTocluster head position
-            cur_robot.second->Do(CIRCLE_LV, CIRCLE_AV, true); //queue circling
+            // tell robot to move to cluster head pos
+            cur_robot.second->Go(this->clusterHead_->pose_, false);
+            // enqueue rotate for after they have reached the cluster head pos
+            cur_robot.second->Do(CIRCLE_LV, CIRCLE_AV, true);
           }
           rotating = true;
         }
