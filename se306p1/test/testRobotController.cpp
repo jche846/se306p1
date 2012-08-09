@@ -151,7 +151,7 @@ class RobotControllerTest : public testing::Test {
     ASSERT_EQ(rc.goal_,pose);
   }
   /**
-  * Tests that setDoing runs correctly.
+  * Tests that setDoing runs correctly when passed none zero values
   */
   TEST_F(RobotControllerTest, testSetDoing_hasGoal){
     msg_do.av = 5;
@@ -161,6 +161,22 @@ class RobotControllerTest : public testing::Test {
     rc.SetDoing(msg_do);
     //check state
     ASSERT_EQ(rc.state_,RobotState::DOING);
+    //check lv is set for the robot
+    ASSERT_EQ(rc.lv_,msg_go.lv);
+    //check av is set for the robot
+    ASSERT_EQ(rc.av_,msg_go.av);
+  }
+  /**
+  * Tests that setDoing runs correctly when passed zero values
+  */
+  TEST_F(RobotControllerTest, testSetDoing_noGoal){
+    msg_do.av = 0;
+    msg_do.lv = 0;
+    msg_do.enqueue = true;
+
+    rc.SetDoing(msg_do);
+    //check state
+    ASSERT_EQ(rc.state_,RobotState::IDLE);
     //check lv is set for the robot
     ASSERT_EQ(rc.lv_,msg_go.lv);
     //check av is set for the robot
