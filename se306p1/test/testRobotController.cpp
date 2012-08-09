@@ -117,6 +117,7 @@ class RobotControllerTest : public testing::Test {
     //was called.
     ASSERT_TRUE(rc.commands_.size()==0);
   }
+
   /**
   * Tests that go_callback calls InterruptCommandQueue when enqueue is false
   */
@@ -131,6 +132,7 @@ class RobotControllerTest : public testing::Test {
     //was called.
     ASSERT_TRUE(rc.commands_.size()==0);
   }
+
   /**
   * Tests that setGoing runs correctly.
   */
@@ -150,6 +152,7 @@ class RobotControllerTest : public testing::Test {
     //check state is the correct pose.
     ASSERT_EQ(rc.goal_,pose);
   }
+
   /**
   * Tests that setDoing runs correctly when passed none zero values
   */
@@ -166,6 +169,7 @@ class RobotControllerTest : public testing::Test {
     //check av is set for the robot
     ASSERT_EQ(rc.av_,msg_go.av);
   }
+
   /**
   * Tests that setDoing runs correctly when passed zero values
   */
@@ -182,6 +186,7 @@ class RobotControllerTest : public testing::Test {
     //check av is set for the robot
     ASSERT_EQ(rc.av_,msg_go.av);
   }
+
   /**
   * tests DequeCommand when command_ is empty
   */
@@ -196,6 +201,33 @@ class RobotControllerTest : public testing::Test {
     //check av is set for the robot has been set to 0
     ASSERT_EQ(rc.av_,0);
   }
+
+  /**
+  * Tests DequeCommand when command_ is not empty.
+  */
+  TEST_F(RobotControllerTest, testDequeCommand_nonEmptyDeque){
+    //check the deque is clear
+    rc.command_.clear();
+    //add an element to the queue
+    //create a command
+    msg_go.x = 5;
+    msg_go.y = 10;
+    msg_go.theta = 30;
+    msg_go.enqueue = true;
+    Command cmd = Command(msg_go);
+    rc.command_.push_back(cmd);
+    rc.DequeCommand();
+    //there is one command in the deque. Running deque should remove it
+    //command_ should be empty
+    ASSERT_TRUE(rc.command_.size()==0);
+    //initialise a pose with the msg_go values
+    Vector2 position = Vector2(msg_go.x,msg_go.y);
+    double theta = msg_go.theta;
+    Pose pose = Pose (position,theta);
+    //the command is executed so the robots pose should be set to msg_go's values.
+    ASSERT_EQ(rc.goal_,pose);
+  }
+  
 }//namespace
 
 int main(int argc, char **argv) {

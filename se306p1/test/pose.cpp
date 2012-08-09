@@ -30,7 +30,7 @@ class PoseTest : public testing::Test {
     ASSERT_EQ(theta,pose.theta_);
   }
 
-  TEST_F(PoseTest, testPoseValues) {
+git   TEST_F(PoseTest, testPoseValues) {
     Vector2 position = Vector2(2.0,3.0);
     double theta = 1.0;
     Pose pose = Pose (position,theta);

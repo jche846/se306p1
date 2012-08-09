@@ -360,7 +360,7 @@ namespace se306p1 {
     } else {
       Go msg;
 
-      msg.x = cmd.x;
+      msg.x = cmd.x;git
       msg.y = cmd.y;
       msg.theta = cmd.theta;
 
@@ -378,7 +378,6 @@ namespace se306p1 {
       Do msg;
       msg.lv = 0;
       msg.av = 0;
-
       SetDoing(msg);
     } else {
       Command cmd = this->commands_.front();
