@@ -228,6 +228,20 @@ class RobotControllerTest : public testing::Test {
     ASSERT_EQ(rc.goal_,pose);
   }
   
+  /**
+  * Tests that the ExecuteCommand() method executes a Go command correctly
+  */
+  TEST_F(RobotControllerTest, testExecuteGoCommand){
+    
+  }
+  
+  /**
+  * Tests that the ExecuteCommand() method executes a Do command correctly
+  */
+  TEST_F(RobotControllerTest, testExecuteDoCommand){
+    
+  }
+  
 }//namespace
 
 int main(int argc, char **argv) {
