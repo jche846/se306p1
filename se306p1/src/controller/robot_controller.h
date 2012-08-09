@@ -92,9 +92,6 @@ namespace se306p1 {
       void odom_callback(nav_msgs::Odometry msg);
       void AnswerPosition();
       void Move();
-      inline bool WithinTolerance(double num, double min, double max);
-      double AngleToGoal();
-      double GetAngleDiff(double phi);
       void MoveTowardsGoal();
       void SetGoing(Go msg);
       void SetDoing(Do msg);
