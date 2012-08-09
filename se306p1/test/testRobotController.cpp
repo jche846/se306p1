@@ -80,16 +80,19 @@ class RobotControllerTest : public testing::Test {
     ASSERT_TRUE(commands_.size()==0);
     ASSERT_TRUE(rc.state_==RobotState::IDLE);
   }
-
+  /**
+  * Tests that do_callback calls InterruptCommandQueue when enqueue is false
+  */
   TEST_F(RobotControllerTest, test_do_callback_no_enqueue) {
     Do msg_do;
     msg_do.lv = 10;
     msg_do.av = 30;
     msg_do.enqueue = false;
+    ASSERT_TRUE(rc.commands_.size()>0);
     rc.do_callback(msg_do);
-    Command cmd = rc.commands_.back();
-    ASSERT_EQ(msg_do.lv, cmd.lv);
-    ASSERT_EQ(msg_do.av, cmd.av);
+    //checking that the command_ deque is cleared proves that InterruptCommandQueue()
+    //was called.
+    ASSERT_TRUE(rc.commands_.size()==0);
   }
 }//namespace
 
