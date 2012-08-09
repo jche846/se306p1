@@ -2,6 +2,7 @@
 
 #include "supervisor.h"
 #include <vector>
+#include <cmath>
 
 namespace se306p1 {
   class RotateSupervisor : public Supervisor {
