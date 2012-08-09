@@ -5,7 +5,7 @@
 
 #define ROBOT_WIDTH 0.35
 #define DEFAULT_MOVE_SPEED 1
-#define CIRCLE_LV 2.0
+#define CIRCLE_LV 0.2
 
 namespace se306p1 {
   RotateSupervisor::~RotateSupervisor() {
@@ -28,7 +28,7 @@ namespace se306p1 {
     // Calculate velocities
     double rotate_time = circumference / CIRCLE_LV;
     circle_av = 360 / rotate_time;
-
+    ROS_INFO("MOVING AT lv:%f av:%f", CIRCLE_LV, circle_av);
     while (ros::ok()) {
       this->DispatchMessages();
 
