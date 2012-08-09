@@ -1,16 +1,24 @@
 #!/bin/bash
 
 #
-# Start the ROS core, controllers and finally the supervisor.
+# Generate a world file, Start Robot Controllers.
 #
+ROBOT_COUNT=$1
+if [ -f $1 ]; then
+    ROBOT_COUNT=5
+fi
 
-roscore &
-./generate_world.py $1 > se306p1.world
+echo "Spawning $ROBOT_COUNT robots"
+
+./generate_world.py $ROBOT_COUNT > se306p1.world
+
 rosrun stage stageros se306p1.world &
-se306p1/bin/rotate_supervisor &
+
 sleep 1
-for i in $(seq 0 $(($1 - 1))); do
-    exec -a robot_controller_${RANDOM} se306p1/bin/robot_controller _rid:=${i} &
+
+for i in $(seq 0 $(($ROBOT_COUNT - 1))); do
+    exec -a robot_controller_${i} se306p1/bin/robot_controller _rid:=${i} &
     echo $i
 done
+
 wait
