@@ -165,7 +165,6 @@ namespace se306p1 {
    */
   void RobotController::MoveTowardsGoal() {
     if (this->gostep_ == GoStep::AIMING) {
-      // We aren't moving forward, set the lv to 0.
       this->av_ = DEFAULT_AV;
       this->lv_ = 0.0;
 
@@ -173,33 +172,31 @@ namespace se306p1 {
                                                 this->goal_.position_);
       double diff = AbsAngleDiff(this->pose_.theta_, angle_to_goal);
 
-//      if (DegreesToRadians(diff) < this->av_) {
-//        this->av_ = DegreesToRadians(diff);
-//      }
+      if (DegreesToRadians(diff) < this->av_) {
+        this->av_ = DegreesToRadians(diff);
+      }
 
-      ROS_INFO(
-          "Robot %ld aiming: av=%f theta=%f goaltheta=%f a2g=%f diff=%f", this->robot_id_, this->av_, this->pose_.theta_, this->goal_.theta_, angle_to_goal, diff);
+//      ROS_INFO(
+//          "Robot %ld aiming: av=%f theta=%f goaltheta=%f a2g=%f diff=%f", this->robot_id_, this->av_, DegreesToRadians(this->pose_.theta_), DegreesToRadians(this->goal_.theta_), angle_to_goal, diff);
 
-      if (359.9 < diff || diff < 0.01) {
-        lvset = false;
+      if (359.999 < diff || diff < 0.001) {
         this->gostep_ = GoStep::MOVING;
       } else {
         this->Move();
       }
     } else if (this->gostep_ == GoStep::MOVING) {
-      // If we aren't rotating, set the av to 0.
       this->av_ = 0.0;
       this->lv_ = DEFAULT_LV;
 
       double distance_to_goal = (this->goal_.position_ - this->pose_.position_)
           .Length();
 
-//      ROS_INFO(
-//          "d2g: %f lv: %f x: %f y: %f", distance_to_goal, lv_, pose_.position_.x_, pose_.position_.y_);
+      if (distance_to_goal < lv_) {
+        this->lv_ = distance_to_goal;
+      }
 
-//      if (distance_to_goal < lv_) {
-//        lv_ = distance_to_goal;
-//      }
+      ROS_INFO(
+          "Robot %ld: dist=%f lv=%f x=%f y=%f", this->robot_id_, distance_to_goal, lv_, pose_.position_.x_, pose_.position_.y_);
 
       if (distance_to_goal < 0.01) {
         this->gostep_ = GoStep::ROTATING;
@@ -210,18 +207,16 @@ namespace se306p1 {
       this->av_ = DEFAULT_AV;
       this->lv_ = 0.0;
 
-      // Get the difference in degrees between the current theta and the goal
-      // theta.
       double diff = AbsAngleDiff(this->pose_.theta_, this->goal_.theta_);
 
-//      if (DegreesToRadians(diff) < this->av_) {
-//        this->av_ = DegreesToRadians(diff);
-//      }
+      if (DegreesToRadians(diff) < this->av_) {
+        this->av_ = DegreesToRadians(diff);
+      }
 
 //      ROS_INFO(
 //          "Robot %ld : av=%f theta=%f goaltheta=%f diff=%f", this->robot_id_, this->av_, this->pose_.theta_, this->goal_.theta_, diff);
 
-      if (359.9 < diff || diff < 0.01) {
+      if (359.999 < diff || diff < 0.001) {
         this->state_ = RobotState::FINISHED;
       } else {
         this->Move();
