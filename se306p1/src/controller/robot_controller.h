@@ -75,7 +75,6 @@ namespace se306p1 {
       ros::Subscriber askPosSubscriber_;
       ros::Subscriber doSubscriber_;
       ros::Subscriber goSubscriber_;
-      ros::Subscriber assocSubscriber_;
       ros::Publisher ansPosPublisher_;
 
       // Stage pub/subs
@@ -89,7 +88,6 @@ namespace se306p1 {
       void go_callback(Go msg);
       void do_callback(Do msg);
       void askPosition_callback(AskPosition msg);
-      void assoc_callback(Associate msg);
       void odom_callback(nav_msgs::Odometry msg);
       void AnswerPosition();
       void Move();

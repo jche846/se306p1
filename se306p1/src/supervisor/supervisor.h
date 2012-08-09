@@ -29,9 +29,6 @@ namespace se306p1 {
     ros::NodeHandle nh_;
     ros::Subscriber ansPosSubscriber_;
     ros::Publisher askPosPublisher_;
-    ros::Publisher assocPublisher_;
-
-    void AssociateRobot(const Robot &robot);
 
   protected:
     std::map<uint64_t, std::shared_ptr<Robot>> robots_;
