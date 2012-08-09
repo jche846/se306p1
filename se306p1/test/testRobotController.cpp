@@ -150,6 +150,22 @@ class RobotControllerTest : public testing::Test {
     //check state is the correct pose.
     ASSERT_EQ(rc.goal_,pose);
   }
+  /**
+  * Tests that setDoing runs correctly.
+  */
+  TEST_F(RobotControllerTest, testSetDoing_hasGoal){
+    msg_do.av = 5;
+    msg_do.lv = 10;
+    msg_do.enqueue = true;
+
+    rc.SetDoing(msg_do);
+    //check state
+    ASSERT_EQ(rc.state_,RobotState::DOING);
+    //check lv is set for the robot
+    ASSERT_EQ(rc.lv_,msg_go.lv);
+    //check av is set for the robot
+    ASSERT_EQ(rc.av_,msg_go.av);
+  }
 }//namespace
 
 int main(int argc, char **argv) {
