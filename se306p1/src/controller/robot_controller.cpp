@@ -65,49 +65,6 @@ namespace se306p1 {
   }
 
   /**
-   * Work out the angle in degrees counter clockwise from North that the robot
-   * needs to turn in order to point at it's goal coordinates.
-   *
-   * @return Degrees representing the angle between the robot's current theta
-   * and the goal coordinates.
-   */
-  double RobotController::AngleToGoal() {
-
-    double dx = this->goal_.position_.x_ - this->pose_.position_.x_;
-    double dy = this->goal_.position_.y_ - this->pose_.position_.y_;
-    double goal_theta = 0;
-    double robot_theta = this->pose_.theta_;
-
-    double a_tan = DegATan(dy / dx);
-
-    if (dy >= 0 and dx >= 0){
-      //sector 1
-      goal_theta = -1*(90-a_tan);
-    } else if (dy >= 0 and dx < 0) {
-      //sector 2
-      goal_theta = (90-a_tan);
-    } else if (dy < 0 and dx < 0) {
-      //sector 3
-      goal_theta = 90 + a_tan;
-    } else if (dy < 0 and dx >= 0) {
-      //sector 4
-      goal_theta = -1*(90 + a_tan);
-    } else {
-      //pass
-      ROS_WARN("Can not calculate angle to destination.");
-    }
-
-    double change =  goal_theta - robot_theta;
-
-    if (change > 180) {
-        change = change - 360;
-    } else if (change < -180) {
-        change = 360 + change;
-    }
-    return change;
-  }
-
-  /**
    * Called when the supervisor publishes a Go message for this robot. If the
    * message is to be enqueued, the message is put on the queue. Otherwise, the
    * command queue is interrupted and thrown away and the Go message is executed
@@ -150,7 +107,8 @@ namespace se306p1 {
   }
 
   /**
-   * Called when stage publishes an odometry message.
+   * Called when stage publishes an odometry message. Updates the controller's
+   * knowledge of the robot's current position.
    *
    * @param msg The odometry message containing position data for this robot.
    */
@@ -160,8 +118,8 @@ namespace se306p1 {
     double yaw;
 
     // Set the position in 2D space.
-    this->pose_.position_.x_ = msg.pose.pose.position.x;
-    this->pose_.position_.y_ = msg.pose.pose.position.y;
+    this->pose_.position_.x_ = -1 * msg.pose.pose.position.y;
+    this->pose_.position_.y_ = msg.pose.pose.position.x;
 
     // Set the rotation.
     QuaternionMsgToRPY(msg.pose.pose.orientation, roll, pitch, yaw);
@@ -197,6 +155,81 @@ namespace se306p1 {
     this->twist_.publish(msg);
   }
 
+  inline bool RobotController::WithinTolerance(double num, double min,
+                                               double max) {
+    return (num > min && num < max);
+  }
+
+  /**
+   * Work out the angle in degrees counter clockwise from North that the robot
+   * must face in order to be aiming at the goal position.
+   *
+   * @return Degrees The theta value that the robot must achieve in order to be
+   * aiming at the goal position.
+   */
+  double RobotController::AngleToGoal() {
+    double dx = this->goal_.position_.x_ - this->pose_.position_.x_;
+    double dy = this->goal_.position_.y_ - this->pose_.position_.y_;
+    double phi = 0.0;
+
+    double a_tan = fabs(DegATan(dy / dx));
+
+    if (dy == 0.0 && dx == 0.0) {
+      phi = 0.0;
+    } else if (dy >= 0.0 && dx >= 0.0) {
+      //sector 1
+      ROS_INFO("SECTOR 1");
+      phi = -90.0 + a_tan;
+    } else if (dy >= 0.0 && dx < 0.0) {
+      //sector 2
+      ROS_INFO("SECTOR 2");
+      phi = 90.0 - a_tan;
+    } else if (dy < 0.0 && dx < 0.0) {
+      ROS_INFO("SECTOR 3");
+      //sector 3
+      phi = 90.0 + a_tan;
+    } else if (dy < 0.0 && dx >= 0.0) {
+      ROS_INFO("SECTOR 4");
+      //sector 4
+      phi = -90.0 - a_tan;
+    }
+
+    ROS_INFO("x: %f, y: %f, dx: %f, dy: %f, phi: %f", this->pose_.position_.x_, this->pose_.position_.y_, dx, dy, phi);
+
+    return (double) phi;
+  }
+
+  /**
+   * Find the scalar amount of degrees between the current robot angle and the
+   * angle the robot needs to be facing to move towards it's goal.
+   *
+   * @return A positive double representing the amount of degrees difference
+   * between the robot theta and the AngleToGoal().
+   */
+  double RobotController::GetAngleDiff() {
+    double theta = this->pose_.theta_;
+    double phi = AngleToGoal();
+    double diff = theta - phi;
+
+    if (theta == phi) {
+      diff = 0.0;
+    } else if (theta >= 0.0 && phi >= 0.0) {
+      diff = fabs(theta - phi);
+    } else if (theta <= 0.0 && phi <= 0.0) {
+      diff = fabs(theta - phi);
+    } else if (theta >= 0.0 && phi <= 0.0) {
+      diff = 180.0 - theta + 180.0 - fabs(phi);
+    } else if (theta <= 0.0 && phi >= 0.0) {
+      diff = 180.0 - fabs(theta) + 180.0 - phi;
+    } else {
+      diff = 0.0;
+    }
+
+    ROS_INFO(
+        "R_ID: %ld, AV: %f, THETA: %f, A2G: %f, DIFF: %f", this->robot_id_, this->av_, theta, phi, diff);
+    return diff;
+  }
+
   /**
    * Execute the next tick of movement when attempting to reach a goal position
    * while executing a Go command. When executing a Go command, the robot will
@@ -210,15 +243,22 @@ namespace se306p1 {
       this->av_ = DEFAULT_AV;
       this->lv_ = 0.0;
 
-      double angle_to_goal = this->AngleToGoal();
+      double diff = GetAngleDiff();
 
-      if (angle_to_goal < this->av_) {
-        this->av_ = angle_to_goal;
+      if (DegreesToRadians(diff) < this->av_) {
+        this->av_ = DegreesToRadians(diff);
       }
 
       this->Move();
 
-      if (this->pose_.theta_ == this->goal_.theta_) {
+//      ROS_INFO(
+//          "Robot %ld : av=%f theta=%f diff=%f", this->robot_id_, this->av_, this->pose_.theta_, diff);
+
+      /*if (diff == 0.0) {
+        this->gostep_ = GoStep::MOVING;
+      }*/
+
+      if (diff < 0.01) {
         this->gostep_ = GoStep::MOVING;
       }
     } else if (this->gostep_ == GoStep::MOVING) {
@@ -228,6 +268,12 @@ namespace se306p1 {
 
       double distance_to_goal = (this->goal_.position_ - this->pose_.position_)
           .Length();
+
+      /*double diff = GetAngleDiff();
+
+      if (DegreesToRadians(diff) < this->av_) {
+        this->av_ = DegreesToRadians(diff);
+      }*/
 
       if (!(distance_to_goal >= (lv_ / FREQUENCY))) {
         lv_ = distance_to_goal;
