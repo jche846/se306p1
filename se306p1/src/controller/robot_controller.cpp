@@ -7,6 +7,7 @@
 
 #include "robot_controller.h"
 #include "../util/trig.h"
+#include <string>
 
 #define FREQUENCY 100 // The number of ticks per second the robot will execute.
 #define DEFAULT_LV 2.0
@@ -248,16 +249,14 @@ namespace se306p1 {
         this->av_ = DegreesToRadians(diff);
       }
 
-//      this->av_ = DegreesToRadians(AngleToGoal()/10);
+      ROS_INFO(
+          "Robot %ld aiming: av=%f theta=%f goaltheta=%f a2g=%f diff=%f", this->robot_id_, this->av_, this->pose_.theta_, this->goal_.theta_, AngleToGoal(), diff);
 
-      this->Move();
-
-//      ROS_INFO(
-//          "Robot %ld : av=%f theta=%f a2g=%f diff=%f", this->robot_id_, this->av_, this->pose_.theta_, AngleToGoal(), diff);
-
-      if (diff < 0.01) {
+      if (359.9 < diff || diff < 0.01) {
         lvset = false;
         this->gostep_ = GoStep::MOVING;
+      } else {
+        this->Move();
       }
     } else if (this->gostep_ == GoStep::MOVING) {
       // If we aren't rotating, set the av to 0.
@@ -267,21 +266,21 @@ namespace se306p1 {
           (this->goal_.position_ - this->pose_.position_).Length();
 
       if (!lvset) {
-        this->lv_ = distance_to_goal / 20;
+        this->lv_ = distance_to_goal / 10;
         lvset = true;
       }
 
-      ROS_INFO(
-          "d2g: %f lv: %f x: %f y: %f", distance_to_goal, lv_, pose_.position_.x_, pose_.position_.y_);
+//      ROS_INFO(
+//          "d2g: %f lv: %f x: %f y: %f", distance_to_goal, lv_, pose_.position_.x_, pose_.position_.y_);
 
 //      if (distance_to_goal < lv_) {
 //        lv_ = distance_to_goal;
 //      }
 
-      this->Move();
-
       if (distance_to_goal < 0.01) {
         this->gostep_ = GoStep::ROTATING;
+      } else {
+        this->Move();
       }
     } else if (this->gostep_ == GoStep::ROTATING) {
       this->av_ = DEFAULT_AV;
@@ -300,8 +299,10 @@ namespace se306p1 {
 //      ROS_INFO(
 //          "Robot %ld : av=%f theta=%f goaltheta=%f diff=%f", this->robot_id_, this->av_, this->pose_.theta_, this->goal_.theta_, diff);
 
-      if (diff < 0.01) {
+      if (359.9 < diff || diff < 0.01) {
         this->state_ = RobotState::FINISHED;
+      } else {
+        this->Move();
       }
     }
   }

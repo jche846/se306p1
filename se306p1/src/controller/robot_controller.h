@@ -59,6 +59,7 @@ namespace se306p1 {
       double av_;  // Angular velocity (counter clockwise)
 
       bool lvset;
+      bool avset;
 
       // Robot state
       RobotState state_;
