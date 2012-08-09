@@ -38,10 +38,12 @@ namespace se306p1 {
 
         if (exec_done) {
           for (auto &cur_robot: this->robots_) {
-            // tell robot to move to cluster head pos
-            cur_robot.second->Go(this->clusterHead_->pose_, false);
+            if(cur_robot.second->id_ != this->clusterHead_->id_){
+              // tell robot to move to cluster head pos
+              cur_robot.second->Go(this->clusterHead_->pose_, false);
+            }
             // enqueue rotate for after they have reached the cluster head pos
-            cur_robot.second->Do(CIRCLE_LV, CIRCLE_AV, true);
+            cur_robot.second->Do(CIRCLE_LV, CIRCLE_AV, cur_robot.second->id_ != this->clusterHead_->id_);
           }
           rotating = true;
         }
