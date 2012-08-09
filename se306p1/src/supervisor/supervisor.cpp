@@ -23,6 +23,7 @@ namespace se306p1 {
   Supervisor::~Supervisor() { }
 
   void Supervisor::ansPos_callback(Position msg) {
+    // attempt to find the robot in the list of found robots
     std::shared_ptr<Robot> robot_ptr;
     if (robots_.find(msg.R_ID) != robots_.end()) {
       robot_ptr = robots_[msg.R_ID];
@@ -30,7 +31,10 @@ namespace se306p1 {
       robot_ptr = nullptr;
     }
 
+    // Discovery state
     if (this->state_ == State::DISCOVERY) {
+      
+      // robot has already been found so check its not moving.
       if (robot_ptr != nullptr) {
         if (robot_ptr->pose_.position_.x_ != msg.x ||
             robot_ptr->pose_.position_.y_ != msg.y ||
@@ -38,9 +42,10 @@ namespace se306p1 {
             ROS_WARN("Robot %" PRId64 " changed its position during discovery.",
                    robots_[msg.R_ID]->id_);
         } else {
-          return;
+          return; // robot wasn't moving
         }
-      } else {
+
+      } else { // need to create a new robot and put it in the robot map
         robots_[msg.R_ID] = std::shared_ptr<Robot>(new Robot(msg.R_ID));
         robot_ptr = robots_[msg.R_ID];
         ROS_INFO("Supervisor associating with robot %" PRId64 ".", msg.R_ID);
@@ -48,9 +53,11 @@ namespace se306p1 {
     }
 
     if(robot_ptr == nullptr){
-      return; // must not be in discovery mode so don't accept new robots
+      return; // if the pointer is still null then we we are not in discovery mode and are not accepting new robots so ignore it.
     }
+    // ensure the robot is stopped
     robot_ptr->Stop();
+    // record its location
     robot_ptr->pose_ = Pose(Vector2(msg.x, msg.y), msg.theta);
     robot_ptr->executing_ = false;
   }
@@ -59,10 +66,12 @@ namespace se306p1 {
     ROS_INFO("Discovering robots for %d seconds.", timeout);
     ros::Rate r(FREQUENCY);
 
+    // set state for the ansPos_callback
     this->state_ = State::DISCOVERY;
 
     ros::Time end = ros::Time::now() + ros::Duration(timeout, 0);
 
+    // blast askPos messages for timeout
     while (ros::ok() && ros::Time::now() <= end) {
       this->askPosPublisher_.publish(AskPosition());
       r.sleep();
