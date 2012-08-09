@@ -72,29 +72,28 @@ namespace se306p1 {
   }
 
   /**
-   * Finds the absolute difference between two angles using the Stage coordinate
-   * system.
+   * Finds the difference from theta to phi in degrees, including direction.
    *
-   * @param theta The angle to find the difference from.
-   * @param phi The angle to find the difference to.
-   * @return The absolute difference between theta and phi.
+   * @param theta The angle we are moving from.
+   * @param phi The angle we are moving to.
+   * @return The angular distance from theta to phi.
    */
-  double AbsAngleDiff(double theta, double phi) {
+  double AngleDiff(double theta, double phi) {
     double diff;
 
-    if (theta == phi) {
-      diff = 0.0;
-    } else if (theta >= 0.0 && phi >= 0.0) {
-      diff = fabs(theta - phi);
-    } else if (theta <= 0.0 && phi <= 0.0) {
-      diff = fabs(theta - phi);
-    } else if (theta >= 0.0 && phi <= 0.0) {
-      diff = 180.0 - theta + 180.0 - fabs(phi);
-    } else if (theta <= 0.0 && phi >= 0.0) {
-      diff = 180.0 - fabs(theta) + 180.0 - phi;
-    } else {
-      diff = 0.0;
-    }
+    if (theta < 0.0)
+      theta = theta + 360.0;
+
+    if (phi < 0.0)
+      phi = phi + 360.0;
+
+    diff = phi - theta;
+
+    if (diff > 180.0)
+      diff = diff - 360.0;
+
+    if (diff < -180.0)
+      diff = 360.0 + diff;
 
     return diff;
   }

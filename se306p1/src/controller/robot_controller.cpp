@@ -7,9 +7,10 @@
 
 #include "robot_controller.h"
 #include "../util/trig.h"
+#include <string>
 
 #define FREQUENCY 100 // The number of ticks per second the robot will execute.
-#define DEFAULT_LV 2.0
+#define DEFAULT_LV 1.0
 #define DEFAULT_AV 2.0
 
 namespace se306p1 {
@@ -75,8 +76,14 @@ namespace se306p1 {
   void RobotController::go_callback(Go msg) {
     if (msg.enqueue) {
       this->commands_.push_back(Command(msg));
+      ROS_INFO(
+          "R%ld GO | x=%f, y=%f, theta=%f, q=true", this->robot_id_, msg.x, msg.y, msg.theta);
+
     } else {
       this->InterruptCommandQueue(Command(msg));
+      ROS_INFO(
+          "R%ld GO | x=%f, y=%f, theta=%f, q=false", this->robot_id_, msg.x, msg.y, msg.theta);
+
     }
   }
 
@@ -90,8 +97,12 @@ namespace se306p1 {
    */
   void RobotController::do_callback(Do msg) {
     if (msg.enqueue) {
+      ROS_INFO(
+          "R%ld DO | lv=%f, av=%f, q=true", this->robot_id_, msg.lv, msg.av);
       this->commands_.push_back(Command(msg));
     } else {
+      ROS_INFO(
+          "R%ld DO | lv=%f, av=%f, q=false", this->robot_id_, msg.lv, msg.av);
       this->InterruptCommandQueue(Command(msg));
     }
   }
@@ -108,7 +119,8 @@ namespace se306p1 {
 
   /**
    * Called when stage publishes an odometry message. Updates the controller's
-   * knowledge of the robot's current position.
+   * knowledge of the robot's current position, and triggers the controller to
+   * update the linear and angular velocity to achieve the robot's goal.
    *
    * @param msg The odometry message containing position data for this robot.
    */
@@ -125,10 +137,11 @@ namespace se306p1 {
     QuaternionMsgToRPY(msg.pose.pose.orientation, roll, pitch, yaw);
     this->pose_.theta_ = RadiansToDegrees(yaw);
 
-    // Diagnostic information
-//    ROS_INFO("Current x position is: %f", msg.pose.pose.position.x);
-//    ROS_INFO("Current y position is: %f", msg.pose.pose.position.y);
-//    ROS_INFO("Current theta is: %f", this->pose_.theta_);
+//    ROS_INFO(
+//        "R%ld ODOM | x=%f, y=%f, theta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->pose_.theta_, this->lv_, this->av_);
+
+// do stuff every stage tick
+    this->UpdateVelocity();
   }
 
   /**
@@ -148,85 +161,26 @@ namespace se306p1 {
   /**
    * Tell stage to drive the robot at the current linear and angular velocity.
    */
-  void RobotController::Move() {
+  void RobotController::PublishVelocity() {
     geometry_msgs::Twist msg;
     msg.angular.z = this->av_;
     msg.linear.x = this->lv_;
     this->twist_.publish(msg);
   }
 
-  inline bool RobotController::WithinTolerance(double num, double min,
-                                               double max) {
-    return (num > min && num < max);
-  }
-
   /**
-   * Work out the angle in degrees counter clockwise from North that the robot
-   * must face in order to be aiming at the goal position.
-   *
-   * @return Degrees The theta value that the robot must achieve in order to be
-   * aiming at the goal position.
+   * Depending on the robot's state and goals, set the linear and angular
+   * velocity for the next tick.
    */
-  double RobotController::AngleToGoal() {
-    double dx = this->goal_.position_.x_ - this->pose_.position_.x_;
-    double dy = this->goal_.position_.y_ - this->pose_.position_.y_;
-    double phi = 0.0;
-
-    double a_tan = fabs(DegATan(dy / dx));
-
-    if (dy == 0.0 && dx == 0.0) {
-      phi = 0.0;
-    } else if (dy >= 0.0 && dx >= 0.0) {
-      //sector 1
-//      ROS_INFO("SECTOR 1");
-      phi = -90.0 + a_tan;
-    } else if (dy >= 0.0 && dx < 0.0) {
-      //sector 2
-//      ROS_INFO("SECTOR 2");
-      phi = 90.0 - a_tan;
-    } else if (dy < 0.0 && dx < 0.0) {
-//      ROS_INFO("SECTOR 3");
-      //sector 3
-      phi = 90.0 + a_tan;
-    } else if (dy < 0.0 && dx >= 0.0) {
-//      ROS_INFO("SECTOR 4");
-      //sector 4
-      phi = -90.0 - a_tan;
+  void RobotController::UpdateVelocity() {
+    if (this->state_ == RobotState::GOING) {  // If the robot is going somewhere, keep trying to go there
+      this->MoveTowardsGoal();
+    } else if (this->state_ == RobotState::DOING) {  // If the robot is doing, keep doing.
+      this->PublishVelocity();
+    } else if (this->state_ == RobotState::FINISHED) {  // Get the next command.
+      this->DequeueCommand();
+      this->AnswerPosition();
     }
-
-//    ROS_INFO("x: %f, y: %f, dx: %f, dy: %f, phi: %f", this->pose_.position_.x_, this->pose_.position_.y_, dx, dy, phi);
-
-    return (double) phi;
-  }
-
-  /**
-   * Find the scalar amount of degrees between the current robot angle and the
-   * angle the robot needs to be facing to move towards it's goal.
-   *
-   * @return A positive double representing the amount of degrees difference
-   * between the robot theta and the AngleToGoal().
-   */
-  double RobotController::GetAngleDiff(double phi) {
-    double theta = this->pose_.theta_;
-    double diff = theta - phi;
-
-    if (theta == phi) {
-      diff = 0.0;
-    } else if (theta >= 0.0 && phi >= 0.0) {
-      diff = fabs(theta - phi);
-    } else if (theta <= 0.0 && phi <= 0.0) {
-      diff = fabs(theta - phi);
-    } else if (theta >= 0.0 && phi <= 0.0) {
-      diff = 180.0 - theta + 180.0 - fabs(phi);
-    } else if (theta <= 0.0 && phi >= 0.0) {
-      diff = 180.0 - fabs(theta) + 180.0 - phi;
-    } else {
-      diff = 0.0;
-    }
-
-//    ROS_INFO(
-//        "R_ID: %ld, AV: %f, THETA: %f, A2G: %f, DIFF: %f", this->robot_id_, this->av_, theta, phi, diff);
-    return diff;
   }
 
   /**
@@ -234,76 +188,86 @@ namespace se306p1 {
    * while executing a Go command. When executing a Go command, the robot will
    * first rotate to point at it's destination. Next, the robot will begin to
    * move towards it's destination. Once it has reached the destination, the
-   * robot will rotate to the specified angle.
+   * robot will align to the specified angle.
    */
   void RobotController::MoveTowardsGoal() {
+
+    // If the robot is already at the position, we can skip aiming at it and
+    // moving to it.
+    if ((this->goal_.position_ - this->pose_.position_).Length() < 0.01) {
+      this->gostep_ = GoStep::ALIGNING;
+    }
+
+    // Aim at the goal position.
     if (this->gostep_ == GoStep::AIMING) {
-      // We aren't moving forward, set the lv to 0.
-      this->av_ = DEFAULT_AV;
-      this->lv_ = 0.0;
+      // Figure out the angle that the robot will need to be at to be facing
+      // the goal position.
+      double angle_to_goal = AngleBetweenPoints(this->pose_.position_,
+                                                this->goal_.position_);
 
-      double diff = this->GetAngleDiff(AngleToGoal());
+      // Figure out how far away from that angle the robot currently is.
+      double diff = AngleDiff(this->pose_.theta_, angle_to_goal);
 
-      if (DegreesToRadians(diff) < this->av_) {
-        this->av_ = DegreesToRadians(diff);
-      }
+      // If the difference is small, we have finished aiming.
+      if (-0.001 < diff && diff < 0.001) {
+        ROS_INFO(
+            "R%ld aimed | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
 
-      this->Move();
-
-//      ROS_INFO(
-//          "Robot %ld : av=%f theta=%f diff=%f", this->robot_id_, this->av_, this->pose_.theta_, diff);
-
-      /*if (diff == 0.0) {
-       this->gostep_ = GoStep::MOVING;
-       }*/
-
-      if (diff < 0.01) {
         this->gostep_ = GoStep::MOVING;
-      }
-    } else if (this->gostep_ == GoStep::MOVING) {
-      // If we aren't rotating, set the av to 0.
-      this->lv_ = DEFAULT_LV;
-      this->av_ = 0.0;
-
-      double distance_to_goal =
-          (this->goal_.position_ - this->pose_.position_).Length();
-
-      /*double diff = GetAngleDiff();
-
-       if (DegreesToRadians(diff) < this->av_) {
-       this->av_ = DegreesToRadians(diff);
-       }*/
-
-      if (distance_to_goal < lv_) {
-        lv_ = distance_to_goal;
-      }
-
-      this->Move();
-
-      if (distance_to_goal < 0.01) {
-        this->gostep_ = GoStep::ROTATING;
-      }
-    } else if (this->gostep_ == GoStep::ROTATING) {
-      this->av_ = DEFAULT_AV;
-      this->lv_ = 0.0;
-
-      // Get the difference in degrees between the current theta and the goal
-      // theta.
-      double diff = this->GetAngleDiff(this->goal_.theta_);
-
-      if (DegreesToRadians(diff) < this->av_) {
+      } else {
+        // We are not moving forward, so 0 lv. Setting av to the diff each tick
+        // ensures we don't overshoot.
+        this->lv_ = 0.0;
         this->av_ = DegreesToRadians(diff);
-      }
-
-      this->Move();
-
-      ROS_INFO(
-          "Robot %ld : av=%f theta=%f goaltheta=%f diff=%f", this->robot_id_, this->av_, this->pose_.theta_, this->goal_.theta_, diff);
-
-      if (diff < 0.01) {
-        this->state_ = RobotState::FINISHED;
       }
     }
+
+    // Move towards the goal position
+    if (this->gostep_ == GoStep::MOVING) {
+      // Figure out the distance from the goal the robot currently is.
+      double distance_to_goal = (this->goal_.position_ - this->pose_.position_)
+          .Length();
+
+      // If the distance is small, we have reached the goal position.
+      if (distance_to_goal < 0.1) {
+        ROS_INFO(
+            "R%ld moved | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
+
+        this->gostep_ = GoStep::ALIGNING;
+      } else {
+        // The robot is not rotating, so 0 av. The lv is a constant, DEFAULT_LV.
+        this->av_ = 0.0;
+        this->lv_ = DEFAULT_LV;
+      }
+    }
+
+    // Rotate into the given angle.
+    if (this->gostep_ == GoStep::ALIGNING) {
+      // Figure out how far from the angle the robot currently is.
+      double diff = AngleDiff(this->pose_.theta_, this->goal_.theta_);
+
+      // If the difference is small, the robot is aligned and the Go is
+      // finished.
+      if (-0.001 < diff && diff < 0.001) {
+        ROS_INFO(
+            "R%ld alned | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
+        ROS_INFO("R%ld FINISHED GO", this->robot_id_);
+
+        // Stop the robot moving.
+        this->lv_ = 0;
+        this->av_ = 0;
+
+        this->state_ = RobotState::FINISHED;
+      } else {
+        // We are not moving forward, so 0 lv. Setting av to the diff each tick
+        // ensures we don't overshoot.
+        this->lv_ = 0.0;
+        this->av_ = DegreesToRadians(diff);
+      }
+    }
+
+    // Update the lv and the av on Stage.
+    this->PublishVelocity();
   }
 
   /**
@@ -345,6 +309,8 @@ namespace se306p1 {
 
     this->lv_ = msg.lv;
     this->av_ = msg.av;
+
+    this->PublishVelocity();
   }
 
   /**
@@ -376,7 +342,7 @@ namespace se306p1 {
    * If there are no more commands to execute, execute a Do with 0 linear and
    * angular velocity.
    */
-  void RobotController::DequeCommand() {
+  void RobotController::DequeueCommand() {
     if (this->commands_.empty()) {  // Do nothing if there are no more commands.
       Do msg;
       msg.lv = 0;
@@ -406,22 +372,11 @@ namespace se306p1 {
     this->ExecuteCommand(cmd);
   }
 
+  /**
+   * Begins running the ros loop.
+   */
   void RobotController::Run() {
-    ros::Rate r(FREQUENCY);  // Run FREQUENCY times a second
-
-    while (ros::ok()) {
-      if (this->state_ == RobotState::GOING) { // If the robot is going somewhere, keep trying to go there
-        this->MoveTowardsGoal();
-      } else if (this->state_ == RobotState::DOING) { // If the robot is doing, keep doing.
-        this->Move();
-      } else if (this->state_ == RobotState::FINISHED) { // Get the next command.
-        this->DequeCommand();
-        this->AnswerPosition();
-      }
-
-      r.sleep();
-      ros::spinOnce();
-    }
+    ros::spin();
   }
 }
 
