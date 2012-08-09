@@ -55,7 +55,7 @@ namespace se306p1 {
       return; // if the pointer is still null then we we are not in discovery mode and are not accepting new robots so ignore it.
     }
     // ensure the robot is stopped
-    robot_ptr->Stop();
+//    robot_ptr->Stop();
     // record its location
     robot_ptr->pose_ = Pose(Vector2(msg.x, msg.y), msg.theta);
     robot_ptr->executing_ = false;
