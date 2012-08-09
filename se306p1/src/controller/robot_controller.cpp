@@ -30,11 +30,6 @@ namespace se306p1 {
         ASK_POS_TOPIC, 1000, &RobotController::askPosition_callback, this,
         ros::TransportHints().reliable());
 
-    // We need to wait for the supervisor to offer an association.
-    this->assocSubscriber_ = nh_.subscribe<Associate>(
-        ASSOCIATE_TOPIC, 1000, &RobotController::assoc_callback, this,
-        ros::TransportHints().reliable());
-
     // Publish our position when asked by the supervisor.
     this->ansPosPublisher_ = nh_.advertise<Position>(ANS_POS_TOPIC, 1000);
 
@@ -44,6 +39,22 @@ namespace se306p1 {
     this->odom_ = nh_.subscribe<nav_msgs::Odometry>(
         odomss.str(), 1000, &RobotController::odom_callback, this,
         ros::TransportHints().reliable());
+
+    // Subscribe to Do messages in order to know when to move.
+    std::stringstream doss;
+    doss << "/robot_" << this->robot_id_ << "/do";
+    this->doSubscriber_ = nh_.subscribe<Do>(doss.str(), 1000,
+                                            &RobotController::do_callback, this,
+                                            ros::TransportHints().reliable());
+
+    // Subscribe to Go messages in order to know when to move.
+    std::stringstream goss;
+    goss << "/robot_" << this->robot_id_ << "/go";
+    this->goSubscriber_ = nh_.subscribe<Go>(goss.str(), 1000,
+                                            &RobotController::go_callback, this,
+                                            ros::TransportHints().reliable());
+    ROS_INFO("Controller for robot %" PRId64 " associated. Hello supervisor!",
+      this->robot_id_);
 
     // Tell stage that we are going to advertise commands to our robot.
     std::stringstream twistss;
@@ -138,26 +149,6 @@ namespace se306p1 {
    */
   void RobotController::askPosition_callback(AskPosition msg) {
     this->AnswerPosition();
-  }
-
-  void RobotController::assoc_callback(Associate msg) {
-    if (msg.R_ID != this->robot_id_) return;
-
-    // Subscribe to Do messages in order to know when to move.
-    std::stringstream doss;
-    doss << "/robot_" << this->robot_id_ << "/do";
-    this->doSubscriber_ = nh_.subscribe<Do>(doss.str(), 1000,
-                                            &RobotController::do_callback, this,
-                                            ros::TransportHints().reliable());
-
-    // Subscribe to Go messages in order to know when to move.
-    std::stringstream goss;
-    goss << "/robot_" << this->robot_id_ << "/go";
-    this->goSubscriber_ = nh_.subscribe<Go>(goss.str(), 1000,
-                                            &RobotController::go_callback, this,
-                                            ros::TransportHints().reliable());
-    ROS_INFO("Controller for robot %" PRId64 " associated. Hello supervisor!",
-      this->robot_id_);
   }
 
   /**
