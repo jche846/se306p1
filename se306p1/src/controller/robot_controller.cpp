@@ -53,7 +53,7 @@ namespace se306p1 {
     this->goSubscriber_ = nh_.subscribe<Go>(goss.str(), 1000,
                                             &RobotController::go_callback, this,
                                             ros::TransportHints().reliable());
-    
+
     // Tell stage that we are going to advertise commands to our robot.
     std::stringstream twistss;
     twistss << "/robot_" << this->robot_id_ << "/cmd_vel";
@@ -178,23 +178,23 @@ namespace se306p1 {
       phi = 0.0;
     } else if (dy >= 0.0 && dx >= 0.0) {
       //sector 1
-      ROS_INFO("SECTOR 1");
+//      ROS_INFO("SECTOR 1");
       phi = -90.0 + a_tan;
     } else if (dy >= 0.0 && dx < 0.0) {
       //sector 2
-      ROS_INFO("SECTOR 2");
+//      ROS_INFO("SECTOR 2");
       phi = 90.0 - a_tan;
     } else if (dy < 0.0 && dx < 0.0) {
-      ROS_INFO("SECTOR 3");
+//      ROS_INFO("SECTOR 3");
       //sector 3
       phi = 90.0 + a_tan;
     } else if (dy < 0.0 && dx >= 0.0) {
-      ROS_INFO("SECTOR 4");
+//      ROS_INFO("SECTOR 4");
       //sector 4
       phi = -90.0 - a_tan;
     }
 
-    ROS_INFO("x: %f, y: %f, dx: %f, dy: %f, phi: %f", this->pose_.position_.x_, this->pose_.position_.y_, dx, dy, phi);
+//    ROS_INFO("x: %f, y: %f, dx: %f, dy: %f, phi: %f", this->pose_.position_.x_, this->pose_.position_.y_, dx, dy, phi);
 
     return (double) phi;
   }
@@ -206,9 +206,8 @@ namespace se306p1 {
    * @return A positive double representing the amount of degrees difference
    * between the robot theta and the AngleToGoal().
    */
-  double RobotController::GetAngleDiff() {
+  double RobotController::GetAngleDiff(double phi) {
     double theta = this->pose_.theta_;
-    double phi = AngleToGoal();
     double diff = theta - phi;
 
     if (theta == phi) {
@@ -225,8 +224,8 @@ namespace se306p1 {
       diff = 0.0;
     }
 
-    ROS_INFO(
-        "R_ID: %ld, AV: %f, THETA: %f, A2G: %f, DIFF: %f", this->robot_id_, this->av_, theta, phi, diff);
+//    ROS_INFO(
+//        "R_ID: %ld, AV: %f, THETA: %f, A2G: %f, DIFF: %f", this->robot_id_, this->av_, theta, phi, diff);
     return diff;
   }
 
@@ -243,7 +242,7 @@ namespace se306p1 {
       this->av_ = DEFAULT_AV;
       this->lv_ = 0.0;
 
-      double diff = GetAngleDiff();
+      double diff = this->GetAngleDiff(AngleToGoal());
 
       if (DegreesToRadians(diff) < this->av_) {
         this->av_ = DegreesToRadians(diff);
@@ -255,8 +254,8 @@ namespace se306p1 {
 //          "Robot %ld : av=%f theta=%f diff=%f", this->robot_id_, this->av_, this->pose_.theta_, diff);
 
       /*if (diff == 0.0) {
-        this->gostep_ = GoStep::MOVING;
-      }*/
+       this->gostep_ = GoStep::MOVING;
+       }*/
 
       if (diff < 0.01) {
         this->gostep_ = GoStep::MOVING;
@@ -266,39 +265,43 @@ namespace se306p1 {
       this->lv_ = DEFAULT_LV;
       this->av_ = 0.0;
 
-      double distance_to_goal = (this->goal_.position_ - this->pose_.position_)
-          .Length();
+      double distance_to_goal =
+          (this->goal_.position_ - this->pose_.position_).Length();
 
       /*double diff = GetAngleDiff();
 
-      if (DegreesToRadians(diff) < this->av_) {
-        this->av_ = DegreesToRadians(diff);
-      }*/
+       if (DegreesToRadians(diff) < this->av_) {
+       this->av_ = DegreesToRadians(diff);
+       }*/
 
-      if (!(distance_to_goal >= (lv_ / FREQUENCY))) {
+      if (distance_to_goal < lv_) {
         lv_ = distance_to_goal;
       }
 
       this->Move();
 
-      if ((this->goal_.position_ - this->pose_.position_).Length() == 0.0) {
+      if (distance_to_goal < 0.01) {
         this->gostep_ = GoStep::ROTATING;
       }
     } else if (this->gostep_ == GoStep::ROTATING) {
-      // Rotate to goal theta.
-      this->lv_ = 0.0;
       this->av_ = DEFAULT_AV;
+      this->lv_ = 0.0;
 
-      double left_to_rotate = this->pose_.theta_ - this->goal_.theta_;
+      // Get the difference in degrees between the current theta and the goal
+      // theta.
+      double diff = this->GetAngleDiff(this->goal_.theta_);
 
-      if (left_to_rotate < this->av_) {
-        this->av_ = left_to_rotate;
+      if (DegreesToRadians(diff) < this->av_) {
+        this->av_ = DegreesToRadians(diff);
       }
 
       this->Move();
 
-      if (this->pose_.theta_ == this->goal_.theta_) {
-        this->state_ = RobotState::FINISHED;
+      ROS_INFO(
+          "Robot %ld : av=%f theta=%f goaltheta=%f diff=%f", this->robot_id_, this->av_, this->pose_.theta_, this->goal_.theta_, diff);
+
+      if (diff < 0.01) {
+        this->gostep_ = GoStep::MOVING;
       }
     }
   }
@@ -407,11 +410,11 @@ namespace se306p1 {
     ros::Rate r(FREQUENCY);  // Run FREQUENCY times a second
 
     while (ros::ok()) {
-      if (this->state_ == RobotState::GOING) {  // If the robot is going somewhere, keep trying to go there
+      if (this->state_ == RobotState::GOING) { // If the robot is going somewhere, keep trying to go there
         this->MoveTowardsGoal();
-      } else if (this->state_ == RobotState::DOING) {  // If the robot is doing, keep doing.
+      } else if (this->state_ == RobotState::DOING) { // If the robot is doing, keep doing.
         this->Move();
-      } else if (this->state_ == RobotState::FINISHED) {  // Get the next command.
+      } else if (this->state_ == RobotState::FINISHED) { // Get the next command.
         this->DequeCommand();
         this->AnswerPosition();
       }

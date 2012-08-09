@@ -91,7 +91,7 @@ namespace se306p1 {
       void Move();
       inline bool WithinTolerance(double num, double min, double max);
       double AngleToGoal();
-      double GetAngleDiff();
+      double GetAngleDiff(double phi);
       void MoveTowardsGoal();
       void SetGoing(Go msg);
       void SetDoing(Do msg);
