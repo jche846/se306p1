@@ -5,8 +5,8 @@
 
 #define ROBOT_WIDTH 0.35
 #define DEFAULT_MOVE_SPEED 1
-#define CIRCLE_LV 2
-#define CIRCLE_AV 2
+#define CIRCLE_LV 0.2
+#define CIRCLE_AV 0.2
 
 namespace se306p1 {
   RotateSupervisor::~RotateSupervisor() {
@@ -56,13 +56,19 @@ namespace se306p1 {
   void RotateSupervisor::FindRobotDests() {
     size_t numRobots = this->robots_.size();
 
-    double theta = 0.5; //TODO: work out theta
+    double goalTheta = AngleBetweenPoints(this->clusterHead_->pose_.position_, Vector2());
+    ROS_INFO("Setting GoalTheta to %f", goalTheta);
+
+    // set goal theta of cluster head
+    Pose headPose = this->clusterHead_->pose_;
+    headPose.theta_ = goalTheta;
+    this->clusterHead_->Go(headPose, false);
 
     Vector2 lastLocation = this->clusterHead_->pose_.position_;
     Vector2 robotSep = lastLocation.Normalized() * ROBOT_WIDTH * 6;
     for (size_t i = 1; i < numRobots; i++) {
       lastLocation = lastLocation + robotSep;
-      this->lineLocations_.push_back(Pose(lastLocation, theta));
+      this->lineLocations_.push_back(Pose(lastLocation, goalTheta));
     }
   }
 }
