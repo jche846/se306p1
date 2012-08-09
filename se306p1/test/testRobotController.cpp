@@ -182,6 +182,20 @@ class RobotControllerTest : public testing::Test {
     //check av is set for the robot
     ASSERT_EQ(rc.av_,msg_go.av);
   }
+  /**
+  * tests DequeCommand when command_ is empty
+  */
+  TEST_F(RobotControllerTest, testDequeCommand_emptyDeque){
+    //check the deque is clear
+    rc.command_.clear();
+    rc.DequeCommand();
+    //check state
+    ASSERT_EQ(rc.state_,RobotState::IDLE);
+    //check lv is set for the robot has been set to 0
+    ASSERT_EQ(rc.lv_,0);
+    //check av is set for the robot has been set to 0
+    ASSERT_EQ(rc.av_,0);
+  }
 }//namespace
 
 int main(int argc, char **argv) {
