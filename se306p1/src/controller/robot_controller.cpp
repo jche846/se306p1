@@ -178,7 +178,7 @@ namespace se306p1 {
 //      }
 
       ROS_INFO(
-          "Robot %ld aiming: av=%f theta=%f goaltheta=%f a2g=%f diff=%f", this->robot_id_, this->av_, this->pose_.theta_, this->goal_.theta_, AngleToGoal(), diff);
+          "Robot %ld aiming: av=%f theta=%f goaltheta=%f a2g=%f diff=%f", this->robot_id_, this->av_, this->pose_.theta_, this->goal_.theta_, angle_to_goal, diff);
 
       if (359.9 < diff || diff < 0.01) {
         lvset = false;
