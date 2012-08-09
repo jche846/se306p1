@@ -4,6 +4,7 @@
 #include <geometry_msgs/Quaternion.h>
 
 #include <tf/transform_datatypes.h>
+#include "vector2.h"
 
 namespace se306p1 {
   /**
@@ -99,7 +100,8 @@ namespace se306p1 {
   }
 
   /**
-   * Find the angle of the vector that points from one point to another.
+   * Find the angle of the vector that points from one point to another using
+   * the Stage coordinate system.
    *
    * @param p1 The point from which to find the angle of the vector that points
    * to p2.
