@@ -53,9 +53,7 @@ namespace se306p1 {
     this->goSubscriber_ = nh_.subscribe<Go>(goss.str(), 1000,
                                             &RobotController::go_callback, this,
                                             ros::TransportHints().reliable());
-    ROS_INFO("Controller for robot %" PRId64 " associated. Hello supervisor!",
-      this->robot_id_);
-
+    
     // Tell stage that we are going to advertise commands to our robot.
     std::stringstream twistss;
     twistss << "/robot_" << this->robot_id_ << "/cmd_vel";
