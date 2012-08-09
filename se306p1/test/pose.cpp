@@ -7,10 +7,6 @@ using namespace se306p1;
 namespace {
 class CommandPose : public testing::Test {
    public:
-   
-    se306p1::Do msg_do;
-    se306p1::Go msg_go;
-    
     CommandTest() {
 
     }
