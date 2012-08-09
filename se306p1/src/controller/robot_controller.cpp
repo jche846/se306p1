@@ -373,7 +373,7 @@ namespace se306p1 {
    * If there are no more commands to execute, execute a Do with 0 linear and
    * angular velocity.
    */
-  void RobotController:: DequeCommand() {
+  void RobotController::DequeCommand() {
     if (this->commands_.empty()) {  // Do nothing if there are no more commands.
       Do msg;
       msg.lv = 0;
