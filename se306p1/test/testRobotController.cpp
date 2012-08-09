@@ -131,6 +131,25 @@ class RobotControllerTest : public testing::Test {
     //was called.
     ASSERT_TRUE(rc.commands_.size()==0);
   }
+  /**
+  * Tests that setGoing runs correctly.
+  */
+  TEST_F(RobotControllerTest, testSetGoing){
+    msg_go.x = 5;
+    msg_go.y = 10;
+    msg_go.theta = 30;
+    msg_go.enqueue = true;
+    Vector2 position = Vector2(5.0,10.0);
+    double theta = 30.0;
+    Pose pose = Pose (position,theta);
+    rc.SetGoing(msg_go);
+    //check state
+    ASSERT_EQ(rc.state_,RobotState::GOING);
+    //check aiming set
+    ASSERT_EQ(rc.gostep_,GoStep::AIMING;);
+    //check state is the correct pose.
+    ASSERT_EQ(rc.goal_,pose);
+  }
 }//namespace
 
 int main(int argc, char **argv) {
