@@ -360,7 +360,7 @@ namespace se306p1 {
     } else {
       Go msg;
 
-      msg.x = cmd.x;git
+      msg.x = cmd.x;
       msg.y = cmd.y;
       msg.theta = cmd.theta;
 
