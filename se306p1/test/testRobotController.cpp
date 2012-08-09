@@ -36,7 +36,9 @@ class RobotControllerTest : public testing::Test {
       
     }
   };
-
+  /**
+  * Tests that do_callback runs correctly when enqueue is true
+  */
   TEST_F(RobotControllerTest, test_do_callback_enqueue) {
     Do msg_do;
     msg_do.lv = 10;
@@ -46,6 +48,8 @@ class RobotControllerTest : public testing::Test {
     Command cmd = rc.commands_.back();
     ASSERT_EQ(msg_do.lv, cmd.lv);
     ASSERT_EQ(msg_do.av, cmd.av);
+    //proves the deque hasnt been called, i.e InterruptQueue hasnt been called
+    ASSERT_TRUE(rc.commands_.size()>0);
   }
   /**
   * Tests that go_callback runs correctly when enqueue is true
