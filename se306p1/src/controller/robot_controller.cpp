@@ -301,7 +301,7 @@ namespace se306p1 {
           "Robot %ld : av=%f theta=%f goaltheta=%f diff=%f", this->robot_id_, this->av_, this->pose_.theta_, this->goal_.theta_, diff);
 
       if (diff < 0.01) {
-        this->gostep_ = GoStep::MOVING;
+        this->state_ = RobotState::FINISHED;
       }
     }
   }
