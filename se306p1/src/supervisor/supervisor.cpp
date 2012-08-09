@@ -18,7 +18,6 @@ namespace se306p1 {
                                                 &Supervisor::ansPos_callback, this,
                                                 ros::TransportHints().reliable());
     askPosPublisher_ = nh_.advertise<AskPosition>(ASK_POS_TOPIC, 1000);
-    assocPublisher_ = nh_.advertise<Associate>(ASSOCIATE_TOPIC, 1000);
   }
 
   Supervisor::~Supervisor() { }
@@ -36,7 +35,7 @@ namespace se306p1 {
         if (robot_ptr->pose_.position_.x_ != msg.x ||
             robot_ptr->pose_.position_.y_ != msg.y ||
             robot_ptr->pose_.theta_ != msg.theta) {
-          ROS_WARN("Robot %" PRId64 " changed its position during discovery.",
+            ROS_WARN("Robot %" PRId64 " changed its position during discovery.",
                    robots_[msg.R_ID]->id_);
         } else {
           return;
@@ -44,7 +43,7 @@ namespace se306p1 {
       } else {
         robots_[msg.R_ID] = std::shared_ptr<Robot>(new Robot(msg.R_ID));
         robot_ptr = robots_[msg.R_ID];
-        this->AssociateRobot(*robot_ptr);
+        ROS_INFO("Supervisor associating with robot %" PRId64 ".", msg.R_ID);
       }
     }
 
@@ -98,13 +97,6 @@ namespace se306p1 {
     ROS_INFO("Robots ready.");
   }
 
-  void Supervisor::AssociateRobot(const Robot &robot) {
-    ROS_INFO("Supervisor associating with robot %" PRId64 ".", robot.id_);
-    Associate msg;
-    msg.R_ID = robot.id_;
-    this->assocPublisher_.publish(msg);
-  }
-
   void Supervisor::Start() {
     while (ros::Time::now().isZero());
 
@@ -152,7 +144,7 @@ namespace se306p1 {
     dispatchIt_++;
     if (dispatchIt_ == robots_.end()) dispatchIt_ = robots_.begin();
     dispatchIt_->second->DispatchCommand();
-    ROS_INFO("Dispatched command for robot %" PRId64 ".", dispatchIt_->first);
+//    ROS_INFO("Dispatched command for robot %" PRId64 ".", dispatchIt_->first);
   }
 
   void Supervisor::MoveNodesToDests(const std::vector<std::shared_ptr<Robot> > &nodesIn,

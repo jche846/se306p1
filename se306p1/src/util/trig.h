@@ -58,7 +58,7 @@ namespace se306p1
   * Returns: the sine of that angle in degres
   */
   inline double DegATan (double x) {
-    return RadiansToDegrees(atan(x));
+    return (double) RadiansToDegrees(atan(x));
   }
 
   /**

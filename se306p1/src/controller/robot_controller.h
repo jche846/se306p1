@@ -75,7 +75,6 @@ namespace se306p1 {
       ros::Subscriber askPosSubscriber_;
       ros::Subscriber doSubscriber_;
       ros::Subscriber goSubscriber_;
-      ros::Subscriber assocSubscriber_;
       ros::Publisher ansPosPublisher_;
 
       // Stage pub/subs
@@ -85,14 +84,15 @@ namespace se306p1 {
      public:
       RobotController(ros::NodeHandle &nh, uint64_t id);
       virtual ~RobotController();
-      double AngleToGoal();
       void go_callback(Go msg);
       void do_callback(Do msg);
       void askPosition_callback(AskPosition msg);
-      void assoc_callback(Associate msg);
       void odom_callback(nav_msgs::Odometry msg);
       void AnswerPosition();
       void Move();
+      inline bool WithinTolerance(double num, double min, double max);
+      double AngleToGoal();
+      double GetAngleDiff();
       void MoveTowardsGoal();
       void SetGoing(Go msg);
       void SetDoing(Do msg);
