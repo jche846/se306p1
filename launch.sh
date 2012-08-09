@@ -4,7 +4,7 @@
 # Generate a world file, Start Robot Controllers.
 #
 ROBOT_COUNT=$1
-if [ -f $1 ]; then
+if [ "x${1}" = x ]; then
     ROBOT_COUNT=5
 fi
 
