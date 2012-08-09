@@ -6,11 +6,11 @@ using namespace se306p1;
 namespace {
 class CommandVector2 : public testing::Test {
    public:
-    CommandTest() {
+    CommandVector2() {
 
     }
 
-    virtual ~CommandTest() {
+    virtual ~CommandVector2() {
 
     }
 
@@ -23,30 +23,31 @@ class CommandVector2 : public testing::Test {
   };
 
   TEST_F(CommandVector2, testDefaultConstruct) {
-    double x = 0.0
+    double x = 0.0;
     double y = 0.0;
+    Vector2 vec = Vector2 ();
     ASSERT_EQ(x,vec.x_);
-    ASSERT_EQ(x,vec.y_);
+    ASSERT_EQ(y,vec.y_);
   }
 
   TEST_F(CommandVector2, testVectorValues) {
     double x = 3.0;
     double y = 4.0;
-    vec = Vector2 (x,y);
+    Vector2 vec = Vector2 (x,y);
     ASSERT_EQ(x,vec.x_);
-    ASSERT_EQ(y,vec.y_);c
+    ASSERT_EQ(y,vec.y_);
   }
 
   TEST_F(CommandVector2, testLength) {
     double x = 3.0;
     double y = 4.0;
-    vec = Vector2 (x,y);
+    Vector2 vec = Vector2 (x,y);
     ASSERT_EQ(5.0,vec.Length());
   }
   TEST_F(CommandVector2, testLengthSquared) {
     double x = 3.0;
     double y = 4.0;
-    vec = Vector2 (x,y);
+    Vector2 vec = Vector2 (x,y);
     ASSERT_EQ(25.0,vec.LengthSquared());
   }
   

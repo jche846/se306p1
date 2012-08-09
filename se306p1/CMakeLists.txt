@@ -47,6 +47,10 @@ rosbuild_add_gtest(test_trig
     test/trig.cpp)
 rosbuild_add_gtest(test_supervisor
     test/supervisor.cpp)
+rosbuild_add_gtest(test_pose
+    test/pose.cpp)
+rosbuild_add_gtest(test_vector2
+    test/vector2.cpp)
 rosbuild_add_rostest(test/supervisor.test)
 
 #target_link_libraries(example ${PROJECT_NAME})
