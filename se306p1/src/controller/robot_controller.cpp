@@ -74,7 +74,7 @@ namespace se306p1 {
    * @param msg A Go message containing a location for the robot to move to.
    */
   void RobotController::go_callback(Go msg) {
-    if (msg.enqueue) {
+    if (msg.enqueue && (this->state_ != RobotState::IDLE || this->state_ != RobotState::FINISHED)) {
       this->commands_.push_back(Command(msg));
       ROS_INFO(
           "R%ld GO | x=%f, y=%f, theta=%f, q=true", this->robot_id_, msg.x, msg.y, msg.theta);
@@ -96,7 +96,7 @@ namespace se306p1 {
    * @param msg A Do message containing linear and angular velocity information.
    */
   void RobotController::do_callback(Do msg) {
-    if (msg.enqueue) {
+    if (msg.enqueue && (this->state_ != RobotState::IDLE || this->state_ != RobotState::FINISHED)) {
       ROS_INFO(
           "R%ld DO | lv=%f, av=%f, q=true", this->robot_id_, msg.lv, msg.av);
       this->commands_.push_back(Command(msg));
@@ -309,6 +309,8 @@ namespace se306p1 {
 
     this->lv_ = msg.lv;
     this->av_ = msg.av;
+
+    ROS_INFO("R%ld STARTING DO: lv: %f av: %f", this->robot_id_, msg.lv, msg.av);
 
     this->PublishVelocity();
   }
