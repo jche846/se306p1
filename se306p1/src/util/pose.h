@@ -5,7 +5,7 @@ namespace se306p1 {
   class Pose {
     public:
       Vector2 position_;
-      double theta_; // Theta is defined as CCW from North.
+      double theta_; // Theta is defined as CCW from East.
 
       inline Pose(Vector2 position = Vector2(0.0, 0.0), double theta = 0.0) :
           position_(position), theta_(theta) {
