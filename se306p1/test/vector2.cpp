@@ -4,13 +4,13 @@
 // The fixture for testing class Command.
 using namespace se306p1;
 namespace {
-class CommandVector2 : public testing::Test {
+class Vector2Test : public testing::Test {
    public:
-    CommandVector2() {
+    Vector2Test() {
 
     }
 
-    virtual ~CommandVector2() {
+    virtual ~Vector2Test() {
 
     }
 
@@ -22,7 +22,7 @@ class CommandVector2 : public testing::Test {
     }
   };
 
-  TEST_F(CommandVector2, testDefaultConstruct) {
+  TEST_F(Vector2Test, testDefaultConstruct) {
     double x = 0.0;
     double y = 0.0;
     Vector2 vec = Vector2 ();
@@ -30,7 +30,7 @@ class CommandVector2 : public testing::Test {
     ASSERT_EQ(y,vec.y_);
   }
 
-  TEST_F(CommandVector2, testVectorValues) {
+  TEST_F(Vector2Test, testVectorValues) {
     double x = 3.0;
     double y = 4.0;
     Vector2 vec = Vector2 (x,y);
@@ -38,13 +38,14 @@ class CommandVector2 : public testing::Test {
     ASSERT_EQ(y,vec.y_);
   }
 
-  TEST_F(CommandVector2, testLength) {
+  TEST_F(Vector2Test, testLength) {
     double x = 3.0;
     double y = 4.0;
     Vector2 vec = Vector2 (x,y);
     ASSERT_EQ(5.0,vec.Length());
   }
-  TEST_F(CommandVector2, testLengthSquared) {
+
+  TEST_F(Vector2Test, testLengthSquared) {
     double x = 3.0;
     double y = 4.0;
     Vector2 vec = Vector2 (x,y);

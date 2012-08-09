@@ -4,13 +4,13 @@
 // The fixture for testing class Command.
 using namespace se306p1;
 namespace {
-class CommandPose : public testing::Test {
+class PoseTest : public testing::Test {
    public:
-    CommandPose() {
+    PoseTest() {
 
     }
 
-    virtual ~CommandPose() {
+    virtual ~PoseTest() {
 
     }
 
@@ -22,7 +22,7 @@ class CommandPose : public testing::Test {
     }
   };
 
-  TEST_F(CommandPose, testDefaultConstruct) {
+  TEST_F(PoseTest, testDefaultConstruct) {
         Pose pose; //this line is obviously way too self concious due to the amount of posing it does
         Vector2 position = Vector2(0.0,0.0);
         double theta = 0.0;
@@ -30,7 +30,7 @@ class CommandPose : public testing::Test {
         ASSERT_EQ(theta,pose.theta_);
   }
 
-  TEST_F(CommandPose, testPoseValues) {
+  TEST_F(PoseTest, testPoseValues) {
         Vector2 position = Vector2(2.0,3.0);
         double theta = 1.0;
         Pose pose = Pose (position,theta);
