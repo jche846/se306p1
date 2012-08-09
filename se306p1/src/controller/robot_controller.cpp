@@ -187,29 +187,35 @@ namespace se306p1 {
    * aiming at the goal position.
    */
   double RobotController::AngleToGoal() {
-    double dx = this->pose_.position_.x_ - this->goal_.position_.x_;
-    double dy = this->pose_.position_.y_ - this->goal_.position_.y_;
+    double dx = this->goal_.position_.x_ - this->pose_.position_.x_;
+    double dy = this->goal_.position_.y_ - this->pose_.position_.y_;
     double phi = 0.0;
 
-    double a_tan = abs(DegATan(dy / dx));
+    double a_tan = fabs(DegATan(dy / dx));
 
     if (dy == 0.0 && dx == 0.0) {
       phi = 0.0;
     } else if (dy >= 0.0 && dx >= 0.0) {
       //sector 1
-      phi = 180.0 - a_tan;
+      ROS_INFO("SECTOR 1");
+      phi = -90.0 + a_tan;
     } else if (dy >= 0.0 && dx < 0.0) {
       //sector 2
-      phi = -180.0 + a_tan;
+      ROS_INFO("SECTOR 2");
+      phi = 90.0 - a_tan;
     } else if (dy < 0.0 && dx < 0.0) {
+      ROS_INFO("SECTOR 3");
       //sector 3
-      phi = -1.0 * a_tan;
+      phi = 90.0 + a_tan;
     } else if (dy < 0.0 && dx >= 0.0) {
+      ROS_INFO("SECTOR 4");
       //sector 4
-      phi = a_tan;
+      phi = -90.0 - a_tan;
     }
 
-    return phi;
+    ROS_INFO("x: %f, y: %f, dx: %f, dy: %f, phi: %f", this->pose_.position_.x_, this->pose_.position_.y_, dx, dy, phi);
+
+    return (double) phi;
   }
 
   /**
@@ -227,13 +233,13 @@ namespace se306p1 {
     if (theta == phi) {
       diff = 0.0;
     } else if (theta >= 0.0 && phi >= 0.0) {
-      diff = abs(theta - phi);
+      diff = fabs(theta - phi);
     } else if (theta <= 0.0 && phi <= 0.0) {
-      diff = abs(theta - phi);
+      diff = fabs(theta - phi);
     } else if (theta >= 0.0 && phi <= 0.0) {
-      diff = 180.0 - theta + 180.0 - abs(phi);
+      diff = 180.0 - theta + 180.0 - fabs(phi);
     } else if (theta <= 0.0 && phi >= 0.0) {
-      diff = 180.0 - abs(theta) + 180.0 - phi;
+      diff = 180.0 - fabs(theta) + 180.0 - phi;
     } else {
       diff = 0.0;
     }
@@ -267,13 +273,13 @@ namespace se306p1 {
 //      ROS_INFO(
 //          "Robot %ld : av=%f theta=%f diff=%f", this->robot_id_, this->av_, this->pose_.theta_, diff);
 
-      if (diff == 0.0) {
+      /*if (diff == 0.0) {
+        this->gostep_ = GoStep::MOVING;
+      }*/
+
+      if (diff < 0.01) {
         this->gostep_ = GoStep::MOVING;
       }
-
-//      if (this->WithinTolerance(diff, -0.01, 0.01)) {
-//        this->gostep_ = GoStep::MOVING;
-//      }
     } else if (this->gostep_ == GoStep::MOVING) {
       // If we aren't rotating, set the av to 0.
       this->lv_ = DEFAULT_LV;
@@ -281,6 +287,12 @@ namespace se306p1 {
 
       double distance_to_goal = (this->goal_.position_ - this->pose_.position_)
           .Length();
+
+      /*double diff = GetAngleDiff();
+
+      if (DegreesToRadians(diff) < this->av_) {
+        this->av_ = DegreesToRadians(diff);
+      }*/
 
       if (!(distance_to_goal >= (lv_ / FREQUENCY))) {
         lv_ = distance_to_goal;
