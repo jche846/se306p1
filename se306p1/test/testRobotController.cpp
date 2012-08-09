@@ -232,14 +232,33 @@ class RobotControllerTest : public testing::Test {
   * Tests that the ExecuteCommand() method executes a Go command correctly
   */
   TEST_F(RobotControllerTest, testExecuteGoCommand){
-    
+    //create a Go command
+    msg_go.x = 5;
+    msg_go.y = 10;
+    msg_go.theta = 30;
+    msg_go.enqueue = true;
+    Command cmd = Command(msg_go);
+    //create a pose
+    Vector2 position = Vector2(msg_go.x,msg_go.y);
+    double theta = msg_go.theta;
+    Pose pose = Pose (position,theta);
+    the robots go should be set to the pose.
+    ASSERT_EQ(rc.goal_,pose);
   }
   
   /**
   * Tests that the ExecuteCommand() method executes a Do command correctly
   */
   TEST_F(RobotControllerTest, testExecuteDoCommand){
-    
+    //create a Do msg
+    msg_do.av = 5;
+    msg_do.lv = 10;
+    msg_do.enqueue = true;
+    Command cmd = Command(msg_do);
+    ExecuteCommand(cmd);
+    //The robots angular and linear velocity should be set to that of the message.
+    ASSERT_EQ(rc.lv_,msg_do.lv);
+    ASSERT_EQ(rc.av_,msg_do.av);
   }
   
 }//namespace
