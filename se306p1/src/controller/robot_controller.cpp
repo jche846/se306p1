@@ -76,24 +76,13 @@ namespace se306p1 {
   void RobotController::go_callback(Go msg) {
     if (msg.enqueue) {
       this->commands_.push_back(Command(msg));
-      if (this->robot_id_ == 0) {
-        double angle_to_goal = AngleBetweenPoints(this->pose_.position_,
-                                                  msg.theta);
-        double diff = CCWAngleDiff(this->pose_.theta_, angle_to_goal);
+      ROS_INFO(
+          "R%ld GO | x=%f, y=%f, theta=%f, q=true", this->robot_id_, msg.x, msg.y, msg.theta);
 
-        ROS_INFO(
-            "R%ld GO: x=%f, y=%f, theta=%f, q=true, rtheta=%f, diff=%f", this->robot_id_, msg.x, msg.y, msg.theta, this->pose_.theta_, diff);
-      }
     } else {
       this->InterruptCommandQueue(Command(msg));
-      if (this->robot_id_ == 0) {
-        double angle_to_goal = AngleBetweenPoints(this->pose_.position_,
-                                                  msg.theta);
-        double diff = CCWAngleDiff(this->pose_.theta_, angle_to_goal);
-
-        ROS_INFO(
-            "R%ld GO: x=%f, y=%f, theta=%f, q=false, rtheta=%f, diff=%f", this->robot_id_, msg.x, msg.y, msg.theta, this->pose_.theta_, diff);
-      }
+      ROS_INFO(
+          "R%ld GO | x=%f, y=%f, theta=%f, q=false", this->robot_id_, msg.x, msg.y, msg.theta);
 
     }
   }
@@ -108,14 +97,12 @@ namespace se306p1 {
    */
   void RobotController::do_callback(Do msg) {
     if (msg.enqueue) {
-      if (this->robot_id_ == 0)
-        ROS_INFO(
-            "R%ld DO: lv=%f, av=%f, q=true", this->robot_id_, msg.lv, msg.av);
+      ROS_INFO(
+          "R%ld DO | lv=%f, av=%f, q=true", this->robot_id_, msg.lv, msg.av);
       this->commands_.push_back(Command(msg));
     } else {
-      if (this->robot_id_ == 0)
-        ROS_INFO(
-            "R%ld DO: lv=%f, av=%f, q=false", this->robot_id_, msg.lv, msg.av);
+      ROS_INFO(
+          "R%ld DO | lv=%f, av=%f, q=false", this->robot_id_, msg.lv, msg.av);
       this->InterruptCommandQueue(Command(msg));
     }
   }
@@ -151,7 +138,7 @@ namespace se306p1 {
     this->pose_.theta_ = RadiansToDegrees(yaw);
 
 //    ROS_INFO(
-//        "R%ld ODOM: x=%f, y=%f, theta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->pose_.theta_, this->lv_, this->av_);
+//        "R%ld ODOM | x=%f, y=%f, theta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->pose_.theta_, this->lv_, this->av_);
 
 // do stuff every stage tick
     this->UpdateVelocity();
@@ -262,9 +249,9 @@ namespace se306p1 {
       // If the difference is small, the robot is aligned and the Go is
       // finished.
       if (-0.001 < diff && diff < 0.001) {
-        if (this->robot_id_ == 0)
-          ROS_INFO(
-              "R%ld alned | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
+        ROS_INFO(
+            "R%ld alned | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
+        ROS_INFO("R%ld FINISHED GO", this->robot_id_);
 
         // Stop the robot moving.
         this->lv_ = 0;
@@ -322,6 +309,8 @@ namespace se306p1 {
 
     this->lv_ = msg.lv;
     this->av_ = msg.av;
+
+    this->PublishVelocity();
   }
 
   /**

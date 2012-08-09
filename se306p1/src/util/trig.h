@@ -99,34 +99,6 @@ namespace se306p1 {
   }
 
   /**
-   * Finds the absolute difference in degrees between two angles using the
-   * Stage coordinate system.
-   *
-   * @param theta The angle to find the difference from.
-   * @param phi The angle to find the difference to.
-   * @return The absolute difference between theta and phi.
-   */
-  double CCWAngleDiff(double theta, double phi) {
-    double diff;
-
-    if (theta == phi) {
-      diff = 0.0;
-    } else if (theta >= 0.0 && phi >= 0.0) {
-      diff = fabs(theta - phi);
-    } else if (theta <= 0.0 && phi <= 0.0) {
-      diff = fabs(theta - phi);
-    } else if (theta >= 0.0 && phi <= 0.0) {
-      diff = 180.0 - theta + 180.0 - fabs(phi);
-    } else if (theta <= 0.0 && phi >= 0.0) {
-      diff = 180.0 - fabs(theta) + 180.0 - phi;
-    } else {
-      diff = 0.0;
-    }
-
-    return diff;
-  }
-
-  /**
    * Find the angle of the vector that points from one point to another using
    * the Stage coordinate system.
    *
