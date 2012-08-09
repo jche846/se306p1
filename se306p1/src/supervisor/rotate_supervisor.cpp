@@ -5,6 +5,7 @@
 
 #define ROBOT_WIDTH 0.35
 #define DEFAULT_MOVE_SPEED 1
+#define CIRCLE_LV 2.0
 
 namespace se306p1 {
   RotateSupervisor::~RotateSupervisor() {
@@ -20,16 +21,13 @@ namespace se306p1 {
     // rotating ensures that the robots are only told to rotate once
     bool rotating = false;
 
-    int circle_lv;  // Linear velocity
-    int circle_av;  // Angular velocity
+    double circle_av;  // Angular velocity
+    int num_robots = robots_.size();
+    double circumference = num_robots * 6 * ROBOT_WIDTH;
 
     // Calculate velocities
-
-    int num_robots = robots_.size();
-    int circumference = num_robots * 6 * ROBOT_WIDTH;
-
-    circle_av = 360/num_robots;
-    circle_lv = circle_av * circumference/(2 * M_PI);
+    double rotate_time = circumference / CIRCLE_LV;
+    circle_av = 360 / rotate_time;
 
     while (ros::ok()) {
       this->DispatchMessages();
@@ -50,7 +48,7 @@ namespace se306p1 {
             // tell robot to move to cluster head pos
             cur_robot.second->Go(this->clusterHead_->pose_, false);
             // enqueue rotate for after they have reached the cluster head pos
-            cur_robot.second->Do(circle_lv, circle_av, true);
+            cur_robot.second->Do(CIRCLE_LV, circle_av, true);
           }
           rotating = true;
         }
