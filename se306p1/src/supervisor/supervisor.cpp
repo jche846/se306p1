@@ -3,7 +3,6 @@
 #include "supervisor.h"
 #include "robot.h"
 
-#include <se306p1/Associate.h>
 #include <se306p1/AskPosition.h>
 #include <se306p1/Position.h>
 

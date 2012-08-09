@@ -15,7 +15,6 @@
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/LaserScan.h>
 #include <se306p1/AskPosition.h>
-#include <se306p1/Associate.h>
 #include <se306p1/Position.h>
 #include <se306p1/Do.h>
 #include <se306p1/Go.h>
