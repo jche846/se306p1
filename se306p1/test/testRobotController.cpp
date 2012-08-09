@@ -94,6 +94,20 @@ class RobotControllerTest : public testing::Test {
     //was called.
     ASSERT_TRUE(rc.commands_.size()==0);
   }
+  /**
+  * Tests that go_callback calls InterruptCommandQueue when enqueue is false
+  */
+  TEST_F(RobotControllerTest, test_go_callback_no_enqueue) {
+    Do msg_do;
+    msg_go.lv = 10;
+    msg_go.av = 30;
+    msg_go.enqueue = false;
+    ASSERT_TRUE(rc.commands_.size()>0);
+    rc.do_callback(msg_go);
+    //checking that the command_ deque is cleared proves that InterruptCommandQueue()
+    //was called.
+    ASSERT_TRUE(rc.commands_.size()==0);
+  }
 }//namespace
 
 int main(int argc, char **argv) {
