@@ -6,12 +6,16 @@
 #include <se306p1/Do.h>
 #include <se306p1/Go.h>
 #include "../src/util/command.h"
+#include "../src/util/pose.h"
+
+#define private public
 #include "../src/controller/robot_controller.h"
+#undef private
+
 // The fixture for testing class Command.
 using namespace se306p1;
 namespace {
 class RobotControllerTest : public testing::Test {
-   
    
    public:
     RobotController rc;
@@ -55,7 +59,9 @@ class RobotControllerTest : public testing::Test {
     ASSERT_EQ(msg_do.lv, cmd.lv);
     ASSERT_EQ(msg_do.av, cmd.av);
   }
-
+  /**
+  * Tests that InterruptCommandQueue is called correctly.
+  */
   TEST_F(RobotControllerTest, test_InterruptCommandQueue){
     msg_go1.x = 7;
     msg_go1.y = 15;
@@ -69,16 +75,25 @@ class RobotControllerTest : public testing::Test {
     Command cmd2 = Command(msg_go2);
     rc.commands_.push_back(cmd1);
     rc.commands_.push_back(cmd2);
+    //check commands are added
     ASSERT_TRUE(commands_.size()>1);
     
     msg_go3.x = 2;
-    msg_go3.y = 2;
+    msg_go3.y = 3;
     msg_go3.theta = 4;
     msg_go3.enqueue = false;
     Command interrupt = Command(msg_go3);
     rc.InterruptCommandQueue(interrupt);
+    //checks deque is cleared
     ASSERT_TRUE(commands_.size()==0);
+    //check idle is set
     ASSERT_TRUE(rc.state_==RobotState::IDLE);
+    
+    Vector2 position = Vector2(2.0,3.0);
+    double theta = 4.0;
+    Pose pose = Pose (position,theta);
+    //prove SetGoing has been called
+    ASSERT_TRUE(rc.goal_==pose);
   }
   /**
   * Tests that do_callback calls InterruptCommandQueue when enqueue is false

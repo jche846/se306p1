@@ -23,19 +23,19 @@ class PoseTest : public testing::Test {
   };
 
   TEST_F(PoseTest, testDefaultConstruct) {
-        Pose pose; //this line is obviously way too self concious due to the amount of posing it does
-        Vector2 position = Vector2(0.0,0.0);
-        double theta = 0.0;
-        ASSERT_EQ(position,pose.position_);
-        ASSERT_EQ(theta,pose.theta_);
+    Pose pose; //this line is obviously way too self concious due to the amount of posing it does
+    Vector2 position = Vector2(0.0,0.0);
+    double theta = 0.0;
+    ASSERT_EQ(position,pose.position_);
+    ASSERT_EQ(theta,pose.theta_);
   }
 
   TEST_F(PoseTest, testPoseValues) {
-        Vector2 position = Vector2(2.0,3.0);
-        double theta = 1.0;
-        Pose pose = Pose (position,theta);
-        ASSERT_EQ(position,pose.position_);
-        ASSERT_EQ(theta,pose.theta_);
+    Vector2 position = Vector2(2.0,3.0);
+    double theta = 1.0;
+    Pose pose = Pose (position,theta);
+    ASSERT_EQ(position,pose.position_);
+    ASSERT_EQ(theta,pose.theta_);
   }
 }//namespace
 
