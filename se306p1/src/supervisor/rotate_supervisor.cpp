@@ -10,6 +10,11 @@ namespace se306p1 {
   RotateSupervisor::~RotateSupervisor() {
   }
 
+  /**
+   * Runs the Alpha version behaviour in the robots.
+   *
+   * @author Sam Grace, Andrew Luey
+   */
   void RotateSupervisor::Run() {
     ROS_INFO("Starting rotate supervisor.");
     ros::Rate r(100);
@@ -24,6 +29,8 @@ namespace se306p1 {
     double CIRCLE_LV = 1.0;
 
     ROS_INFO("MOVING AT lv:%f av:%f", CIRCLE_LV, circle_av);
+    //The while loop that repeatedly runs to make the robots move to new positions.
+
     while (ros::ok()) {
       this->DispatchMessages();
 
@@ -37,6 +44,11 @@ namespace se306p1 {
             break;
           }
         }
+
+        /**
+         * this block is only ever called once. It starts the robots moving in a circle,
+         * then sets rotating to true so this block is never called again.
+         */
 
         if (exec_done) {
           this->clusterHead_->pose_.theta_ = 999;
@@ -58,10 +70,20 @@ namespace se306p1 {
     }
   }
 
+  /**
+   * Sets the pose for all robots in this->lineLocations for all robots except
+   * the head to arrange in a a radial line out from the (0,0) origin through
+   * the cluster head position, and spaced evenly at 5 robot diameters apart.
+   *
+   * Sets the cluster head to align towards the origin.
+   *
+   * @author scott goodhew
+   */
   void RotateSupervisor::FindRobotDests() {
     size_t numRobots = this->robots_.size();
 
-    double goalTheta = AngleBetweenPoints(this->clusterHead_->pose_.position_, Vector2());
+    double goalTheta = AngleBetweenPoints(this->clusterHead_->pose_.position_,
+                                          Vector2());
     ROS_INFO("Setting GoalTheta to %f", goalTheta);
 
     // set goal theta of cluster head
