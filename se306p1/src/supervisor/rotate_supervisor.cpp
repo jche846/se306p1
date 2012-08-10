@@ -20,8 +20,8 @@ namespace se306p1 {
     // rotating ensures that the robots are only told to rotate once
     bool rotating = false;
 
-    double circle_av = 0.2;
-    double CIRCLE_LV = 1.7;
+    double circle_av = 0.62;
+    double CIRCLE_LV = 1.0;
 
     ROS_INFO("MOVING AT lv:%f av:%f", CIRCLE_LV, circle_av);
     while (ros::ok()) {
@@ -39,6 +39,7 @@ namespace se306p1 {
         }
 
         if (exec_done) {
+          this->clusterHead_->pose_.theta_ = 999;
           for (auto &cur_robot: this->robots_) {
             if(cur_robot.second->id_ != this->clusterHead_->id_){
               // tell robot to move to cluster head pos
