@@ -49,6 +49,11 @@ namespace se306p1 {
      */
     virtual void Run() = 0;
 
+    /**
+     * Atempt to send a message to a robot Controller
+     *
+     * This method must be called regularly to ensure that messages are sent to the Robot Controllers  
+     */
     void DispatchMessages();
 
   public:
@@ -63,16 +68,22 @@ namespace se306p1 {
 
     /**
      * Elect a cluster head.
+     * 
+     * Will also create the nonHeadRobots_ lists
      */
     void ElectHead();
 
     /**
      * Start the supervisor.
+     *
+     * Will call Run() after finding all the RobotControllers and electing a head.
      */
     void Start();
 
     /**
+     * Moves a list of robots to a list of position
      *
+     * Will send robots to destinations in a manner that the minimum time is taken for all the robots to reach a destination 
      */
     void MoveNodesToDests(const std::vector<std::shared_ptr<Robot> > &nodes,
                           const std::vector<Pose> &poses);

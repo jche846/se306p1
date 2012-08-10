@@ -15,7 +15,6 @@
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/LaserScan.h>
 #include <se306p1/AskPosition.h>
-#include <se306p1/Associate.h>
 #include <se306p1/Position.h>
 #include <se306p1/Do.h>
 #include <se306p1/Go.h>
@@ -41,7 +40,7 @@ namespace se306p1 {
   enum class GoStep {
     AIMING,
     MOVING,
-    ROTATING
+    ALIGNING
   };
 
   class RobotController {
@@ -89,15 +88,13 @@ namespace se306p1 {
       void askPosition_callback(AskPosition msg);
       void odom_callback(nav_msgs::Odometry msg);
       void AnswerPosition();
-      void Move();
-      inline bool WithinTolerance(double num, double min, double max);
-      double AngleToGoal();
-      double GetAngleDiff();
+      void PublishVelocity();
+      void UpdateVelocity();
       void MoveTowardsGoal();
       void SetGoing(Go msg);
       void SetDoing(Do msg);
       void ExecuteCommand(Command cmd);
-      void DequeCommand();
+      void DequeueCommand();
       void InterruptCommandQueue(Command cmd);
       void Run();
   };
