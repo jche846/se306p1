@@ -1,10 +1,3 @@
-/*
- * RobotController.h
- *
- *  Created on: Aug 4, 2012
- *      Author: ahug048
- */
-
 #pragma once
 
 #define __STDC_FORMAT_MACROS

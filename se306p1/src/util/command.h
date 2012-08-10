@@ -1,11 +1,3 @@
-/**
- * command.h
- *
- *  Created on: Aug 4, 2012
- *      Author: ahug048
- * 
- */
-
 #pragma once
 
 #include <se306p1/Do.h>

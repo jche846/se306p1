@@ -1,10 +1,3 @@
-/*
- * RobotController.cpp
- *
- *  Created on: Aug 4, 2012
- *      Author: ahug048
- */
-
 #include "robot_controller.h"
 #include "../util/trig.h"
 #include <string>
