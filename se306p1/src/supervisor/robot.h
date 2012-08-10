@@ -16,21 +16,21 @@
 
 namespace se306p1 {
   class Robot {
-  private:
+    private:
     ros::NodeHandle nh_;
     ros::Publisher doPublisher_;
     ros::Publisher goPublisher_;
 
     void EnqueueCommand(Command c);
 
-  public:
+    public:
     Robot(uint64_t n);
     virtual ~Robot();
 
     enum class Readiness {
-        NOT_READY,
-        HALF_READY,
-        READY
+      NOT_READY,
+      HALF_READY,
+      READY
     };
 
     uint64_t id_;

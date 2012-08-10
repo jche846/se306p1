@@ -14,18 +14,18 @@
 namespace se306p1 {
   class Command {
     public:
-      bool enqueue;
-      bool isDo;
-      double lv;
-      double av;
-      double x;
-      double y;
-      double theta;
+    bool enqueue;
+    bool isDo;
+    double lv;
+    double av;
+    double x;
+    double y;
+    double theta;
 
     Command() {
       /**
-      * Set the default values to 0 and make the command a Go command
-      */
+       * Set the default values to 0 and make the command a Go command
+       */
       this->enqueue = false;
       this->isDo = false;
       this->x = 0.0;
@@ -36,21 +36,21 @@ namespace se306p1 {
     }
     Command(Do msg) {
       /**
-      * Constructor for Do commands 
-      */
+       * Constructor for Do commands
+       */
       this->lv = msg.lv;
       this->av = msg.av;
       /**
-      * isDo signifies if this->command is a Do or a Go.
-      */
+       * isDo signifies if this->command is a Do or a Go.
+       */
       this->isDo = true;
       this->enqueue = msg.enqueue;
     }
 
     Command(Go msg) {
       /**
-      * Constructor for Go commands
-      */
+       * Constructor for Go commands
+       */
       this->x = msg.x;
       this->y = msg.y;
       this->theta = msg.theta;
@@ -60,8 +60,8 @@ namespace se306p1 {
 
     virtual ~Command() {
       /**
-      * Deconstrucot
-      */
+       * Deconstrucot
+       */
     }
   };
 }

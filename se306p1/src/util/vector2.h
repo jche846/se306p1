@@ -4,15 +4,20 @@
 
 namespace se306p1 {
   class Vector2 {
-  public:
+    public:
     double x_;
     double y_;
 
-    inline Vector2(double x = 0.0, double y = 0.0) : x_(x), y_(y) { }
+    inline Vector2(double x = 0.0, double y = 0.0) :
+        x_(x), y_(y) {
+    }
 
-    inline Vector2(const Vector2 &from) : x_(from.x_), y_(from.y_) { }
+    inline Vector2(const Vector2 &from) :
+        x_(from.x_), y_(from.y_) {
+    }
 
-    ~Vector2() {}
+    ~Vector2() {
+    }
 
     inline bool operator==(const Vector2 &vector) const {
       return this->x_ == vector.x_ && this->x_ == vector.x_;

@@ -74,7 +74,9 @@ namespace se306p1 {
    * @param msg A Go message containing a location for the robot to move to.
    */
   void RobotController::go_callback(Go msg) {
-    if (msg.enqueue && (this->state_ != RobotState::IDLE || this->state_ != RobotState::FINISHED)) {
+    if (msg.enqueue
+        && (this->state_ != RobotState::IDLE
+            || this->state_ != RobotState::FINISHED)) {
       this->commands_.push_back(Command(msg));
       ROS_INFO(
           "R%" PRIu64 " GO | x=%f, y=%f, theta=%f, q=true", this->robot_id_, msg.x, msg.y, msg.theta);
@@ -96,7 +98,9 @@ namespace se306p1 {
    * @param msg A Do message containing linear and angular velocity information.
    */
   void RobotController::do_callback(Do msg) {
-    if (msg.enqueue && (this->state_ != RobotState::IDLE || this->state_ != RobotState::FINISHED)) {
+    if (msg.enqueue
+        && (this->state_ != RobotState::IDLE
+            || this->state_ != RobotState::FINISHED)) {
       ROS_INFO(
           "R%" PRIu64 " DO | lv=%f, av=%f, q=true", this->robot_id_, msg.lv, msg.av);
       this->commands_.push_back(Command(msg));
@@ -173,9 +177,9 @@ namespace se306p1 {
    * velocity for the next tick.
    */
   void RobotController::UpdateVelocity() {
-    if (this->state_ == RobotState::GOING) {  // If the robot is going somewhere, keep trying to go there
+    if (this->state_ == RobotState::GOING) { // If the robot is going somewhere, keep trying to go there
       this->MoveTowardsGoal();
-    } else if (this->state_ == RobotState::DOING) {  // If the robot is doing, keep doing.
+    } else if (this->state_ == RobotState::DOING) { // If the robot is doing, keep doing.
       this->PublishVelocity();
     } else if (this->state_ == RobotState::FINISHED) {  // Get the next command.
       this->DequeueCommand();
@@ -191,7 +195,6 @@ namespace se306p1 {
    * robot will align to the specified angle.
    */
   void RobotController::MoveTowardsGoal() {
-
     // If the robot is already at the position, we can skip aiming at it and
     // moving to it.
     if ((this->goal_.position_ - this->pose_.position_).Length() < 0.01) {
@@ -200,10 +203,10 @@ namespace se306p1 {
 
     // Aim at the goal position.
     if (this->gostep_ == GoStep::AIMING) {
-      if(this->goal_.theta_ == 999){
+      if (this->goal_.theta_ == 999) {
         ROS_INFO("R%" PRIu64 " Skipping alned", this->robot_id_);
         this->gostep_ = GoStep::MOVING;
-      }else{
+      } else {
         // Figure out the angle that the robot will need to be at to be facing
         // the goal position.
         double angle_to_goal = AngleBetweenPoints(this->pose_.position_,
@@ -230,8 +233,8 @@ namespace se306p1 {
     // Move towards the goal position
     if (this->gostep_ == GoStep::MOVING) {
       // Figure out the distance from the goal the robot currently is.
-      double distance_to_goal = (this->goal_.position_ - this->pose_.position_)
-          .Length();
+      double distance_to_goal =
+          (this->goal_.position_ - this->pose_.position_).Length();
 
       // If the distance is small, we have reached the goal position.
       if (distance_to_goal < 0.1) {
@@ -240,7 +243,7 @@ namespace se306p1 {
 
         this->gostep_ = GoStep::ALIGNING;
       } else {
-        // The robot is not rotating, so 0 av. The lv is a constant, DEFAULT_LV.
+        // The robot is not rotating, so 0 av. The lv is constant.
         this->av_ = 0.0;
         this->lv_ = DEFAULT_LV;
       }
@@ -248,10 +251,13 @@ namespace se306p1 {
 
     // Rotate into the given angle.
     if (this->gostep_ == GoStep::ALIGNING) {
-      if(this->goal_.theta_ == 999){
+      if (this->goal_.theta_ == 999) {
         ROS_INFO("R%" PRIu64 " Skipping alned", this->robot_id_);
+
+        this->lv_ = 0.0;
+        this->av_ = 0.0;
         this->state_ = RobotState::FINISHED;
-      }else{
+      } else {
 
         // Figure out how far from the angle the robot currently is.
         double diff = AngleDiff(this->pose_.theta_, this->goal_.theta_);
@@ -264,8 +270,8 @@ namespace se306p1 {
           ROS_INFO("R%" PRIu64 " FINISHED GO", this->robot_id_);
 
           // Stop the robot moving.
-          this->lv_ = 0;
-          this->av_ = 0;
+          this->lv_ = 0.0;
+          this->av_ = 0.0;
 
           this->state_ = RobotState::FINISHED;
         } else {
@@ -282,8 +288,7 @@ namespace se306p1 {
   }
 
   /**
-   * Set the robot to Go as per to Go message. Resets the robot lv and av to
-   * their default values.
+   * Set the robot to Go as per to Go message.
    *
    * @param msg The message containing the x, y, and theta values the robot
    * should try and reach.
@@ -321,7 +326,8 @@ namespace se306p1 {
     this->lv_ = msg.lv;
     this->av_ = msg.av;
 
-    ROS_INFO("R%" PRIu64 " STARTING DO: lv: %f av: %f", this->robot_id_, msg.lv, msg.av);
+    ROS_INFO(
+        "R%" PRIu64 " STARTING DO: lv: %f av: %f", this->robot_id_, msg.lv, msg.av);
 
     this->PublishVelocity();
   }

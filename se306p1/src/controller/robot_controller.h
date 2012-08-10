@@ -27,7 +27,8 @@
 #define ANS_POS_TOPIC "/supervisor/ans_pos"
 
 /**
- * This header file defines the state variables and methods available to control a robot
+ * This header file defines the state variables and methods available to control
+ * a robot.
  */
 namespace se306p1 {
   enum class RobotState {
@@ -44,58 +45,58 @@ namespace se306p1 {
   };
 
   class RobotController {
-     private:
-      // Robot identification
-      uint64_t robot_id_;
+    private:
+    // Robot identification
+    uint64_t robot_id_;
 
-      // Position
-      Pose pose_;
+    // Position
+    Pose pose_;
 
-      // Where the robot is currently trying to end up after receiving a go.
-      Pose goal_;
+    // Where the robot is currently trying to end up after receiving a go.
+    Pose goal_;
 
-      // Movement fields
-      double lv_;  // Linear velocity
-      double av_;  // Angular velocity (counter clockwise)
+    // Movement fields
+    double lv_;  // Linear velocity
+    double av_;  // Angular velocity (counter clockwise)
 
-      // Robot state
-      RobotState state_;
+    // Robot state
+    RobotState state_;
 
-      // Current step of Go command
-      GoStep gostep_;
+    // Current step of Go command
+    GoStep gostep_;
 
-      // Command queue
-      std::deque<Command> commands_;
+    // Command queue
+    std::deque<Command> commands_;
 
-      // ROS Node handler for pub/subbing to topics
-      ros::NodeHandle nh_;
+    // ROS Node handler for pub/subbing to topics
+    ros::NodeHandle nh_;
 
-      // Supervisor pub/subs
-      ros::Subscriber askPosSubscriber_;
-      ros::Subscriber doSubscriber_;
-      ros::Subscriber goSubscriber_;
-      ros::Publisher ansPosPublisher_;
+    // Supervisor pub/subs
+    ros::Subscriber askPosSubscriber_;
+    ros::Subscriber doSubscriber_;
+    ros::Subscriber goSubscriber_;
+    ros::Publisher ansPosPublisher_;
 
-      // Stage pub/subs
-      ros::Subscriber odom_;
-      ros::Publisher twist_;
+    // Stage pub/subs
+    ros::Subscriber odom_;
+    ros::Publisher twist_;
 
-     public:
-      RobotController(ros::NodeHandle &nh, uint64_t id);
-      virtual ~RobotController();
-      void go_callback(Go msg);
-      void do_callback(Do msg);
-      void askPosition_callback(AskPosition msg);
-      void odom_callback(nav_msgs::Odometry msg);
-      void AnswerPosition();
-      void PublishVelocity();
-      void UpdateVelocity();
-      void MoveTowardsGoal();
-      void SetGoing(Go msg);
-      void SetDoing(Do msg);
-      void ExecuteCommand(Command cmd);
-      void DequeueCommand();
-      void InterruptCommandQueue(Command cmd);
-      void Run();
+    public:
+    RobotController(ros::NodeHandle &nh, uint64_t id);
+    virtual ~RobotController();
+    void go_callback(Go msg);
+    void do_callback(Do msg);
+    void askPosition_callback(AskPosition msg);
+    void odom_callback(nav_msgs::Odometry msg);
+    void AnswerPosition();
+    void PublishVelocity();
+    void UpdateVelocity();
+    void MoveTowardsGoal();
+    void SetGoing(Go msg);
+    void SetDoing(Do msg);
+    void ExecuteCommand(Command cmd);
+    void DequeueCommand();
+    void InterruptCommandQueue(Command cmd);
+    void Run();
   };
 }

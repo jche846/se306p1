@@ -37,7 +37,7 @@ namespace se306p1 {
       if (!rotating) {
         bool exec_done = true;
         // iterate through all robots and see if they have finished executing
-        for (auto &cur_robot: this->robots_) {
+        for (auto &cur_robot : this->robots_) {
           if (cur_robot.second->executing_) {
             // if any of the robots are executing wait
             exec_done = false;
@@ -52,13 +52,15 @@ namespace se306p1 {
 
         if (exec_done) {
           this->clusterHead_->pose_.theta_ = 999;
-          for (auto &cur_robot: this->robots_) {
-            if(cur_robot.second->id_ != this->clusterHead_->id_){
+          for (auto &cur_robot : this->robots_) {
+            if (cur_robot.second->id_ != this->clusterHead_->id_) {
               // tell robot to move to cluster head pos
               cur_robot.second->Go(this->clusterHead_->pose_, false);
             }
             // enqueue rotate for after they have reached the cluster head pos
-            cur_robot.second->Do(CIRCLE_LV, circle_av, cur_robot.second->id_ != this->clusterHead_->id_);
+            cur_robot.second->Do(
+                CIRCLE_LV, circle_av,
+                cur_robot.second->id_ != this->clusterHead_->id_);
           }
           rotating = true;
         }

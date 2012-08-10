@@ -6,15 +6,15 @@
 
 namespace se306p1 {
   class RotateSupervisor : public Supervisor {
-  private:
+    private:
     void FindRobotDests();
     std::vector<Pose> lineLocations_;
 
-  public:
+    public:
     virtual ~RotateSupervisor();
     /**
-    * Run the supervisor.
-    */
+     * Run the supervisor.
+     */
     virtual void Run();
   };
 }

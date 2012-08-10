@@ -21,7 +21,7 @@ namespace se306p1 {
       CONTROLLING,
     };
 
-  private:
+    private:
     State state_;
 
     std::map<uint64_t, std::shared_ptr<Robot>>::iterator dispatchIt_;
@@ -30,7 +30,7 @@ namespace se306p1 {
     ros::Subscriber ansPosSubscriber_;
     ros::Publisher askPosPublisher_;
 
-  protected:
+    protected:
     std::map<uint64_t, std::shared_ptr<Robot>> robots_;
     std::shared_ptr<Robot> clusterHead_;
     std::vector<std::shared_ptr<Robot>> nonHeadRobots_;
@@ -56,7 +56,7 @@ namespace se306p1 {
      */
     void DispatchMessages();
 
-  public:
+    public:
     Supervisor();
     virtual ~Supervisor();
 

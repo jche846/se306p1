@@ -11,17 +11,18 @@ namespace se306p1 {
     this->id_ = n;
     this->readiness_ = Readiness::NOT_READY;
 
-     ros::SubscriberStatusCallback statusCb = [this](const ros::SingleSubscriberPublisher& pub) -> void {
-      switch(this->readiness_) {
-        case Readiness::NOT_READY:
-          this->readiness_ = Readiness::HALF_READY;
-          return;
-        default:
-          this->readiness_ = Readiness::READY;
-          ROS_INFO("Controller for robot %" PRId64 " ready.", this->id_);
-          return;
-      }
-    };
+    ros::SubscriberStatusCallback statusCb =
+        [this](const ros::SingleSubscriberPublisher& pub) -> void {
+          switch(this->readiness_) {
+            case Readiness::NOT_READY:
+            this->readiness_ = Readiness::HALF_READY;
+            return;
+            default:
+            this->readiness_ = Readiness::READY;
+            ROS_INFO("Controller for robot %" PRId64 " ready.", this->id_);
+            return;
+          }
+        };
 
     // create publishers and subscribers
     std::stringstream doss;
@@ -33,14 +34,16 @@ namespace se306p1 {
     goPublisher_ = nh_.advertise<se306p1::Go>(goss.str(), 1000, statusCb);
   }
 
-  Robot::~Robot() {}
+  Robot::~Robot() {
+  }
 
   void Robot::EnqueueCommand(Command c) {
     this->commands_.push_back(c);
   }
 
   void Robot::DispatchCommand() {
-    if (this->commands_.empty()) return;
+    if (this->commands_.empty())
+      return;
 
     Command c = this->commands_.front();
     this->commands_.pop_front();
