@@ -77,12 +77,12 @@ namespace se306p1 {
     if (msg.enqueue && (this->state_ != RobotState::IDLE || this->state_ != RobotState::FINISHED)) {
       this->commands_.push_back(Command(msg));
       ROS_INFO(
-          "R%ld GO | x=%f, y=%f, theta=%f, q=true", this->robot_id_, msg.x, msg.y, msg.theta);
+          "R%" PRIu64 " GO | x=%f, y=%f, theta=%f, q=true", this->robot_id_, msg.x, msg.y, msg.theta);
 
     } else {
       this->InterruptCommandQueue(Command(msg));
       ROS_INFO(
-          "R%ld GO | x=%f, y=%f, theta=%f, q=false", this->robot_id_, msg.x, msg.y, msg.theta);
+          "R%" PRIu64 " GO | x=%f, y=%f, theta=%f, q=false", this->robot_id_, msg.x, msg.y, msg.theta);
 
     }
   }
@@ -98,11 +98,11 @@ namespace se306p1 {
   void RobotController::do_callback(Do msg) {
     if (msg.enqueue && (this->state_ != RobotState::IDLE || this->state_ != RobotState::FINISHED)) {
       ROS_INFO(
-          "R%ld DO | lv=%f, av=%f, q=true", this->robot_id_, msg.lv, msg.av);
+          "R%" PRIu64 " DO | lv=%f, av=%f, q=true", this->robot_id_, msg.lv, msg.av);
       this->commands_.push_back(Command(msg));
     } else {
       ROS_INFO(
-          "R%ld DO | lv=%f, av=%f, q=false", this->robot_id_, msg.lv, msg.av);
+          "R%" PRIu64 " DO | lv=%f, av=%f, q=false", this->robot_id_, msg.lv, msg.av);
       this->InterruptCommandQueue(Command(msg));
     }
   }
@@ -137,8 +137,8 @@ namespace se306p1 {
     QuaternionMsgToRPY(msg.pose.pose.orientation, roll, pitch, yaw);
     this->pose_.theta_ = RadiansToDegrees(yaw);
 
-//    ROS_INFO(
-//        "R%ld ODOM | x=%f, y=%f, theta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->pose_.theta_, this->lv_, this->av_);
+    ROS_INFO(
+        "R%" PRIu64 " ODOM | x=%f, y=%f, theta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->pose_.theta_, this->lv_, this->av_);
 
 // do stuff every stage tick
     this->UpdateVelocity();
@@ -201,7 +201,7 @@ namespace se306p1 {
     // Aim at the goal position.
     if (this->gostep_ == GoStep::AIMING) {
       if(this->goal_.theta_ == 999){
-        ROS_INFO("R%ld Skipping alned", this->robot_id_);
+        ROS_INFO("R%" PRIu64 " Skipping alned", this->robot_id_);
         this->gostep_ = GoStep::MOVING;
       }else{
         // Figure out the angle that the robot will need to be at to be facing
@@ -215,7 +215,7 @@ namespace se306p1 {
         // If the difference is small, we have finished aiming.
         if (-0.001 < diff && diff < 0.001) {
           ROS_INFO(
-              "R%ld aimed | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
+              "R%" PRIu64 " aimed | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
 
           this->gostep_ = GoStep::MOVING;
         } else {
@@ -236,7 +236,7 @@ namespace se306p1 {
       // If the distance is small, we have reached the goal position.
       if (distance_to_goal < 0.1) {
         ROS_INFO(
-            "R%ld moved | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
+            "R%" PRIu64 " moved | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
 
         this->gostep_ = GoStep::ALIGNING;
       } else {
@@ -249,7 +249,7 @@ namespace se306p1 {
     // Rotate into the given angle.
     if (this->gostep_ == GoStep::ALIGNING) {
       if(this->goal_.theta_ == 999){
-        ROS_INFO("R%ld Skipping alned", this->robot_id_);
+        ROS_INFO("R%" PRIu64 " Skipping alned", this->robot_id_);
         this->state_ = RobotState::FINISHED;
       }else{
 
@@ -260,8 +260,8 @@ namespace se306p1 {
         // finished.
         if (-0.001 < diff && diff < 0.001) {
           ROS_INFO(
-              "R%ld alned | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
-          ROS_INFO("R%ld FINISHED GO", this->robot_id_);
+              "R%" PRIu64 " alned | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
+          ROS_INFO("R%" PRIu64 " FINISHED GO", this->robot_id_);
 
           // Stop the robot moving.
           this->lv_ = 0;
@@ -321,7 +321,7 @@ namespace se306p1 {
     this->lv_ = msg.lv;
     this->av_ = msg.av;
 
-    ROS_INFO("R%ld STARTING DO: lv: %f av: %f", this->robot_id_, msg.lv, msg.av);
+    ROS_INFO("R%" PRIu64 " STARTING DO: lv: %f av: %f", this->robot_id_, msg.lv, msg.av);
 
     this->PublishVelocity();
   }
