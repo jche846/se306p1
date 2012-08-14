@@ -134,7 +134,7 @@ void Supervisor::ElectHead() {
 
   for (auto &pair : this->robots_) {
     double distToOrig = pair.second->pose_.position_.Length();
-    if (clusterHeadDist == -1) {
+    if (clusterHeadDist == -1 && distToOrig != 0) {
       this->clusterHead_ = pair.second;
       clusterHeadDist = distToOrig;
     } else {
@@ -149,6 +149,7 @@ void Supervisor::ElectHead() {
       }
     }
   }
+  ROS_INFO("Elected R%ld as Cluster Head", this->clusterHead_->id_);
 }
 
 void Supervisor::DispatchMessages() {
