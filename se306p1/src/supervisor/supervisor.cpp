@@ -25,9 +25,9 @@ Supervisor::~Supervisor() {
 
 void Supervisor::ansPos_callback(Position msg) {
   // attempt to find the robot in the list of found robots
-  std::shared_ptr<Robot> robot_ptr;
+  Robot *robot_ptr;
   if (robots_.find(msg.R_ID) != robots_.end()) {
-    robot_ptr = robots_[msg.R_ID];
+    robot_ptr = robots_[msg.R_ID].get();
   } else {
     robot_ptr = nullptr;
   }
@@ -47,8 +47,8 @@ void Supervisor::ansPos_callback(Position msg) {
       }
 
     } else {  // need to create a new robot and put it in the robot map
-      robots_[msg.R_ID] = std::shared_ptr < Robot > (new Robot(msg.R_ID));
-      robot_ptr = robots_[msg.R_ID];
+      robots_[msg.R_ID] = std::unique_ptr<Robot>(new Robot(msg.R_ID));
+      robot_ptr = robots_[msg.R_ID].get();
       ROS_INFO("Supervisor associating with robot %" PRId64 ".", msg.R_ID);
     }
   }
@@ -128,24 +128,22 @@ void Supervisor::Start() {
 }
 
 void Supervisor::ElectHead() {
-  std::map<uint64_t, std::shared_ptr<Robot> >::iterator it;
+  std::map<uint64_t, std::unique_ptr<Robot> >::iterator it;
 
   double clusterHeadDist = -1;
 
   for (auto &pair : this->robots_) {
     double distToOrig = pair.second->pose_.position_.Length();
     if (clusterHeadDist == -1 && distToOrig != 0) {
-      this->clusterHead_ = pair.second;
+      this->clusterHead_ = pair.second.get();
       clusterHeadDist = distToOrig;
     } else {
       if (distToOrig != 0 && distToOrig < clusterHeadDist) {
-
         this->nonHeadRobots_.push_back(this->clusterHead_);
-
-        this->clusterHead_ = pair.second;
+        this->clusterHead_ = pair.second.get();
         clusterHeadDist = distToOrig;
       } else {
-        this->nonHeadRobots_.push_back(pair.second);
+        this->nonHeadRobots_.push_back(pair.second.get());
       }
     }
   }
@@ -161,9 +159,9 @@ void Supervisor::DispatchMessages() {
 }
 
 void Supervisor::MoveNodesToDests(
-    const std::vector<std::shared_ptr<Robot> > &nodesIn,
+    const std::vector<Robot *> &nodesIn,
     const std::vector<Pose> &posesIn) {
-  std::vector<std::shared_ptr<Robot> > nodes = nodesIn;
+  std::vector<Robot *> nodes = nodesIn;
   std::vector<Pose> poses = posesIn;
 
   while (poses.size()) {
@@ -174,7 +172,7 @@ void Supervisor::MoveNodesToDests(
     for (size_t nodeIndex = 0; nodeIndex < nodes.size(); nodeIndex++) {
       double dist = std::numeric_limits<double>::max();
       int destIndex = 0;
-      std::shared_ptr<Robot> node = nodes[nodeIndex];
+      Robot *node = nodes[nodeIndex];
       for (size_t posesIndex = 0; posesIndex < poses.size(); posesIndex++) {
         double testDist =
             abs((node->pose_.position_ - poses[posesIndex].position_)

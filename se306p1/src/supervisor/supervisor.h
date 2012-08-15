@@ -24,16 +24,16 @@ class Supervisor {
  private:
   State state_;
 
-  std::map<uint64_t, std::shared_ptr<Robot>>::iterator dispatchIt_;
+  std::map<uint64_t, std::unique_ptr<Robot>>::iterator dispatchIt_;
 
   ros::NodeHandle nh_;
   ros::Subscriber ansPosSubscriber_;
   ros::Publisher askPosPublisher_;
 
  protected:
-  std::map<uint64_t, std::shared_ptr<Robot>> robots_;
-  std::shared_ptr<Robot> clusterHead_;
-  std::vector<std::shared_ptr<Robot>> nonHeadRobots_;
+  std::map<uint64_t, std::unique_ptr<Robot>> robots_;
+  Robot *clusterHead_;
+  std::vector<Robot *> nonHeadRobots_;
 
   /**
    * The callback for the position answer, used to either:
@@ -85,7 +85,7 @@ class Supervisor {
    *
    * Will send robots to destinations in a manner that the minimum time is taken for all the robots to reach a destination
    */
-  void MoveNodesToDests(const std::vector<std::shared_ptr<Robot> > &nodes,
+  void MoveNodesToDests(const std::vector<Robot *> &nodes,
                         const std::vector<Pose> &poses);
 };
 }
