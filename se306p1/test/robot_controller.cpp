@@ -36,6 +36,8 @@ class RobotControllerTest : public testing::Test {
     virtual void TearDown() {
       
     }
+    void setGoal(double x, double y);
+    void setPose(double x, double y, double theta);
   };
 
   /**
@@ -202,12 +204,12 @@ class RobotControllerTest : public testing::Test {
   }
 
   /**
-  * tests DequeCommand when commands_ is empty
+  * tests DequeueCommand when commands_ is empty
   */
-  TEST_F(RobotControllerTest, testDequecommands_emptyDeque){
+  TEST_F(RobotControllerTest, testDequeueCommands_emptyDeque){
     //check the deque is clear
     rc.commands_.clear();
-    rc.DequeCommand();
+    rc.DequeueCommand();
     //check state
     ASSERT_EQ(rc.state_,RobotState::IDLE);
     //check lv is set for the robot has been set to 0
@@ -217,20 +219,21 @@ class RobotControllerTest : public testing::Test {
   }
 
   /**
-  * Tests DequeCommand when commands_ is not empty.
+  * Tests DequeueCommand when commands_ is not empty.
   */
-  TEST_F(RobotControllerTest, testDequecommands_nonEmptyDeque){
+  TEST_F(RobotControllerTest, testDequeueCommands_nonEmptyDeque){
     //check the deque is clear
     rc.commands_.clear();
     //add an element to the queue
     //create a command
+    Go msg_go;
     msg_go.x = 5;
     msg_go.y = 10;
     msg_go.theta = 30;
     msg_go.enqueue = true;
     Command cmd = Command(msg_go);
     rc.commands_.push_back(cmd);
-    rc.DequeCommand();
+    rc.DequeueCommand();
     //there is one command in the deque. Running deque should remove it
     //commands_ should be empty
     ASSERT_TRUE(rc.commands_.size()==0);
@@ -247,6 +250,7 @@ class RobotControllerTest : public testing::Test {
   */
   TEST_F(RobotControllerTest, testExecuteGoCommand){
     //create a Go command
+    Go msg_go;
     msg_go.x = 5;
     msg_go.y = 10;
     msg_go.theta = 30;
@@ -256,7 +260,7 @@ class RobotControllerTest : public testing::Test {
     Vector2 position = Vector2(msg_go.x,msg_go.y);
     double theta = msg_go.theta;
     Pose pose = Pose (position,theta);
-    the robots go should be set to the pose.
+    //the robots go should be set to the pose.
     ASSERT_EQ(rc.goal_,pose);
   }
 
@@ -265,11 +269,12 @@ class RobotControllerTest : public testing::Test {
   */
   TEST_F(RobotControllerTest, testExecuteDoCommand){
     //create a Do msg
+    Do msg_do;
     msg_do.av = 5;
     msg_do.lv = 10;
     msg_do.enqueue = true;
     Command cmd = Command(msg_do);
-    ExecuteCommand(cmd);
+    rc.ExecuteCommand(cmd);
     //The robots angular and linear velocity should be set to that of the message.
     ASSERT_EQ(rc.lv_,msg_do.lv);
     ASSERT_EQ(rc.av_,msg_do.av);
@@ -278,50 +283,51 @@ class RobotControllerTest : public testing::Test {
   /**
   * Directly sets the fields for the position of the robot
   */
-  void setPose(double x, double y, double theta){
+  void RobotControllerTest::setPose(double x, double y, double theta){
     rc.pose_.position_.x_ = x;
     rc.pose_.position_.y_ = y;
-    rc.pose_.position_.theta_ = theta;
+    rc.pose_.theta_ = theta;
   }
   /**
   * Directly sets the fields for the goal of the robot
   */
-  void setGoal(double x, double y){
+  void RobotControllerTest::setGoal(double x, double y){
     rc.goal_.position_.x_ = x;
     rc.goal_.position_.y_ = y;
   }
+  // The following tests may be deprecated or need to be moved to another test suite
   /**
   * Test for a goal in sector 1
   */
-  TEST_F(RobotControllerTest, testAngleToGoal_Sector1 ){
+  /*TEST_F(RobotControllerTest, testAngleToGoal_Sector1 ){
     setPose(3,-3,0);
     setGoal(7,1);
     ASSERT_EQ(rc.AngleToGoal(),-45.0);
-  }
+  }*/
   /**
   * Test for a goal in sector 2
   */
-  TEST_F(RobotControllerTest, testAngleToGoal_Sector1 ){
+  /*TEST_F(RobotControllerTest, testAngleToGoal_Sector1 ){
     setPose(3,-3,0);
     setGoal(-1,1);
     ASSERT_EQ(rc.AngleToGoal(),45.0);
-  }
+  }*/
   /**
   * Test for a goal in sector 3
   */
-  TEST_F(RobotControllerTest, testAngleToGoal_Sector1 ){
+  /*TEST_F(RobotControllerTest, testAngleToGoal_Sector1 ){
     setPose(3,-3,0);
     setGoal(-1,-7);
     ASSERT_EQ(rc.AngleToGoal(),135.0);
-  }
+  }*/
   /**
   * Test for a goal in sector 4
   */
-  TEST_F(RobotControllerTest, testAngleToGoal_Sector1 ){
+  /*TEST_F(RobotControllerTest, testAngleToGoal_Sector1 ){
     setPose(3,-3,0);
     setGoal(7,-7);
     ASSERT_EQ(rc.AngleToGoal(),-135.0);
-  }
+  }*/
 }//namespace
 
 int main(int argc, char **argv) {
