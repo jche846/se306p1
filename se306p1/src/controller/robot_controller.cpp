@@ -126,8 +126,6 @@ void RobotController::odom_callback(nav_msgs::Odometry msg) {
   double pitch;
   double yaw;
 
-  ROS_INFO(msg);
-
   // Set the position in 2D space.
   this->pose_.position_.x_ = -1 * msg.pose.pose.position.y;
   this->pose_.position_.y_ = msg.pose.pose.position.x;
