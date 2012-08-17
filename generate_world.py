@@ -35,6 +35,7 @@ interval_sim 100
 
 window
 ( 
+  show_data 1
   size [ 745.000 448.000 ]
   scale 30
 )
