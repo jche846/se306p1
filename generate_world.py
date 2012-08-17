@@ -17,6 +17,7 @@ define mylaser laser
 
 define myrobot position
 (
+  localization_origin [ 0 0 0 0 ]
   size [0.35 0.35 0.25]
   drive "diff"
   mylaser(pose [ 0.050 0.000 0 0.000 ])
