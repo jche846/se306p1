@@ -28,7 +28,9 @@ enum class RobotState {
   FINISHED,
   IDLE,
   DOING,
-  GOING
+  GOING,
+  SCANNINGINIT,
+  SCANNING
 };
 
 enum class GoStep {
@@ -41,6 +43,9 @@ class RobotController {
  private:
   // Robot identification
   uint64_t robot_id_;
+
+  // Scan Result
+  int scanResult_;
 
   // Position
   Pose pose_;
@@ -72,7 +77,11 @@ class RobotController {
 
   // Stage pub/subs
   ros::Subscriber odom_;
+  ros::Subscriber baseScan_;
   ros::Publisher twist_;
+
+  // Coutdown clock for Scanning
+  double scanningStart_;
 
  public:
   RobotController(ros::NodeHandle &nh, uint64_t id);
@@ -81,9 +90,11 @@ class RobotController {
   void do_callback(Do msg);
   void askPosition_callback(AskPosition msg);
   void odom_callback(nav_msgs::Odometry msg);
+  void baseScan_callback(sensor_msgs::LaserScan msg);
   void AnswerPosition();
   void PublishVelocity();
   void UpdateVelocity();
+  void Scan();
   void MoveTowardsGoal();
   void SetGoing(Go msg);
   void SetDoing(Do msg);

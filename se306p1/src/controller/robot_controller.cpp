@@ -34,6 +34,13 @@ RobotController::RobotController(ros::NodeHandle &nh, uint64_t id = 0) {
       odomss.str(), 1000, &RobotController::odom_callback, this,
       ros::TransportHints().reliable());
 
+  // Subscribe to laser messages from Stage
+  std::stringstream laserss;
+  laserss << "/robot_" << this->robot_id_ << "/base_scan";
+  this->baseScan_ = nh_.subscribe<sensor_msgs::LaserScan>(
+      laserss.str(), 1000, &RobotController::baseScan_callback, this,
+      ros::TransportHints().reliable());
+
   // Subscribe to Do messages in order to know when to move.
   std::stringstream doss;
   doss << "/robot_" << this->robot_id_ << "/do";
@@ -142,6 +149,55 @@ void RobotController::odom_callback(nav_msgs::Odometry msg) {
 }
 
 /**
+*  When state is SCANNINGINIT, waits for an object to appear in the laser range finder,
+*  then enters SCANNING state.
+*  When state is SCANNING, sets the global variable scanResult based on what is currently being scanned.
+*
+* @param msg The LaserScan message containing laser scan data for this robot.
+*/
+void RobotController::baseScan_callback(sensor_msgs::LaserScan msg) {
+  int barCount = 0;
+  if (this->state_ == RobotState::SCANNINGINIT) {
+    ROS_INFO("base_scan call back INIT");
+    //
+    for (int i = 0; i < 180; i++) {
+      if (msg.ranges[i] != 5.0) {
+        this->state_ = RobotState::SCANNING;
+        this->scanningStart_ = ros::Time::now().toSec();
+        break;
+      }
+    }
+  } else if (this->state_ == RobotState::SCANNING) {
+    ROS_INFO("base_scan call back SCANNING");
+    //count number of bars
+    for (int i = 0; i < 180; i++) {
+      if (msg.ranges[i] != 5.0) {
+        barCount++;
+        for (; msg.ranges[i] != 5.0 && i < 180; i++) ;
+      }
+    }
+
+    if (barCount == 0) {
+      this->state_ = RobotState::SCANNINGINIT;
+      ROS_WARN("Nothing Scanned at end of 5 seconds. Rescanning.");
+    } else {
+     if (barCount == 1) {
+        this->scanResult_ = 1;
+      } else if (barCount == 2) {
+        this->scanResult_ = 2;
+      } else if (barCount == 3) {
+        this->scanResult_ = 3;
+      } else if (barCount == 4) {
+        this->scanResult_ = 4;
+      }
+      ROS_INFO("Scan Result: %d", this->scanResult_);
+    }
+  } else {
+    ROS_INFO("base_scan call back");
+  }
+}
+
+/**
  * Publish this robot's position to the ans_position topic.
  */
 void RobotController::AnswerPosition() {
@@ -177,6 +233,8 @@ void RobotController::UpdateVelocity() {
   } else if (this->state_ == RobotState::FINISHED) {  // Get the next command.
     this->DequeueCommand();
     this->AnswerPosition();
+  } else if(this->state_ == RobotState::SCANNING || this->state_ == RobotState::SCANNINGINIT){
+    this->Scan();
   }
 }
 
@@ -280,6 +338,19 @@ void RobotController::MoveTowardsGoal() {
   this->PublishVelocity();
 }
 
+/**
+ *
+ *
+ */
+void RobotController::Scan() {
+  if(this->state_ == RobotState::SCANNING) {
+    if(ros::Time::now().toSec() - scanningStart_ > 5){
+      // TODO: call post scanning command
+      this->state_ = RobotState::IDLE;
+    }
+    // wait
+  }
+}
 /**
  * Set the robot to Go as per to Go message.
  *
@@ -387,6 +458,7 @@ void RobotController::InterruptCommandQueue(Command cmd) {
  * Begins running the ros loop.
  */
 void RobotController::Run() {
+  this->state_ = RobotState::SCANNINGINIT;
   ros::spin();
 }
 }
