@@ -65,8 +65,6 @@ namespace {
     ASSERT_NEAR(result, RadiansToDegrees(input), 0.0001);
   }
 
-
-
   /**
    * Tests that a zero converts from radians to degrees
    */
@@ -74,18 +72,104 @@ namespace {
     ASSERT_EQ(0, RadiansToDegrees(0));
   }
 
-  TEST_F(TrigTest, testDegSin) {
+  // SINE
+
+  /**
+   * Tests positive sine
+   */
+  TEST_F(TrigTest, testPosDegSin) {
     ASSERT_NEAR(0.5, DegSin(30), 0.0001);
   }
-  TEST_F(TrigTest, testDegCos) {
+
+  /**
+   * Tests negative sine
+   */
+  TEST_F(TrigTest, testNegDegSin) {
+    ASSERT_NEAR(-0.5, DegSin(-30), 0.0001);
+  }
+
+  /**
+   * Tests zero sine
+   */
+  TEST_F(TrigTest, testZeroDegSin) {
+    ASSERT_NEAR(0, DegSin(0), 0.0001);
+  }
+
+  // COSINE
+
+  /**
+   * Tests positive cosine
+   */
+  TEST_F(TrigTest, testPosDegCos) {
+    ASSERT_NEAR(-1.0, DegCos(180), 0.0001);
+  }
+
+  /**
+   * Tests negative cosine
+   */
+  TEST_F(TrigTest, testNegDegCos) {
+    ASSERT_NEAR(-1.0, DegCos(-180), 0.0001);
+  }
+
+  /**
+   * Tests zero parameter cosine
+   */
+  TEST_F(TrigTest, testZeroParamDegCos) {
+    ASSERT_NEAR(1.0, DegCos(0), 0.0001);
+  }
+
+  /**
+   * Tests zero returned cosine
+   */
+  TEST_F(TrigTest, testZeroRetDegCos) {
     ASSERT_NEAR(0.0, DegCos(90), 0.0001);
   }
-  TEST_F(TrigTest, testDegTan) {
+
+  // TAN
+
+  /**
+   * Tests positive tan
+   */
+  TEST_F(TrigTest, testPosDegTan) {
     ASSERT_NEAR(1, DegTan(45), 0.0001);
   }
-  TEST_F(TrigTest, testDegATan) {
+
+  /**
+   * Tests positive atan
+   */
+  TEST_F(TrigTest, testPosDegATan) {
     ASSERT_NEAR(45, DegATan(1), 0.0001);
   }
+
+  /**
+   * Tests negative tan
+   */
+  TEST_F(TrigTest, testNegDegTan) {
+    ASSERT_NEAR(-1, DegTan(-45), 0.0001);
+  }
+
+  /**
+   * Tests negative atan
+   */
+  TEST_F(TrigTest, testNegDegATan) {
+    double result = -45.0;
+    ASSERT_NEAR(result, DegATan(-1.0), 0.0001);
+  }
+
+  /**
+   * Tests zero tan
+   */
+  TEST_F(TrigTest, testZeroDegTan) {
+    ASSERT_NEAR(0, DegTan(0), 0.0001);
+  }
+
+  /**
+   * Tests zero atan
+   */
+  TEST_F(TrigTest, testZeroDegATan) {
+    ASSERT_NEAR(0, DegATan(0), 0.0001);
+  }
+
 } //namespace
 
 int main(int argc, char **argv) {
