@@ -17,7 +17,7 @@ rosrun stage stageros se306p1.world &
 sleep 1
 
 for i in $(seq 0 $(($ROBOT_COUNT - 1))); do
-    exec -a robot_controller_${i} se306p1/bin/robot_controller _rid:=${i} &
+    se306p1/bin/robot_controller _rid:=${i} &
     echo $i
 done
 

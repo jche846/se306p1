@@ -1,4 +1,5 @@
 #include <limits>
+#include <memory>
 
 #include "supervisor.h"
 #include "robot.h"
@@ -11,7 +12,7 @@
 #define FREQUENCY 1
 
 namespace se306p1 {
-Supervisor::Supervisor() {
+Supervisor::Supervisor(ros::NodeHandle &nh) : nh_(nh) {
   // create publishers and subscribers
   ansPosSubscriber_ = nh_.subscribe<Position>(ANS_POS_TOPIC, 1000,
                                               &Supervisor::ansPos_callback,
@@ -24,6 +25,8 @@ Supervisor::~Supervisor() {
 }
 
 void Supervisor::ansPos_callback(Position msg) {
+  if (msg.R_ID < this->rmin_ || msg.R_ID > this->rmax_) return;
+
   // attempt to find the robot in the list of found robots
   std::shared_ptr<Robot> robot_ptr;
   if (robots_.find(msg.R_ID) != robots_.end()) {
@@ -34,7 +37,6 @@ void Supervisor::ansPos_callback(Position msg) {
 
   // Discovery state
   if (this->state_ == State::DISCOVERY) {
-
     // robot has already been found so check its not moving.
     if (robot_ptr != nullptr) {
       if (robot_ptr->pose_.position_.x_ != msg.x
@@ -45,9 +47,8 @@ void Supervisor::ansPos_callback(Position msg) {
       } else {
         return;  // robot wasn't moving
       }
-
     } else {  // need to create a new robot and put it in the robot map
-      robots_[msg.R_ID] = std::shared_ptr < Robot > (new Robot(msg.R_ID));
+      robots_[msg.R_ID] = std::shared_ptr<Robot>(new Robot(msg.R_ID));
       robot_ptr = robots_[msg.R_ID];
       ROS_INFO("Supervisor associating with robot %" PRId64 ".", msg.R_ID);
     }
@@ -64,7 +65,15 @@ void Supervisor::ansPos_callback(Position msg) {
 }
 
 void Supervisor::Discover(int timeout) {
-  ROS_INFO("Discovering robots for %d seconds.", timeout);
+  int rmin, rmax;
+
+  nh_.getParam("rmin", rmin);
+  nh_.getParam("rmax", rmax);
+
+  this->rmin_ = static_cast<uint64_t>(rmin);
+  this->rmax_ = static_cast<uint64_t>(rmax);
+
+  ROS_INFO("Discovering robots from %d to %d for %d seconds.", rmin, rmax, timeout);
   ros::Rate r(FREQUENCY);
 
   // set state for the ansPos_callback

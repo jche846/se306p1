@@ -30,6 +30,9 @@ class Supervisor {
   ros::Subscriber ansPosSubscriber_;
   ros::Publisher askPosPublisher_;
 
+  uint64_t rmin_;
+  uint64_t rmax_;
+
  protected:
   std::map<uint64_t, std::shared_ptr<Robot>> robots_;
   std::shared_ptr<Robot> clusterHead_;
@@ -57,7 +60,7 @@ class Supervisor {
   void DispatchMessages();
 
  public:
-  Supervisor();
+  Supervisor(ros::NodeHandle &);
   virtual ~Supervisor();
 
   /**
