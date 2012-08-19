@@ -198,23 +198,46 @@ std::Vector<Vector2>FindRobotPositions (Vector2 center, double theta, double dia
     positions.push_back(center);
     numRobots--;  
   }
+
   // Process any left over robots to positions along each side of the shape. 
+
+  // The maximum difference in the number of Robots on sides should be 1
+  // Each side should have at minimum the integer division of numRobots by numSides
+  // so the remainder is less than the number of sides. Then there should be 
+  // and additional robot on n sides where n is the remainder of the integer division
   int baseNumberOfRobotsOnEachEdge = numRobots / numSides;
   int numSidesWithAdditionalRobot = numRobots % numSides;
+
+  // Loop over each edge of the polygon adding the extra robots to it
   for (int i = 0; i < numSides ; i++) {
+
+    // The two vertexes that we are positioning the robots between
     Vector2 vertex1 = positions.at(i);
     Vector2 vertex2 = positions.at((i+1) % numSides);
+
+    // The difference between these two vertexes so that we know where to place the robots
     double dx = vertex1.x_ - vertex2.x_;
     double dy = vertex1.y_ - vertex2.y_;
     
+    // Calculating the number of robots that will have to be added to the current edge
     int numRobotsToAdd = baseNumberOfRobotsOnEachEdge;
     if (i < numSidesWithAdditionalRobot){
       // Add basenumrobots + 1 to this edge
       numRobotsToAdd++;    
     }
-    //booyakasha!
+
+    //booyakasha (when dave did some mad refactoring skillz)!
+
+    // The size of the splits between each robot on the edge
     double xSplit = dx/(numRobotsToAdd+1);
     double ySplit = dy/(numRobotsToAdd+1);
+
+    // Add the robots to the positions vector spaced equally along the edge
+    for (int j = 0 ; j<numRobotsToAdd ; j++) {
+      double x = vertex1.x_ + ((j+1) * xSplit);
+      double y = vertex1.y_ + ((j+1) * ySplit);
+      positions.push_back(Vector2(x,y));
+    }
   }
   return positions;
 }
