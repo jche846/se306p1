@@ -179,7 +179,7 @@ Vector2 FindPointFromTheta (Vector2 center, double theta, double diameter) {
     x = center.x_ - (diameter * DegSin(theta));
     y = center.y_ + (diameter * DegCos(theta));
   } else if (theta > 90.0 && theta <= 180.0) {
-    // Quad4 (bottom left) 
+    // Quad4 (bottom left)
     x = center.x_ - (diameter * DegCos(theta));
     y = center.y_ - (diameter * DegSin(theta));
   } else {

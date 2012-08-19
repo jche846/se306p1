@@ -3,6 +3,8 @@
 #include <se306p1/Do.h>
 #include <se306p1/Go.h>
 
+#include <limits>
+
 namespace se306p1 {
 class Command {
  public:
@@ -20,13 +22,16 @@ class Command {
      */
     this->enqueue = false;
     this->isDo = false;
-    this->x = 0.0;
-    this->y = 0.0;
-    this->theta = 0.0;
-    this->lv = 0.0;
-    this->av = 0.0;
+    this->x = std::numeric_limits<double>::quiet_NaN();
+    this->y = std::numeric_limits<double>::quiet_NaN();
+    this->theta = std::numeric_limits<double>::quiet_NaN();
+    this->lv = std::numeric_limits<double>::quiet_NaN();
+    this->av = std::numeric_limits<double>::quiet_NaN();
   }
   Command(Do msg) {
+    this->x = std::numeric_limits<double>::quiet_NaN();
+    this->y = std::numeric_limits<double>::quiet_NaN();
+    this->theta = std::numeric_limits<double>::quiet_NaN();
     /**
      * Constructor for Do commands
      */
@@ -46,6 +51,8 @@ class Command {
     this->x = msg.x;
     this->y = msg.y;
     this->theta = msg.theta;
+    this->lv = std::numeric_limits<double>::quiet_NaN();
+    this->av = std::numeric_limits<double>::quiet_NaN();
     this->isDo = false;
     this->enqueue = msg.enqueue;
   }
