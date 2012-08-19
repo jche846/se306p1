@@ -207,7 +207,7 @@ Vector2 FindPointFromTheta (Vector2 center, double theta, double diameter) {
 *
 * @return A vector of Vector2s that determines the positions that the robots should take
 */
-std::vector<Vector2>FindRobotPositions (Vector2 center, double theta, double diameter, int numRobots, int numSides) {
+std::vector<Vector2> FindRobotPositions (Vector2 center, double theta, double diameter, int numRobots, int numSides) {
   // Handles special case of there being more sides than robots and 
   // makes sure that there will be a robot on every corner by decreasing 
   // the number of sides
