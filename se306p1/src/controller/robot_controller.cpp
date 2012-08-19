@@ -29,7 +29,7 @@ RobotController::RobotController(ros::NodeHandle &nh, uint64_t id = 0) {
 
   // Subscribe to pose messages from Stage
   std::stringstream odomss;
-  odomss << "/robot_" << this->robot_id_ << "/base_pose_ground_truth";
+  odomss << "/robot_" << this->robot_id_ << "/odom";
   this->odom_ = nh_.subscribe<nav_msgs::Odometry>(
       odomss.str(), 1000, &RobotController::odom_callback, this,
       ros::TransportHints().reliable());
@@ -134,8 +134,8 @@ void RobotController::odom_callback(nav_msgs::Odometry msg) {
   QuaternionMsgToRPY(msg.pose.pose.orientation, roll, pitch, yaw);
   this->pose_.theta_ = RadiansToDegrees(yaw);
 
-  ROS_INFO(
-      "R%" PRIu64 " ODOM | x=%f, y=%f, theta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->pose_.theta_, this->lv_, this->av_);
+//  ROS_INFO(
+//      "R%" PRIu64 " ODOM | x=%f, y=%f, theta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->pose_.theta_, this->lv_, this->av_);
 
 // do stuff every stage tick
   this->UpdateVelocity();
