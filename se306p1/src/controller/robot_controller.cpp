@@ -71,6 +71,12 @@ RobotController::~RobotController() {
   // TODO Auto-generated destructor stub
 }
 
+/**
+ * On each clock callback, execute the robot behaviour according to its
+ * internal state.
+ *
+ * @param msg The current time since Stage was launched.
+ */
 void RobotController::clock_callback(rosgraph_msgs::Clock msg) {
   if (this->state_ == RobotState::GOING) {  // If the robot is going somewhere, keep trying to go there
     this->MoveTowardsGoal();
@@ -178,9 +184,8 @@ void RobotController::askPosition_callback(AskPosition msg) {
 }
 
 /**
- *  When state is SCANNINGINIT, waits for an object to appear in the laser range finder,
- *  then enters SCANNING state.
- *  When state is SCANNING, sets the global variable scanResult based on what is currently being scanned.
+ * If the robot state is scanning, the scanResult will be set to the number of
+ * obstacles in the laser range.
  *
  * @param msg The LaserScan message containing laser scan data for this robot.
  */
@@ -326,6 +331,10 @@ void RobotController::MoveTowardsGoal() {
   this->PublishVelocity();
 }
 
+/**
+ * Perform a scan for items. The scan will continue for SCAN_TIME. If nothing is
+ * found, the scan will restart from the beginning.
+ */
 void RobotController::Scan() {
   if (this->scanstep_ == ScanStep::INIT) {
     this->scanningStart_ = ros::Time::now().toSec();
@@ -349,6 +358,12 @@ void RobotController::Scan() {
   }
 }
 
+/**
+ * Change the state of the robot to scanning, and initialise the scanning state
+ * to init.
+ *
+ * @param msg
+ */
 void RobotController::SetScanning(se306p1::Scan msg) {
   this->state_ = RobotState::SCANNING;
   this->scanstep_ = ScanStep::INIT;

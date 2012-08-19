@@ -69,6 +69,8 @@ class RobotController {
 
   // Current step of Go command
   GoStep gostep_;
+
+  // Current step of Scan command
   ScanStep scanstep_;
 
   // Command queue
