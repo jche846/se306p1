@@ -7,6 +7,9 @@
 #define DEFAULT_MOVE_SPEED 1
 
 namespace se306p1 {
+RotateSupervisor::RotateSupervisor(ros::NodeHandle &nh) : Supervisor(nh) {
+}
+
 RotateSupervisor::~RotateSupervisor() {
 }
 
@@ -104,8 +107,10 @@ void RotateSupervisor::FindRobotDests() {
 
 #ifdef ROTATE_SUPERVISOR_MAIN
 int main(int argc, char *argv[]) {
-  ros::init(argc, argv, "rotate_supervisor");
-  se306p1::RotateSupervisor s;
+  ros::init(argc, argv, "rotate_supervisor", ros::init_options::AnonymousName);
+  ros::NodeHandle nh("~");
+
+  se306p1::RotateSupervisor s(nh);
   s.Start();
   return 0;
 }

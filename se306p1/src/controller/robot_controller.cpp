@@ -463,8 +463,9 @@ void RobotController::Run() {
 }
 }
 
+#ifdef ROBOT_CONTROLLER_MAIN
 int main(int argc, char *argv[]) {
-  ros::init(argc, argv, argv[0]);
+  ros::init(argc, argv, "rotate_supervisor", ros::init_options::AnonymousName);
 
   ros::NodeHandle nh("~");
 
@@ -478,3 +479,4 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
+#endif
