@@ -30,6 +30,7 @@ class Supervisor {
   ros::Subscriber ansPosSubscriber_;
   ros::Publisher askPosPublisher_;
 
+  uint64_t sid_;
   uint64_t rmin_;
   uint64_t rmax_;
 

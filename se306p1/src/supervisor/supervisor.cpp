@@ -19,6 +19,10 @@ Supervisor::Supervisor(ros::NodeHandle &nh) : nh_(nh) {
                                               this,
                                               ros::TransportHints().reliable());
   askPosPublisher_ = nh_.advertise<AskPosition>(ASK_POS_TOPIC, 1000);
+
+  int sid;
+  nh_.getParam("sid", sid);
+  this->sid_ = static_cast<uint64_t>(sid);
 }
 
 Supervisor::~Supervisor() {
@@ -43,14 +47,14 @@ void Supervisor::ansPos_callback(Position msg) {
           || robot_ptr->pose_.position_.y_ != msg.y
           || robot_ptr->pose_.theta_ != msg.theta) {
         ROS_WARN(
-            "Robot %" PRId64 " changed its position during discovery.", robots_[msg.R_ID]->id_);
+            "Supervisor %" PRId64 ": Robot %" PRId64 " changed its position during discovery.", this->sid_, robots_[msg.R_ID]->id_);
       } else {
         return;  // robot wasn't moving
       }
     } else {  // need to create a new robot and put it in the robot map
       robots_[msg.R_ID] = std::shared_ptr<Robot>(new Robot(msg.R_ID));
       robot_ptr = robots_[msg.R_ID];
-      ROS_INFO("Supervisor associating with robot %" PRId64 ".", msg.R_ID);
+      ROS_INFO("Supervisor %" PRId64 ": Associating with robot %" PRId64 ".", this->sid_, msg.R_ID);
     }
   }
 
@@ -73,7 +77,7 @@ void Supervisor::Discover(int timeout) {
   this->rmin_ = static_cast<uint64_t>(rmin);
   this->rmax_ = static_cast<uint64_t>(rmax);
 
-  ROS_INFO("Discovering robots from %d to %d for %d seconds.", rmin, rmax, timeout);
+  ROS_INFO("Supervisor %" PRId64 ": Discovering robots from %d to %d for %d seconds.", this->sid_, rmin, rmax, timeout);
   ros::Rate r(FREQUENCY);
 
   // set state for the ansPos_callback
@@ -88,11 +92,11 @@ void Supervisor::Discover(int timeout) {
     ros::spinOnce();
   }
 
-  ROS_INFO("Discovered %zd robots.", robots_.size());
+  ROS_INFO("Supervisor %" PRId64 ": Discovered %zd robots.", this->sid_, robots_.size());
 }
 
 void Supervisor::WaitForReady() {
-  ROS_INFO("Waiting for robots to become ready.");
+  ROS_INFO("Supervisor %" PRId64 ": Waiting for robots to become ready.", this->sid_);
   ros::Rate r(FREQUENCY);
 
   this->state_ = State::WAITING;
@@ -113,7 +117,7 @@ void Supervisor::WaitForReady() {
     break;
   }
 
-  ROS_INFO("Robots ready.");
+  ROS_INFO("Supervisor %" PRId64 ": Robots ready.", this->sid_);
 }
 
 void Supervisor::Start() {
@@ -124,7 +128,7 @@ void Supervisor::Start() {
   this->state_ = State::CONTROLLING;
 
   if (!this->robots_.size()) {
-    ROS_ERROR("No robots discovered.");
+    ROS_ERROR("Supervisor %" PRId64 ": No robots discovered.", this->sid_);
     return;
   }
 
