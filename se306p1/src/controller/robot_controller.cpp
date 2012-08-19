@@ -158,7 +158,6 @@ void RobotController::odom_callback(nav_msgs::Odometry msg) {
 void RobotController::baseScan_callback(sensor_msgs::LaserScan msg) {
   int barCount = 0;
   if (this->state_ == RobotState::SCANNINGINIT) {
-    ROS_INFO("base_scan call back INIT");
     //
     for (int i = 0; i < 180; i++) {
       if (msg.ranges[i] != 5.0) {
@@ -168,7 +167,6 @@ void RobotController::baseScan_callback(sensor_msgs::LaserScan msg) {
       }
     }
   } else if (this->state_ == RobotState::SCANNING) {
-    ROS_INFO("base_scan call back SCANNING");
     //count number of bars
     for (int i = 0; i < 180; i++) {
       if (msg.ranges[i] != 5.0) {
@@ -190,10 +188,7 @@ void RobotController::baseScan_callback(sensor_msgs::LaserScan msg) {
       } else if (barCount == 4) {
         this->scanResult_ = 4;
       }
-      ROS_INFO("Scan Result: %d", this->scanResult_);
     }
-  } else {
-    ROS_INFO("base_scan call back");
   }
 }
 
@@ -346,6 +341,7 @@ void RobotController::Scan() {
   if(this->state_ == RobotState::SCANNING) {
     if(ros::Time::now().toSec() - scanningStart_ > 5){
       // TODO: call post scanning command
+      ROS_INFO("Scan Result: %d", this->scanResult_);
       this->state_ = RobotState::IDLE;
     }
     // wait
@@ -458,7 +454,6 @@ void RobotController::InterruptCommandQueue(Command cmd) {
  * Begins running the ros loop.
  */
 void RobotController::Run() {
-  this->state_ = RobotState::SCANNINGINIT;
   ros::spin();
 }
 }
