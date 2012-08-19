@@ -170,6 +170,59 @@ namespace {
     ASSERT_NEAR(0, DegATan(0), 0.0001);
   }
 
+  //TODO ANGLE DIFF
+
+
+
+  //TODO ANGLE BETWEEN POINTS
+
+  //TODO NORMALIZE ANGLE
+
+  // FIND ROBOT POSITIONS
+
+  /**
+   * Tests zero tan
+   */
+//  TEST_F(TrigTest, testFindRobotPos) {
+//
+//    // Inputs
+//    Vector2 center = new Vector2();
+//    double theta = 90;
+//        double diameter = 10.0;
+//        int numRobots
+//        int numSides
+//
+//    ASSERT_NEAR(0, FindRobotPositions(), 0.0001);
+//  }
+
+  //TODO FIND POINT FROM THETA
+
+  // The following tests may be deprecated or need to be moved to another test suite
+  /**
+  * Test for a goal in sector 1
+  */
+  TEST_F(TrigTest, testAngleDiff_Sector1 ){
+    ASSERT_EQ(AngleDiff(10, 55),-45.0);
+  }
+//  /**
+//  * Test for a goal in sector 2
+//  */
+//  TEST_F(TrigTest, testAngleDiff_Sector1 ){
+//    ASSERT_EQ(AngleDiff(),45.0);
+//  }
+//  /**
+//  * Test for a goal in sector 3
+//  */
+//  TEST_F(TrigTest, testAngleDiff_Sector1 ){
+//    ASSERT_EQ(AngleDiff(),135.0);
+//  }
+//  /**
+//  * Test for a goal in sector 4
+//  */
+//  TEST_F(TrigTest, testAngleDiff_Sector1 ){
+//    ASSERT_EQ(AngleDiff(),-135.0);
+//  }
+
 } //namespace
 
 int main(int argc, char **argv) {
