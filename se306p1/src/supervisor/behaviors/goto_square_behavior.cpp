@@ -8,15 +8,15 @@
 #define CIRCLE_LV 1.0
 
 namespace se306p1 {
-RotateBehavior::RotateBehavior(Supervisor &sup) : Behavior(sup) {
-  this->rotating_=false;
+GotoSquareBehavior::GotoSquareBehavior(Supervisor &sup) : Behavior(sup) {
+  this->behaving_ = false;
 }
 
-RotateBehavior::~RotateBehavior() {
+GotoSquareBehavior::~GotoSquareBehavior() {
 }
 
-void RotateBehavior::Tick() {
-  if (!this->rotating_) {
+void GotoSquareBehavior::Tick() {
+  if (!behaving_) {
     bool exec_done = true;
     // iterate through all robots and see if they have finished executing
     for (auto &cur_robot : this->supervisor_.robots_) {
@@ -28,7 +28,7 @@ void RotateBehavior::Tick() {
     }
 
     /**
-     * this block is only ever called once. It starts the robots moving in a circle,
+     * this block is only ever called once. It tells the robots to go to square,
      * then sets rotating to true so this block is never called again.
      */
 
@@ -44,7 +44,7 @@ void RotateBehavior::Tick() {
             CIRCLE_LV, CIRCLE_AV,
             cur_robot.second->id_ != this->supervisor_.clusterHead_->id_);
       }
-      this->rotating_ = true;
+      this->behaving_ = true;
     }
   }
 }

@@ -8,7 +8,7 @@
 namespace se306p1 {
 class RotateBehavior : public Behavior {
 private:
-  bool rotating_;
+  bool rotating_;  //initially false. Set explicitly in constructor.
 
 public:
   RotateBehavior(Supervisor &sup);
