@@ -8,10 +8,12 @@
 #include <se306p1/Position.h>
 
 #include "../util/pose.h"
+#include "../util/trig.h"
 
 #include "behaviors/all.h"
 
 #define FREQUENCY 1
+#define ROBOT_WIDTH 0.35
 
 namespace se306p1 {
 Supervisor::Supervisor(ros::NodeHandle &nh) : nh_(nh) {
@@ -140,7 +142,8 @@ void Supervisor::Start() {
 
   ros::Rate r(100);
 
-  this->currentBehavior_->Initialize();
+  this->MoveNodesToDests(this->nonHeadRobots_, this->FindRobotDests());
+
   while (ros::ok()) {
     this->DispatchMessages();
     this->currentBehavior_->Tick();
@@ -181,6 +184,66 @@ void Supervisor::DispatchMessages() {
     dispatchIt_ = robots_.begin();
   dispatchIt_->second->DispatchCommand();
 //    ROS_INFO("Dispatched command for robot %" PRId64 ".", dispatchIt_->first);
+}
+
+std::vector<Pose> Supervisor::FindRobotDests() {
+  std::vector<Pose> lineLocations;
+
+  size_t numRobots = this->robots_.size();
+
+  double goalTheta = AngleBetweenPoints(this->clusterHead_->pose_.position_,
+                                        Vector2());
+  ROS_INFO("Setting GoalTheta to %f", goalTheta);
+
+  // set goal theta of cluster head
+  Pose headPose = this->clusterHead_->pose_;
+  headPose.theta_ = goalTheta;
+  this->clusterHead_->Go(headPose, false);
+
+  Vector2 lastLocation = this->clusterHead_->pose_.position_;
+  Vector2 robotSep = lastLocation.Normalized() * ROBOT_WIDTH * 6;
+  for (size_t i = 1; i < numRobots; i++) {
+    lastLocation = lastLocation + robotSep;
+    lineLocations.push_back(Pose(lastLocation, goalTheta));
+  }
+
+  return lineLocations;
+}
+
+void Supervisor::MoveNodesToDests(
+    const std::vector<std::shared_ptr<Robot> > &nodesIn,
+    const std::vector<Pose> &posesIn) {
+  std::vector<std::shared_ptr<Robot> > nodes = nodesIn;
+  std::vector<Pose> poses = posesIn;
+
+  while (poses.size()) {
+    double longestDist = -1;
+    int longestNodeIndex = 0;
+    int longestPoseIndex = 0;
+
+    for (size_t nodeIndex = 0; nodeIndex < nodes.size(); nodeIndex++) {
+      double dist = std::numeric_limits<double>::max();
+      int destIndex = 0;
+      std::shared_ptr<Robot> node = nodes[nodeIndex];
+      for (size_t posesIndex = 0; posesIndex < poses.size(); posesIndex++) {
+        double testDist =
+            abs((node->pose_.position_ - poses[posesIndex].position_)
+                .LengthSquared());
+        if (testDist < dist) {
+          dist = testDist;
+          destIndex = posesIndex;
+        }
+      }
+      if (dist > longestDist) {
+        longestDist = dist;
+        longestNodeIndex = nodeIndex;
+        longestPoseIndex = destIndex;
+      }
+    }
+    nodes[longestNodeIndex]->Go(poses[longestPoseIndex], false);
+    nodes.erase(nodes.begin() + longestNodeIndex);
+    poses.erase(poses.begin() + longestPoseIndex);
+  }
 }
 
 void Supervisor::RegisterBehaviors() {

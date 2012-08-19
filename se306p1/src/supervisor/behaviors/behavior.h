@@ -12,14 +12,10 @@ class Behavior {
 protected:
   Supervisor &supervisor_;
 
-  void MoveNodesToDests(const std::vector<std::shared_ptr<Robot> > &nodes,
-                        const std::vector<Pose> &poses);
-
 public:
-  Behavior(Supervisor &sup);
-  virtual ~Behavior();
+  Behavior(Supervisor &sup) : supervisor_(sup) { };
+  virtual ~Behavior() { };
 
-  virtual void Initialize() = 0;
   virtual void Tick() = 0;
 
   typedef std::unique_ptr<Behavior> BehaviorFactory(Supervisor &sup);

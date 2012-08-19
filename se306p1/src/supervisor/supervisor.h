@@ -26,6 +26,10 @@ class Supervisor {
  private:
   State state_;
 
+  void MoveNodesToDests(const std::vector<std::shared_ptr<Robot> > &nodes,
+                        const std::vector<Pose> &poses);
+  std::vector<Pose> FindRobotDests();
+
   std::map<uint64_t, std::shared_ptr<Robot>>::iterator dispatchIt_;
 
   ros::NodeHandle nh_;

@@ -35,7 +35,6 @@ rosbuild_add_executable(robot_controller
 rosbuild_add_executable(supervisor
   src/supervisor/supervisor.cpp
   src/supervisor/robot.cpp
-  src/supervisor/behaviors/behavior.cpp
   src/supervisor/behaviors/rotate_behavior.cpp)
 set_target_properties(supervisor PROPERTIES COMPILE_DEFINITIONS SUPERVISOR_MAIN)
 

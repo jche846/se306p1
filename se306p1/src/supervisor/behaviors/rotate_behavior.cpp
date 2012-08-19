@@ -2,9 +2,6 @@
 
 #include "../supervisor.h"
 
-#include "../../util/trig.h"
-
-#define ROBOT_WIDTH 0.35
 #define DEFAULT_MOVE_SPEED 1
 
 #define CIRCLE_AV 0.62
@@ -15,15 +12,6 @@ RotateBehavior::RotateBehavior(Supervisor &sup) : Behavior(sup) {
 }
 
 RotateBehavior::~RotateBehavior() {
-}
-
-void RotateBehavior::Initialize() {
-  ROS_INFO("Starting rotate behavior.");
-
-  std::vector<Pose> dests = this->FindRobotDests();
-  this->MoveNodesToDests(this->supervisor_.nonHeadRobots_, dests);
-
-  ROS_INFO("MOVING AT lv:%f av:%f", CIRCLE_LV, CIRCLE_AV);
 }
 
 void RotateBehavior::Tick() {
@@ -58,29 +46,5 @@ void RotateBehavior::Tick() {
       this->rotating_ = true;
     }
   }
-}
-
-std::vector<Pose> RotateBehavior::FindRobotDests() {
-  std::vector<Pose> lineLocations;
-
-  size_t numRobots = this->supervisor_.robots_.size();
-
-  double goalTheta = AngleBetweenPoints(this->supervisor_.clusterHead_->pose_.position_,
-                                        Vector2());
-  ROS_INFO("Setting GoalTheta to %f", goalTheta);
-
-  // set goal theta of cluster head
-  Pose headPose = this->supervisor_.clusterHead_->pose_;
-  headPose.theta_ = goalTheta;
-  this->supervisor_.clusterHead_->Go(headPose, false);
-
-  Vector2 lastLocation = this->supervisor_.clusterHead_->pose_.position_;
-  Vector2 robotSep = lastLocation.Normalized() * ROBOT_WIDTH * 6;
-  for (size_t i = 1; i < numRobots; i++) {
-    lastLocation = lastLocation + robotSep;
-    lineLocations.push_back(Pose(lastLocation, goalTheta));
-  }
-
-  return lineLocations;
 }
 }
