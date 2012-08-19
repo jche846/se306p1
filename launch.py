@@ -20,7 +20,7 @@ if __name__ == '__main__':
         num_members = int(round(num_robots / float(num_groups)))
 
         for i in range(num_groups):
-            os.system("se306p1/bin/rotate_supervisor _sid:={} _rmin:={} _rmax:={} &".format(
+            os.system("se306p1/bin/supervisor _sid:={} _rmin:={} _rmax:={} &".format(
                 i, i * num_members, (i + 1) * num_members - 1
             ))
     elif node_to_launch == "controller":

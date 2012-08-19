@@ -32,11 +32,12 @@ rosbuild_genmsg()
 rosbuild_add_executable(robot_controller
   src/controller/robot_controller.cpp)
 
-rosbuild_add_executable(rotate_supervisor
-  src/supervisor/rotate_supervisor.cpp
+rosbuild_add_executable(supervisor
   src/supervisor/supervisor.cpp
-  src/supervisor/robot.cpp)
-set_target_properties(rotate_supervisor PROPERTIES COMPILE_DEFINITIONS ROTATE_SUPERVISOR_MAIN)
+  src/supervisor/robot.cpp
+  src/supervisor/behaviors/behavior.cpp
+  src/supervisor/behaviors/rotate_behavior.cpp)
+set_target_properties(supervisor PROPERTIES COMPILE_DEFINITIONS SUPERVISOR_MAIN)
 
 rosbuild_add_executable(robot_controller
   src/controller/robot_controller.cpp)

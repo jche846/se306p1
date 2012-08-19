@@ -9,6 +9,8 @@
 #include <se306p1/Position.h>
 #include "../util/pose.h"
 
+#include "behaviors/behavior.h"
+
 #define ASSOCIATE_TOPIC "/supervisor/associate"
 #define ASK_POS_TOPIC "/supervisor/ask_pos"
 #define ANS_POS_TOPIC "/supervisor/ans_pos"
@@ -30,14 +32,12 @@ class Supervisor {
   ros::Subscriber ansPosSubscriber_;
   ros::Publisher askPosPublisher_;
 
+  std::map<uint64_t, Behavior::BehaviorFactory *> behaviorFactories_;
+  std::unique_ptr<Behavior> currentBehavior_;
+
   uint64_t sid_;
   uint64_t rmin_;
   uint64_t rmax_;
-
- protected:
-  std::map<uint64_t, std::shared_ptr<Robot>> robots_;
-  std::shared_ptr<Robot> clusterHead_;
-  std::vector<std::shared_ptr<Robot>> nonHeadRobots_;
 
   /**
    * The callback for the position answer, used to either:
@@ -49,20 +49,19 @@ class Supervisor {
   void ansPos_callback(Position msg);
 
   /**
-   * Stuff for the supervisor to do. This is an abstract method.
-   */
-  virtual void Run() = 0;
-
-  /**
    * Atempt to send a message to a robot Controller
    *
    * This method must be called regularly to ensure that messages are sent to the Robot Controllers
    */
   void DispatchMessages();
+  void RegisterBehaviors();
 
  public:
+  std::map<uint64_t, std::shared_ptr<Robot>> robots_;
+  std::shared_ptr<Robot> clusterHead_;
+  std::vector<std::shared_ptr<Robot>> nonHeadRobots_;
+
   Supervisor(ros::NodeHandle &);
-  virtual ~Supervisor();
 
   /**
    * Request positions of all robots to discover them.
@@ -83,13 +82,5 @@ class Supervisor {
    * Will call Run() after finding all the RobotControllers and electing a head.
    */
   void Start();
-
-  /**
-   * Moves a list of robots to a list of position
-   *
-   * Will send robots to destinations in a manner that the minimum time is taken for all the robots to reach a destination
-   */
-  void MoveNodesToDests(const std::vector<std::shared_ptr<Robot> > &nodes,
-                        const std::vector<Pose> &poses);
 };
 }

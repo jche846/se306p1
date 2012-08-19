@@ -9,6 +9,8 @@
 
 #include "../util/pose.h"
 
+#include "behaviors/all.h"
+
 #define FREQUENCY 1
 
 namespace se306p1 {
@@ -22,10 +24,9 @@ Supervisor::Supervisor(ros::NodeHandle &nh) : nh_(nh) {
 
   int sid;
   nh_.getParam("sid", sid);
-  this->sid_ = static_cast<uint64_t>(sid);
-}
 
-Supervisor::~Supervisor() {
+  this->sid_ = static_cast<uint64_t>(sid);
+  this->RegisterBehaviors();
 }
 
 void Supervisor::ansPos_callback(Position msg) {
@@ -121,8 +122,7 @@ void Supervisor::WaitForReady() {
 }
 
 void Supervisor::Start() {
-  while (ros::Time::now().isZero())
-    ;
+  while (ros::Time::now().isZero());
 
   this->Discover(5);
   this->state_ = State::CONTROLLING;
@@ -137,7 +137,17 @@ void Supervisor::Start() {
   this->dispatchIt_ = robots_.begin();
 
   this->ElectHead();
-  this->Run();
+
+  ros::Rate r(100);
+
+  this->currentBehavior_->Initialize();
+  while (ros::ok()) {
+    this->DispatchMessages();
+    this->currentBehavior_->Tick();
+
+    r.sleep();
+    ros::spinOnce();
+  }
 }
 
 void Supervisor::ElectHead() {
@@ -173,39 +183,21 @@ void Supervisor::DispatchMessages() {
 //    ROS_INFO("Dispatched command for robot %" PRId64 ".", dispatchIt_->first);
 }
 
-void Supervisor::MoveNodesToDests(
-    const std::vector<std::shared_ptr<Robot> > &nodesIn,
-    const std::vector<Pose> &posesIn) {
-  std::vector<std::shared_ptr<Robot> > nodes = nodesIn;
-  std::vector<Pose> poses = posesIn;
+void Supervisor::RegisterBehaviors() {
+  this->behaviorFactories_[RotateBehavior::id_] = &Behavior::construct<RotateBehavior>;
 
-  while (poses.size()) {
-    double longestDist = -1;
-    int longestNodeIndex = 0;
-    int longestPoseIndex = 0;
-
-    for (size_t nodeIndex = 0; nodeIndex < nodes.size(); nodeIndex++) {
-      double dist = std::numeric_limits<double>::max();
-      int destIndex = 0;
-      std::shared_ptr<Robot> node = nodes[nodeIndex];
-      for (size_t posesIndex = 0; posesIndex < poses.size(); posesIndex++) {
-        double testDist =
-            abs((node->pose_.position_ - poses[posesIndex].position_)
-                .LengthSquared());
-        if (testDist < dist) {
-          dist = testDist;
-          destIndex = posesIndex;
-        }
-      }
-      if (dist > longestDist) {
-        longestDist = dist;
-        longestNodeIndex = nodeIndex;
-        longestPoseIndex = destIndex;
-      }
-    }
-    nodes[longestNodeIndex]->Go(poses[longestPoseIndex], false);
-    nodes.erase(nodes.begin() + longestNodeIndex);
-    poses.erase(poses.begin() + longestPoseIndex);
-  }
+  // TODO: remove this code later, this hardcodes the rotate behavior
+  this->currentBehavior_ = this->behaviorFactories_[1](*this);
 }
 }
+
+#ifdef SUPERVISOR_MAIN
+int main(int argc, char *argv[]) {
+  ros::init(argc, argv, "supervisor", ros::init_options::AnonymousName);
+  ros::NodeHandle nh("~");
+
+  se306p1::Supervisor s(nh);
+  s.Start();
+  return 0;
+}
+#endif
