@@ -170,32 +170,9 @@ namespace {
     ASSERT_NEAR(0, DegATan(0), 0.0001);
   }
 
-  //TODO ANGLE DIFF
+  //TODO QuaternionMsgToRPY
 
-
-
-  //TODO ANGLE BETWEEN POINTS
-
-  //TODO NORMALIZE ANGLE
-
-  // FIND ROBOT POSITIONS
-
-//  /**
-//   * Tests zero tan
-//   */
-//  TEST_F(TrigTest, testFindRobotPos) {
-//
-//    // Inputs
-//    Vector2 center = new Vector2();
-//    double theta = 90;
-//        double diameter = 10.0;
-//        int numRobots
-//        int numSides
-//
-//    ASSERT_NEAR(0, FindRobotPositions(), 0.0001);
-//  }
-
-  //TODO FIND POINT FROM THETA
+  // ANGLE DIFF
 
   /**
   * Test for a goal in top left positive
@@ -252,6 +229,14 @@ namespace {
   TEST_F(TrigTest, testNegAngleDiff_BR ){
     ASSERT_EQ(AngleDiff(-135, -90), 45.0);
   }
+
+  //TODO ANGLE BETWEEN POINTS
+
+  //TODO NORMALIZE ANGLE
+
+  //TODO FIND POINT FROM THETA
+
+  //TODO FIND ROBOT POSITIONS
 
 } //namespace
 
