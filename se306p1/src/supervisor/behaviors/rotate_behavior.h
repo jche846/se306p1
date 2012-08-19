@@ -14,6 +14,9 @@ public:
   RotateBehavior(Supervisor &sup);
   virtual ~RotateBehavior();
 
+  /**
+   * Get the ID of the behavior.
+   */
   inline static uint64_t id() { return 1; }
 
   virtual void Tick();
