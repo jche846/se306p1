@@ -4,12 +4,20 @@ import sys
 import os
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        sys.stderr.write("usage: {} NUM_ROBOTS NUM_GROUPS\n".format(sys.argv[0]))
+    if len(sys.argv) > 2:
+        sys.stderr.write("usage: {} [CONFIG_FILE]\n".format(sys.argv[1]))
         sys.exit(1)
 
-    num_robots = int(sys.argv[1])
-    num_groups = int(sys.argv[2])
+    if len(sys.argv) == 2:
+        config_fn = sys.argv[1]
+    else:
+        config_fn = "launch.config"
+
+    with open(config_fn) as f:
+        raw_n, raw_gn = f.read().split()
+
+    num_robots = int(raw_n)
+    num_groups = int(raw_gn)
 
     os.system("./generate_world.py {} {} > se306p1.world".format(
         num_robots, num_groups
@@ -20,6 +28,8 @@ if __name__ == '__main__':
     for i in range(num_robots):
         os.system("se306p1/bin/robot_controller _rid:={} &".format(i))
 
-    raw_input("Press ENTER to kill all processes.")
-    os.killpg(os.getpgid(os.getpid()), 9)
+    try:
+        raw_input("Press ENTER to kill all processes.")
+    except:
+        os.killpg(os.getpgid(os.getpid()), 9)
 
