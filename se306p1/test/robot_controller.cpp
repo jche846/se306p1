@@ -18,8 +18,10 @@ namespace {
 class RobotControllerTest : public testing::Test {
    
    public:
+    
     ros::NodeHandle nh;
     RobotController rc;
+    
     RobotControllerTest() : nh("~"), rc(nh,1) {
       
     }
@@ -29,7 +31,6 @@ class RobotControllerTest : public testing::Test {
     }
 
     virtual void SetUp() {
-
       //rc = new RobotController(nh,1);
     }
 
@@ -104,15 +105,15 @@ class RobotControllerTest : public testing::Test {
     Command interrupt = Command(msg_go3);
     rc.InterruptCommandQueue(interrupt);
     //checks deque is cleared
-    ASSERT_TRUE(rc.commands_.size()==0);
-    //check idle is set
-    ASSERT_TRUE(rc.state_==RobotState::IDLE);
+    ASSERT_EQ(rc.commands_.size(),0);
     
     Vector2 position = Vector2(2.0,3.0);
     double theta = 4.0;
     Pose pose = Pose (position,theta);
     //prove SetGoing has been called
-    ASSERT_TRUE(rc.goal_==pose);
+    ASSERT_TRUE(rc.goal_.theta_==theta);
+    ASSERT_TRUE(rc.goal_.position_.x_==position.x_);
+    ASSERT_TRUE(rc.goal_.position_.y_==position.y_);
   }
 
   /**
@@ -123,8 +124,8 @@ class RobotControllerTest : public testing::Test {
     msg_do.lv = 10;
     msg_do.av = 30;
     msg_do.enqueue = false;
-    ASSERT_TRUE(rc.commands_.size()>0);
     rc.do_callback(msg_do);
+    ASSERT_TRUE(rc.commands_.size()==0);
     //checking that the commands_ deque is cleared proves that InterruptCommandQueue()
     //was called.
     ASSERT_TRUE(rc.commands_.size()==0);
@@ -139,11 +140,15 @@ class RobotControllerTest : public testing::Test {
     msg_go.y = 10;
     msg_go.theta = 30;
     msg_go.enqueue = false;
-    ASSERT_TRUE(rc.commands_.size()>0);
+    Vector2 position = Vector2(5.0,10.0);
+    double theta = 30.0;
     rc.go_callback(msg_go);
+    ASSERT_TRUE(rc.commands_.size()==0);
     //checking that the commands_ deque is cleared proves that InterruptCommandQueue()
     //was called.
-    ASSERT_TRUE(rc.commands_.size()==0);
+    ASSERT_TRUE(rc.goal_.theta_==theta);
+    ASSERT_TRUE(rc.goal_.position_.x_==position.x_);
+    ASSERT_TRUE(rc.goal_.position_.y_==position.y_);
   }
 
   /**
@@ -157,14 +162,16 @@ class RobotControllerTest : public testing::Test {
     msg_go.enqueue = true;
     Vector2 position = Vector2(5.0,10.0);
     double theta = 30.0;
-    Pose pose = Pose (position,theta);
     rc.SetGoing(msg_go);
     //check state
     ASSERT_EQ(rc.state_,RobotState::GOING);
     //check aiming set
     ASSERT_EQ(rc.gostep_,GoStep::AIMING);
-    //check state is the correct pose.
-    ASSERT_EQ(rc.goal_,pose);
+
+    //prove SetGoing has been called
+    ASSERT_TRUE(rc.goal_.theta_==theta);
+    ASSERT_TRUE(rc.goal_.position_.x_==position.x_);
+    ASSERT_TRUE(rc.goal_.position_.y_==position.y_);
   }
 
   /**
@@ -231,6 +238,7 @@ class RobotControllerTest : public testing::Test {
     msg_go.y = 10;
     msg_go.theta = 30;
     msg_go.enqueue = true;
+    
     Command cmd = Command(msg_go);
     rc.commands_.push_back(cmd);
     rc.DequeueCommand();
@@ -242,7 +250,9 @@ class RobotControllerTest : public testing::Test {
     double theta = msg_go.theta;
     Pose pose = Pose (position,theta);
     //the command is executed so the robots pose should be set to msg_go's values.
-    ASSERT_EQ(rc.goal_,pose);
+    ASSERT_TRUE(rc.goal_.theta_==theta);
+    ASSERT_TRUE(rc.goal_.position_.x_==position.x_);
+    ASSERT_TRUE(rc.goal_.position_.y_==position.y_);
   }
 
   /**
@@ -260,8 +270,11 @@ class RobotControllerTest : public testing::Test {
     Vector2 position = Vector2(msg_go.x,msg_go.y);
     double theta = msg_go.theta;
     Pose pose = Pose (position,theta);
+    rc.ExecuteCommand(cmd);
     //the robots go should be set to the pose.
-    ASSERT_EQ(rc.goal_,pose);
+    ASSERT_TRUE(rc.goal_.theta_==theta);
+    ASSERT_TRUE(rc.goal_.position_.x_==position.x_);
+    ASSERT_TRUE(rc.goal_.position_.y_==position.y_);
   }
 
   /**
@@ -283,18 +296,21 @@ class RobotControllerTest : public testing::Test {
   /**
   * Directly sets the fields for the position of the robot
   */
+  /*
   void RobotControllerTest::setPose(double x, double y, double theta){
     rc.pose_.position_.x_ = x;
     rc.pose_.position_.y_ = y;
     rc.pose_.theta_ = theta;
-  }
+  }*/
   /**
   * Directly sets the fields for the goal of the robot
   */
+  /*
   void RobotControllerTest::setGoal(double x, double y){
     rc.goal_.position_.x_ = x;
     rc.goal_.position_.y_ = y;
   }
+  */
   // The following tests may be deprecated or need to be moved to another test suite
   /**
   * Test for a goal in sector 1
@@ -331,6 +347,7 @@ class RobotControllerTest : public testing::Test {
 }//namespace
 
 int main(int argc, char **argv) {
+  ros::init(argc, argv, "test_robot_controller");
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
