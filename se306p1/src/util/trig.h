@@ -132,4 +132,19 @@ double AngleBetweenPoints(const Vector2 &p1, const Vector2 &p2) {
 
   return (double) phi;
 }
+
+
+/**
+* Finds a point that is located the distance that is diameter from the center at an angle of theta.
+* @param center The center of the polygon
+* @param theta The angle from the center of the polygon that point should be
+* @param diameter The distance from the center of the polygon that the point should be
+* @return point The point that the function calculates.
+*/
+Vector2 FindPointFromTheta (Vector2 center, double theta, double diameter) {
+
+
+  return null;
+}
+
 }
