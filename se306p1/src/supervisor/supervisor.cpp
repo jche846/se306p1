@@ -8,8 +8,12 @@
 #include <se306p1/Position.h>
 
 #include "../util/pose.h"
+#include "../util/trig.h"
+
+#include "behaviors/all.h"
 
 #define FREQUENCY 1
+#define ROBOT_WIDTH 0.35
 
 namespace se306p1 {
 Supervisor::Supervisor(ros::NodeHandle &nh) : nh_(nh) {
@@ -22,10 +26,13 @@ Supervisor::Supervisor(ros::NodeHandle &nh) : nh_(nh) {
 
   int sid;
   nh_.getParam("sid", sid);
-  this->sid_ = static_cast<uint64_t>(sid);
-}
 
-Supervisor::~Supervisor() {
+  this->sid_ = static_cast<uint64_t>(sid);
+
+  RegisterBehaviors(*this);
+
+  // TODO: remove this, it's hardcoded!
+  this->SwitchBehavior(RotateBehavior::id());
 }
 
 void Supervisor::ansPos_callback(Position msg) {
@@ -121,8 +128,7 @@ void Supervisor::WaitForReady() {
 }
 
 void Supervisor::Start() {
-  while (ros::Time::now().isZero())
-    ;
+  while (ros::Time::now().isZero());
 
   this->Discover(5);
   this->state_ = State::CONTROLLING;
@@ -137,7 +143,18 @@ void Supervisor::Start() {
   this->dispatchIt_ = robots_.begin();
 
   this->ElectHead();
-  this->Run();
+
+  ros::Rate r(100);
+
+  this->MoveNodesToDests(this->nonHeadRobots_, this->FindRobotDests());
+
+  while (ros::ok()) {
+    this->DispatchMessages();
+    this->currentBehavior_->Tick();
+
+    r.sleep();
+    ros::spinOnce();
+  }
 }
 
 void Supervisor::ElectHead() {
@@ -171,6 +188,30 @@ void Supervisor::DispatchMessages() {
     dispatchIt_ = robots_.begin();
   dispatchIt_->second->DispatchCommand();
 //    ROS_INFO("Dispatched command for robot %" PRId64 ".", dispatchIt_->first);
+}
+
+std::vector<Pose> Supervisor::FindRobotDests() {
+  std::vector<Pose> lineLocations;
+
+  size_t numRobots = this->robots_.size();
+
+  double goalTheta = AngleBetweenPoints(this->clusterHead_->pose_.position_,
+                                        Vector2());
+  ROS_INFO("Setting GoalTheta to %f", goalTheta);
+
+  // set goal theta of cluster head
+  Pose headPose = this->clusterHead_->pose_;
+  headPose.theta_ = goalTheta;
+  this->clusterHead_->Go(headPose, false);
+
+  Vector2 lastLocation = this->clusterHead_->pose_.position_;
+  Vector2 robotSep = lastLocation.Normalized() * ROBOT_WIDTH * 6;
+  for (size_t i = 1; i < numRobots; i++) {
+    lastLocation = lastLocation + robotSep;
+    lineLocations.push_back(Pose(lastLocation, goalTheta));
+  }
+
+  return lineLocations;
 }
 
 void Supervisor::MoveNodesToDests(
@@ -208,4 +249,19 @@ void Supervisor::MoveNodesToDests(
     poses.erase(poses.begin() + longestPoseIndex);
   }
 }
+
+void Supervisor::SwitchBehavior(uint64_t id) {
+  this->currentBehavior_ = this->behaviorFactories_[id](*this);
 }
+}
+
+#ifdef SUPERVISOR_MAIN
+int main(int argc, char *argv[]) {
+  ros::init(argc, argv, "supervisor", ros::init_options::AnonymousName);
+  ros::NodeHandle nh("~");
+
+  se306p1::Supervisor s(nh);
+  s.Start();
+  return 0;
+}
+#endif
