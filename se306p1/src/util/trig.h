@@ -133,9 +133,95 @@ double AngleBetweenPoints(const Vector2 &p1, const Vector2 &p2) {
   return (double) phi;
 }
 
+/**
+* Normalizes an angle so that if it is outside the allowable range it fixes it.
+* 
+* @param theta The angle to be normalized
+*
+* @return the normalized angle
+*/
+double normalizeAngle (double theta) {
+  // Ensures that the angle is within 360 and -360
+  while (theta > 360.0) theta-=360.0; 
+  while (theta < -360.0) theta += 360.0;
+  // Fixes the sign and the angle amount so it is within 180 and -180
+  if(theta > 180.0){
+    theta = -360.0 + theta; 
+  } else if (theta < -180.0){
+    theta = 360.0 + theta;
+  }
+  return theta;
+}
+
+/**
+* Finds the points that robots should take in order to make the polygon with number of edges specified.
+*
+* Special cases to be wary of:
+*   - If there are more sides than there are robots, the number of sides should be the same as the number
+*     of robots so that there is a robot on every vertex
+*   - If there are 4 sides (i.e. a square) then the shape should be rotated 45 degrees as to make
+*     it look like a square rather than a diamond
+*
+* @param center A Vector2 of the position of the center of the polygon
+* @param theta A double that determines which direction that the top vertex should be from the diameter
+* @param diameter A double that determines the distance that vertexes of the polygon should be from the center
+* @param numRobots The number of robots that should be in the polygon
+* @param numSides The number of sides of the polygon
+*
+* @return A vector of Vector2s that determines the positions that the robots should take
+*/
+std::Vector<Vector2>FindRobotPositions (Vector2 center, double theta, double diameter, int numRobots, int numSides) {
+  // Handles special case of there being more sides than robots and 
+  // makes sure that there will be a robot on every corner by decreasing 
+  // the number of sides
+  if (numSides > numRobots) {
+    numSides = numRobots;
+  }
+  // Handles the special case for a square. rotate the square 45 degrees 
+  // to make it a square as opposed to a diamond.
+  if (numSides == 4) {
+    theta += 45;
+    theta = normalizeAngle(theta); 
+  }
+  // Set the size of the angle change 
+  double angleStepSize = 360.0/numSides;
+  std::Vector<Vector2> positions;
+  // Assign the positions of the vertexes of the polygon
+  for (int i = 0 ; i < numSides ; i++) {
+    positions.push_back(FindPointFromTheta(center, (theta + i*angleStepSize), diameter));
+  }
+  // We need to process the remaining robots that weren't used in vertices for the polygon
+  numRobots -= numSides;
+  // If there is 1 left over robot, either after the vertices or after placing equal number of extra robots 
+  // on sides, then put it in the middle of the shape.
+  if (numRobots%numSides == 1) {
+    positions.push_back(center);
+    numRobots--;  
+  }
+  // Process any left over robots to positions along each side of the shape. 
+  int baseNumberOfRobotsOnEachEdge = numRobots / numSides;
+  int numSidesWithAdditionalRobot = numRobots % numSides;
+  for (int i = 0; i < numSides ; i++) {
+    Vector2 vertex1 = positions.at(i);
+    Vector2 vertex2 = positions.at((i+1) % numSides);
+    double dx = vertex1.x_ - vertex2.x_;
+    double dy = vertex1.y_ - vertex2.y_;
+    
+    int numRobotsToAdd = baseNumberOfRobotsOnEachEdge;
+    if (i < numSidesWithAdditionalRobot){
+      // Add basenumrobots + 1 to this edge
+      numRobotsToAdd++;    
+    }
+    //booyakasha!
+    double xSplit = dx/(numRobotsToAdd+1);
+    double ySplit = dy/(numRobotsToAdd+1);
+  }
+  return positions;
+}
 
 /**
 * Finds a point that is located the distance that is diameter from the center at an angle of theta.
+*
 * @param center The center of the polygon
 * @param theta The angle from the center of the polygon that point should be
 * @param diameter The distance from the center of the polygon that the point should be
