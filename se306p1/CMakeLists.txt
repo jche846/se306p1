@@ -35,18 +35,24 @@ rosbuild_add_executable(robot_controller
 rosbuild_add_executable(supervisor
   src/supervisor/supervisor.cpp
   src/supervisor/robot.cpp
-  src/supervisor/behaviors/rotate_behavior.cpp)
+  src/supervisor/behaviors/rotate_behavior.cpp
+  src/supervisor/behaviors/goto_circle_behavior.cpp
+  src/supervisor/behaviors/goto_square_behavior.cpp
+  src/util/trig.cpp)
 set_target_properties(supervisor PROPERTIES COMPILE_DEFINITIONS SUPERVISOR_MAIN)
 
 rosbuild_add_executable(robot_controller
-  src/controller/robot_controller.cpp)
+  src/controller/robot_controller.cpp
+  src/util/trig.cpp)
 set_target_properties(robot_controller PROPERTIES COMPILE_DEFINITIONS ROBOT_CONTROLLER_MAIN)
 
 rosbuild_add_gtest(test_command
     test/command.cpp)
 rosbuild_add_gtest(test_trig
+    src/util/trig.cpp
     test/trig.cpp)
 rosbuild_add_gtest(test_supervisor
+    src/util/trig.cpp
     test/supervisor.cpp)
 rosbuild_add_gtest(test_pose
     test/pose.cpp)
@@ -54,6 +60,7 @@ rosbuild_add_gtest(test_vector2
     test/vector2.cpp)
 rosbuild_add_gtest(test_robot_controller
     test/robot_controller.cpp
+    src/util/trig.cpp
     src/controller/robot_controller.cpp)
 rosbuild_add_rostest(test/supervisor.test)
 

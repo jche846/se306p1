@@ -32,7 +32,7 @@ Supervisor::Supervisor(ros::NodeHandle &nh) : nh_(nh) {
   this->RegisterBehaviors();
 
   // TODO: remove this, it's hardcoded!
-  this->SwitchBehavior(RotateBehavior::id());
+  this->SwitchBehavior(GotoSquareBehavior::id());
 }
 
 void Supervisor::ansPos_callback(Position msg) {
@@ -148,9 +148,20 @@ void Supervisor::Start() {
 
   this->MoveNodesToDests(this->nonHeadRobots_, this->FindRobotDests());
 
+  ROS_INFO("Supervisor %" PRId64 ": Spinning up.", this->sid_);
+
   while (ros::ok()) {
     this->DispatchMessages();
-    this->currentBehavior_->Tick();
+
+    bool execDone = true;
+    for (auto &robot : this->robots_) {
+      if (robot.second->executing_) {
+        execDone = false;
+        break;
+      }
+    }
+
+    if (execDone) this->currentBehavior_->Tick();
 
     r.sleep();
     ros::spinOnce();
