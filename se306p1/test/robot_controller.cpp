@@ -296,54 +296,54 @@ class RobotControllerTest : public testing::Test {
   /**
   * Directly sets the fields for the position of the robot
   */
-  /*
-  void RobotControllerTest::setPose(double x, double y, double theta){
-    rc.pose_.position_.x_ = x;
-    rc.pose_.position_.y_ = y;
-    rc.pose_.theta_ = theta;
-  }*/
+  
+//  void RobotControllerTest::setPose(double x, double y, double theta){
+//    rc.pose_.position_.x_ = x;
+//    rc.pose_.position_.y_ = y;
+//    rc.pose_.theta_ = theta;
+//  }
   /**
   * Directly sets the fields for the goal of the robot
   */
-  /*
-  void RobotControllerTest::setGoal(double x, double y){
-    rc.goal_.position_.x_ = x;
-    rc.goal_.position_.y_ = y;
-  }
-  */
+  
+//  void RobotControllerTest::setGoal(double x, double y){
+//    rc.goal_.position_.x_ = x;
+//    rc.goal_.position_.y_ = y;
+//  }
+  
   // The following tests may be deprecated or need to be moved to another test suite
   /**
   * Test for a goal in sector 1
   */
-  /*TEST_F(RobotControllerTest, testAngleToGoal_Sector1 ){
-    setPose(3,-3,0);
-    setGoal(7,1);
-    ASSERT_EQ(rc.AngleToGoal(),-45.0);
-  }*/
+//  TEST_F(RobotControllerTest, testAngleToGoal_Sector1 ){
+//    setPose(3,-3,0);
+//    setGoal(7,1);
+//   ASSERT_EQ(rc.AngleToGoal(),-45.0);
+//  }
   /**
   * Test for a goal in sector 2
   */
-  /*TEST_F(RobotControllerTest, testAngleToGoal_Sector1 ){
-    setPose(3,-3,0);
-    setGoal(-1,1);
-    ASSERT_EQ(rc.AngleToGoal(),45.0);
-  }*/
+//  TEST_F(RobotControllerTest, testAngleToGoal_Sector1 ){
+//    setPose(3,-3,0);
+//    setGoal(-1,1);
+//    ASSERT_EQ(rc.AngleToGoal(),45.0);
+//  }
   /**
   * Test for a goal in sector 3
   */
-  /*TEST_F(RobotControllerTest, testAngleToGoal_Sector1 ){
-    setPose(3,-3,0);
-    setGoal(-1,-7);
-    ASSERT_EQ(rc.AngleToGoal(),135.0);
-  }*/
+//  TEST_F(RobotControllerTest, testAngleToGoal_Sector1 ){
+//    setPose(3,-3,0);
+//    setGoal(-1,-7);
+//    ASSERT_EQ(rc.AngleToGoal(),135.0);
+//  }
   /**
   * Test for a goal in sector 4
   */
-  /*TEST_F(RobotControllerTest, testAngleToGoal_Sector1 ){
-    setPose(3,-3,0);
-    setGoal(7,-7);
-    ASSERT_EQ(rc.AngleToGoal(),-135.0);
-  }*/
+//  TEST_F(RobotControllerTest, testAngleToGoal_Sector1 ){
+//    setPose(3,-3,0);
+//    setGoal(7,-7);
+//    ASSERT_EQ(rc.AngleToGoal(),-135.0);
+//  }
 }//namespace
 
 int main(int argc, char **argv) {
