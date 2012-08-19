@@ -3,6 +3,7 @@
 import random
 import math
 import sys
+import os
 
 COLORS = ["blue", "green", "black", "yellow", "red", "brown"]
 
@@ -30,6 +31,12 @@ define floorplan model
 (
   color "gray30"
   boundary 1
+  laser_return 1
+)
+
+define barcode model
+(
+  color "black"
   laser_return 1
 )
 
@@ -66,6 +73,24 @@ myrobot
 """.format(
         i=len(robots), x=x, y=y, color=COLORS[n % len(COLORS)]
     ))
+def append_barcodes():
+  barcodes = []
+  count = 0
+  for filename in os.listdir("images"):
+    barcodes.append("""\
+barcode
+( 
+  name "{name}"
+  bitmap "images/{fileName}"
+  size [ 6 4.5 0.5 ]
+  pose [ 60.0 {y}.0 0.0 0.0 ]
+)
+""".format(
+        name=filename.replace(".pgm", "", 1), fileName=filename, y=count * 8
+  ))
+    count += 1
+  return barcodes
+
 
 def generate(n, gn):
     robots = []
@@ -91,7 +116,7 @@ def generate(n, gn):
 
             append_robot(robots, i, x, y)
 
-    return HEADER + "\n".join(robots)
+    return HEADER + "\n".join(robots) + "\n".join(append_barcodes())
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
