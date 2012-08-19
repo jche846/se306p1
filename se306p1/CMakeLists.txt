@@ -40,6 +40,7 @@ set_target_properties(rotate_supervisor PROPERTIES COMPILE_DEFINITIONS ROTATE_SU
 
 rosbuild_add_executable(robot_controller
   src/controller/robot_controller.cpp)
+set_target_properties(robot_controller PROPERTIES COMPILE_DEFINITIONS ROBOT_CONTROLLER_MAIN)
 
 rosbuild_add_gtest(test_command
     test/command.cpp)
@@ -51,8 +52,9 @@ rosbuild_add_gtest(test_pose
     test/pose.cpp)
 rosbuild_add_gtest(test_vector2
     test/vector2.cpp)
-#rosbuild_add_gtest(test_robot_controller
-#    test/robot_controller.cpp)
+rosbuild_add_gtest(test_robot_controller
+    test/robot_controller.cpp
+    src/controller/robot_controller.cpp)
 rosbuild_add_rostest(test/supervisor.test)
 
 #target_link_libraries(example ${PROJECT_NAME})
