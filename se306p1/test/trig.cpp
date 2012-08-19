@@ -180,9 +180,9 @@ namespace {
 
   // FIND ROBOT POSITIONS
 
-  /**
-   * Tests zero tan
-   */
+//  /**
+//   * Tests zero tan
+//   */
 //  TEST_F(TrigTest, testFindRobotPos) {
 //
 //    // Inputs
@@ -197,31 +197,61 @@ namespace {
 
   //TODO FIND POINT FROM THETA
 
-  // The following tests may be deprecated or need to be moved to another test suite
   /**
-  * Test for a goal in sector 1
+  * Test for a goal in top left positive
   */
-  TEST_F(TrigTest, testAngleDiff_Sector1 ){
-    ASSERT_EQ(AngleDiff(10, 55),-45.0);
+  TEST_F(TrigTest, testPosAngleDiff_TL ){
+    ASSERT_EQ(AngleDiff(10, 55), 45.0);
   }
-//  /**
-//  * Test for a goal in sector 2
-//  */
-//  TEST_F(TrigTest, testAngleDiff_Sector1 ){
-//    ASSERT_EQ(AngleDiff(),45.0);
-//  }
-//  /**
-//  * Test for a goal in sector 3
-//  */
-//  TEST_F(TrigTest, testAngleDiff_Sector1 ){
-//    ASSERT_EQ(AngleDiff(),135.0);
-//  }
-//  /**
-//  * Test for a goal in sector 4
-//  */
-//  TEST_F(TrigTest, testAngleDiff_Sector1 ){
-//    ASSERT_EQ(AngleDiff(),-135.0);
-//  }
+
+  /**
+  * Test for a goal in top left negative
+  */
+  TEST_F(TrigTest, testNegAngleDiff_TL ){
+    ASSERT_EQ(AngleDiff(55, 10), -45.0);
+  }
+
+  /**
+  * Test for a goal in bottom left positive
+  */
+  TEST_F(TrigTest, testPosAngleDiff_BL ){
+    ASSERT_EQ(AngleDiff(90,135),45.0);
+  }
+
+  /**
+  * Test for a goal in bottom left negative
+  */
+  TEST_F(TrigTest, testNegAngleDiff_BL ){
+    ASSERT_EQ(AngleDiff(135,90),-45.0);
+  }
+
+  /**
+  * Test for a goal in top right positive
+  */
+  TEST_F(TrigTest, testPosAngleDiff_TR ){
+    ASSERT_EQ(AngleDiff(-10, -55), -45.0);
+  }
+
+  /**
+  * Test for a goal in top right negative
+  */
+  TEST_F(TrigTest, testNegAngleDiff_TR ){
+    ASSERT_EQ(AngleDiff(-55, -10), 45.0);
+  }
+
+  /**
+  * Test for a goal in bottom right positive
+  */
+  TEST_F(TrigTest, testPosAngleDiff_BR ){
+    ASSERT_EQ(AngleDiff(-90, -135), -45.0);
+  }
+
+  /**
+  * Test for a goal in bottom right negative
+  */
+  TEST_F(TrigTest, testNegAngleDiff_BR ){
+    ASSERT_EQ(AngleDiff(-135, -90), 45.0);
+  }
 
 } //namespace
 
