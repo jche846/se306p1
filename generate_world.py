@@ -19,6 +19,7 @@ define mylaser laser
 
 define myrobot position
 (
+  localization_origin [ 0 0 0 0 ]
   size [0.35 0.35 0.25]
   drive "diff"
   mylaser(pose [ 0.050 0.000 0.000 0.000 ])
@@ -37,6 +38,7 @@ interval_sim 100
 
 window
 ( 
+  show_data 1
   size [ 745.000 448.000 ]
   scale 30
 )
