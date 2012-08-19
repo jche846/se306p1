@@ -14,7 +14,7 @@ public:
   RotateBehavior(Supervisor &sup);
   virtual ~RotateBehavior();
 
-  static const uint64_t id_ = 1;
+  inline static uint64_t id() { return 1; }
 
   virtual void Tick();
 };

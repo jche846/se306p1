@@ -58,7 +58,7 @@ class Supervisor {
    * This method must be called regularly to ensure that messages are sent to the Robot Controllers
    */
   void DispatchMessages();
-  void RegisterBehaviors();
+  void SwitchBehavior(uint64_t id);
 
  public:
   std::map<uint64_t, std::shared_ptr<Robot>> robots_;
@@ -86,5 +86,10 @@ class Supervisor {
    * Will call Run() after finding all the RobotControllers and electing a head.
    */
   void Start();
+  template<typename T>
+
+  inline void RegisterBehavior() {
+    this->behaviorFactories_[T::id()] = &Behavior::construct<T>;
+  };
 };
 }

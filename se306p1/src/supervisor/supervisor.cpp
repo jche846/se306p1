@@ -28,7 +28,11 @@ Supervisor::Supervisor(ros::NodeHandle &nh) : nh_(nh) {
   nh_.getParam("sid", sid);
 
   this->sid_ = static_cast<uint64_t>(sid);
-  this->RegisterBehaviors();
+
+  RegisterBehaviors(*this);
+
+  // TODO: remove this, it's hardcoded!
+  this->SwitchBehavior(RotateBehavior::id());
 }
 
 void Supervisor::ansPos_callback(Position msg) {
@@ -246,11 +250,8 @@ void Supervisor::MoveNodesToDests(
   }
 }
 
-void Supervisor::RegisterBehaviors() {
-  this->behaviorFactories_[RotateBehavior::id_] = &Behavior::construct<RotateBehavior>;
-
-  // TODO: remove this code later, this hardcodes the rotate behavior
-  this->currentBehavior_ = this->behaviorFactories_[1](*this);
+void Supervisor::SwitchBehavior(uint64_t id) {
+  this->currentBehavior_ = this->behaviorFactories_[id](*this);
 }
 }
 
