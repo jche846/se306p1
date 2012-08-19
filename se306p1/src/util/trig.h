@@ -154,6 +154,43 @@ double normalizeAngle (double theta) {
 }
 
 /**
+* Finds a point that is located the distance that is diameter from the center at an angle of theta.
+*
+* @param center The center of the polygon
+* @param theta The angle from the center of the polygon that point should be
+* @param diameter The distance from the center of the polygon that the point should be
+* @return point The point that the function calculates.
+*/
+Vector2 FindPointFromTheta (Vector2 center, double theta, double diameter) {
+  double x; // x value of the point that we are calculating
+  double y; // y value of the point that we are calculating
+  if (theta < 0.0 && theta >= -90.0) {
+    // Quad 1 (top right)
+    theta = fabs(theta);
+    x = center.x_ + (diameter * DegSin(theta));
+    y = center.y_ + (diameter * DegCos(theta));
+  } else if (theta < -90.0 && theta <= -180.0) {
+    // Quad 2 (bottom right)
+    theta = fabs(theta);
+    x = center.x_ + (diameter * DegCos(theta));
+    y = center.y_ - (diameter * DegSin(theta));
+  } else if (theta > 0.0 && theta <= 90.0) {
+    // Quad 3 (top left)
+    x = center.x_ - (diameter * DegSin(theta));
+    y = center.y_ + (diameter * DegCos(theta));
+  } else if (theta > 90.0 && theta <= 180.0) {
+    // Quad4 (bottom left) 
+    x = center.x_ - (diameter * DegCos(theta));
+    y = center.y_ - (diameter * DegSin(theta));
+  } else {
+    // Throw an error as the angle is invalid
+    x = std::numeric_limits<double>::quiet_NaN();
+    y = std::numeric_limits<double>::quiet_NaN();
+  }
+  return Vector2 (x, y);
+}
+
+/**
 * Finds the points that robots should take in order to make the polygon with number of edges specified.
 *
 * Special cases to be wary of:
@@ -170,7 +207,7 @@ double normalizeAngle (double theta) {
 *
 * @return A vector of Vector2s that determines the positions that the robots should take
 */
-std::Vector<Vector2>FindRobotPositions (Vector2 center, double theta, double diameter, int numRobots, int numSides) {
+std::vector<Vector2> FindRobotPositions (Vector2 center, double theta, double diameter, int numRobots, int numSides) {
   // Handles special case of there being more sides than robots and 
   // makes sure that there will be a robot on every corner by decreasing 
   // the number of sides
@@ -185,7 +222,7 @@ std::Vector<Vector2>FindRobotPositions (Vector2 center, double theta, double dia
   }
   // Set the size of the angle change 
   double angleStepSize = 360.0/numSides;
-  std::Vector<Vector2> positions;
+  std::vector<Vector2> positions;
   // Assign the positions of the vertexes of the polygon
   for (int i = 0 ; i < numSides ; i++) {
     positions.push_back(FindPointFromTheta(center, (theta + i*angleStepSize), diameter));
@@ -240,43 +277,6 @@ std::Vector<Vector2>FindRobotPositions (Vector2 center, double theta, double dia
     }
   }
   return positions;
-}
-
-/**
-* Finds a point that is located the distance that is diameter from the center at an angle of theta.
-*
-* @param center The center of the polygon
-* @param theta The angle from the center of the polygon that point should be
-* @param diameter The distance from the center of the polygon that the point should be
-* @return point The point that the function calculates.
-*/
-Vector2 FindPointFromTheta (Vector2 center, double theta, double diameter) {
-  double x; // x value of the point that we are calculating
-  double y; // y value of the point that we are calculating
-  if (theta < 0.0 && theta >= -90.0) {
-    // Quad 1 (top right)
-    theta = fabs(theta);
-    x = center.x_ + (diameter * DegSin(theta));
-    y = center.y_ + (diameter * DegCos(theta));
-  } else if (theta < -90.0 && theta <= -180.0) {
-    // Quad 2 (bottom right)
-    theta = fabs(theta);
-    x = center.x_ + (diameter * DegCos(theta));
-    y = center.y_ - (diameter * DegSin(theta));
-  } else if (theta > 0.0 && theta <= 90.0) {
-    // Quad 3 (top left)
-    x = center.x_ - (diameter * DegSin(theta));
-    y = center.y_ + (diameter * DegCos(theta));
-  } else if (theta > 90.0 && theta <= 180.0) {
-    // Quad4 (bottom left) 
-    x = center.x_ - (diameter * DegCos(theta));
-    y = center.y_ - (diameter * DegSin(theta));
-  } else {
-    // Throw an error as the angle is invalid
-    x = std::numeric_limits<double>::quiet_NaN();
-    y = std::numeric_limits<double>::quiet_NaN();
-  }
-  return Vector2 (x, y);
 }
 
 }
