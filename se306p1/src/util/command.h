@@ -1,5 +1,6 @@
 #pragma once
 
+#include <se306p1/Scan.h>
 #include <se306p1/Do.h>
 #include <se306p1/Go.h>
 
@@ -35,6 +36,7 @@ class Command {
     this->lv = std::numeric_limits<double>::quiet_NaN();
     this->av = std::numeric_limits<double>::quiet_NaN();
   }
+
   Command(Do msg) {
     this->x = std::numeric_limits<double>::quiet_NaN();
     this->y = std::numeric_limits<double>::quiet_NaN();

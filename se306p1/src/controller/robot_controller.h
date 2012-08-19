@@ -10,6 +10,7 @@
 #include <sensor_msgs/LaserScan.h>
 #include <se306p1/AskPosition.h>
 #include <se306p1/Position.h>
+#include <se306p1/Scan.h>
 #include <se306p1/Do.h>
 #include <se306p1/Go.h>
 #include "../util/pose.h"
@@ -30,7 +31,6 @@ enum class RobotState {
   IDLE,
   DOING,
   GOING,
-  SCANNINGINIT,
   SCANNING
 };
 
@@ -41,8 +41,8 @@ enum class GoStep {
 };
 
 enum class ScanStep {
+  INIT,
   SCANNING,
-  PASSING,
   FINISHED
 };
 
@@ -89,7 +89,7 @@ class RobotController {
   ros::Subscriber baseScan_;
   ros::Publisher twist_;
 
-  // Coutdown clock for Scanning
+  // Count down clock for Scanning
   double scanningStart_;
 
  public:
@@ -97,6 +97,7 @@ class RobotController {
   virtual ~RobotController();
   void clock_callback(rosgraph_msgs::Clock msg);
   void odom_callback(nav_msgs::Odometry msg);
+  void scan_callback(se306p1::Scan msg);
   void go_callback(Go msg);
   void do_callback(Do msg);
   void askPosition_callback(AskPosition msg);
@@ -105,6 +106,7 @@ class RobotController {
   void PublishVelocity();
   void Scan();
   void MoveTowardsGoal();
+  void SetScanning(se306p1::Scan msg);
   void SetGoing(Go msg);
   void SetDoing(Do msg);
   void ExecuteCommand(Command cmd);

@@ -5,10 +5,11 @@
 #define FREQUENCY 100 // The number of ticks per second the robot will execute.
 #define DEFAULT_LV 1.0
 #define DEFAULT_AV 2.0
+#define SCAN_TIME 5
 
 namespace se306p1 {
 RobotController::RobotController(ros::NodeHandle &nh, uint64_t id = 0) {
-  // Node handler ti talk to ROS.
+  // Node handler to talk to ROS.
   this->nh_ = nh;
 
   // Initialise the robot as stationary with a given ID.
@@ -107,6 +108,19 @@ void RobotController::odom_callback(nav_msgs::Odometry msg) {
 //      "R%" PRIu64 " ODOM | x=%f, y=%f, theta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->pose_.theta_, this->lv_, this->av_);
 }
 
+void RobotController::scan_callback(se306p1::Scan msg) {
+  if (msg.enqueue
+      && (this->state_ != RobotState::IDLE
+          || this->state_ != RobotState::FINISHED)) {
+    this->commands_.push_back(Command(msg));
+    ROS_INFO( "R%" PRIu64 " SCAN | q=true", this->robot_id_);
+
+  } else {
+    this->InterruptCommandQueue(Command(msg));
+    ROS_INFO( "R%" PRIu64 " SCAN | q=false", this->robot_id_);
+  }
+}
+
 /**
  * Called when the supervisor publishes a Go message for this robot. If the
  * message is to be enqueued, the message is put on the queue. Otherwise, the
@@ -185,11 +199,9 @@ void RobotController::baseScan_callback(sensor_msgs::LaserScan msg) {
       }
     }
 
-    ROS_INFO(
-        "R%" PRIu64 " SCANNED %d", this->robot_id_, barCount);
+    ROS_INFO( "R%" PRIu64 " SCANNED %d", this->robot_id_, barCount);
 
     this->scanResult_ = barCount;
-    this->state_ = RobotState::IDLE;
   }
 }
 
@@ -318,11 +330,31 @@ void RobotController::MoveTowardsGoal() {
 }
 
 void RobotController::Scan() {
-  if (ros::Time::now().toSec() - scanningStart_ > 5) {
-    // TODO: call post scanning command
-    ROS_INFO("Scan Result: %d", this->scanResult_);
-    this->state_ = RobotState::IDLE;
+  if (this->scanstep_ == ScanStep::INIT) {
+    this->scanningStart_ = ros::Time::now().toSec();
+    this->scanstep_ = ScanStep::SCANNING;
   }
+
+  if (this->scanstep_ == ScanStep::SCANNING) {
+    if (ros::Time::now().toSec() - this->scanningStart_ >= SCAN_TIME) {
+      this->scanstep_ = ScanStep::FINISHED;
+    }
+  }
+
+  if (this->scanstep_ == ScanStep::FINISHED) {
+    if (this->scanResult_ == 0) {
+      ROS_WARN("R%" PRIu64 " Scanned nothing", this->robot_id_);
+      this->scanstep_ = ScanStep::INIT;
+    } else {
+      ROS_INFO("R%" PRIu64 " Scanned %d", this->robot_id_, this->scanResult_);
+      this->state_ = RobotState::FINISHED;
+    }
+  }
+}
+
+void RobotController::SetScanning(se306p1::Scan msg) {
+  this->state_ = RobotState::SCANNING;
+  this->scanstep_ = ScanStep::INIT;
 }
 
 /**
@@ -376,14 +408,14 @@ void RobotController::SetDoing(Do msg) {
  * @param cmd The Do or Go command to be executed.
  */
 void RobotController::ExecuteCommand(Command cmd) {
-  if (cmd.isDo) {
+  if (cmd.type == CommandType::DO) {
     Do msg;
 
     msg.lv = cmd.lv;
     msg.av = cmd.av;
 
     this->SetDoing(msg);
-  } else {
+  } else if (cmd.type == CommandType::GO) {
     Go msg;
 
     msg.x = cmd.x;
@@ -391,6 +423,9 @@ void RobotController::ExecuteCommand(Command cmd) {
     msg.theta = cmd.theta;
 
     this->SetGoing(msg);
+  } else if (cmd.type == CommandType::SCAN) {
+    se306p1::Scan msg;
+    this->SetScanning(msg);
   }
 }
 
