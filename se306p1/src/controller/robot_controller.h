@@ -40,6 +40,12 @@ enum class GoStep {
   ALIGNING
 };
 
+enum class ScanStep {
+  SCANNING,
+  PASSING,
+  FINISHED
+};
+
 class RobotController {
  private:
   // Robot identification
@@ -63,6 +69,7 @@ class RobotController {
 
   // Current step of Go command
   GoStep gostep_;
+  ScanStep scanstep_;
 
   // Command queue
   std::deque<Command> commands_;
@@ -96,7 +103,6 @@ class RobotController {
   void baseScan_callback(sensor_msgs::LaserScan msg);
   void AnswerPosition();
   void PublishVelocity();
-  void UpdateVelocity();
   void Scan();
   void MoveTowardsGoal();
   void SetGoing(Go msg);

@@ -71,8 +71,16 @@ RobotController::~RobotController() {
 }
 
 void RobotController::clock_callback(rosgraph_msgs::Clock msg) {
-  // do stuff every stage tick
-  this->UpdateVelocity();
+  if (this->state_ == RobotState::GOING) {  // If the robot is going somewhere, keep trying to go there
+    this->MoveTowardsGoal();
+  } else if (this->state_ == RobotState::DOING) {  // If the robot is doing, keep doing.
+    this->PublishVelocity();
+  } else if (this->state_ == RobotState::FINISHED) {  // Get the next command.
+    this->DequeueCommand();
+    this->AnswerPosition();
+  } else if (this->state_ == RobotState::SCANNING) {
+    this->Scan();
+  }
 }
 
 /**
@@ -163,40 +171,25 @@ void RobotController::askPosition_callback(AskPosition msg) {
  * @param msg The LaserScan message containing laser scan data for this robot.
  */
 void RobotController::baseScan_callback(sensor_msgs::LaserScan msg) {
-  int barCount = 0;
-  if (this->state_ == RobotState::SCANNINGINIT) {
-    //
-    for (int i = 0; i < 180; i++) {
-      if (msg.ranges[i] != 5.0) {
-        this->state_ = RobotState::SCANNING;
-        this->scanningStart_ = ros::Time::now().toSec();
-        break;
-      }
-    }
-  } else if (this->state_ == RobotState::SCANNING) {
-    //count number of bars
+  if (this->state_ == RobotState::SCANNING) {
+    int barCount = 0;
+
     for (int i = 0; i < 180; i++) {
       if (msg.ranges[i] != 5.0) {
         barCount++;
-        for (; msg.ranges[i] != 5.0 && i < 180; i++)
-          ;
+
+        // Run over the current bar
+        while (msg.ranges[i] != 5.0 && i < 180) {
+          i++;
+        }
       }
     }
 
-    if (barCount == 0) {
-      this->state_ = RobotState::SCANNINGINIT;
-      ROS_WARN("Nothing Scanned at end of 5 seconds. Rescanning.");
-    } else {
-      if (barCount == 1) {
-        this->scanResult_ = 1;
-      } else if (barCount == 2) {
-        this->scanResult_ = 2;
-      } else if (barCount == 3) {
-        this->scanResult_ = 3;
-      } else if (barCount == 4) {
-        this->scanResult_ = 4;
-      }
-    }
+    ROS_INFO(
+        "R%" PRIu64 " SCANNED %d", this->robot_id_, barCount);
+
+    this->scanResult_ = barCount;
+    this->state_ = RobotState::IDLE;
   }
 }
 
@@ -225,24 +218,6 @@ void RobotController::PublishVelocity() {
 }
 
 /**
- * Depending on the robot's state and goals, set the linear and angular
- * velocity for the next tick.
- */
-void RobotController::UpdateVelocity() {
-  if (this->state_ == RobotState::GOING) {  // If the robot is going somewhere, keep trying to go there
-    this->MoveTowardsGoal();
-  } else if (this->state_ == RobotState::DOING) {  // If the robot is doing, keep doing.
-    this->PublishVelocity();
-  } else if (this->state_ == RobotState::FINISHED) {  // Get the next command.
-    this->DequeueCommand();
-    this->AnswerPosition();
-  } else if (this->state_ == RobotState::SCANNING
-      || this->state_ == RobotState::SCANNINGINIT) {
-    this->Scan();
-  }
-}
-
-/**
  * Execute the next tick of movement when attempting to reach a goal position
  * while executing a Go command. When executing a Go command, the robot will
  * first rotate to point at it's destination. Next, the robot will begin to
@@ -250,13 +225,13 @@ void RobotController::UpdateVelocity() {
  * robot will align to the specified angle.
  */
 void RobotController::MoveTowardsGoal() {
-  // If the robot is already at the position, we can skip aiming at it and
-  // moving to it.
+// If the robot is already at the position, we can skip aiming at it and
+// moving to it.
   if ((this->goal_.position_ - this->pose_.position_).Length() < 0.01) {
     this->gostep_ = GoStep::ALIGNING;
   }
 
-  // Aim at the goal position.
+// Aim at the goal position.
   if (this->gostep_ == GoStep::AIMING) {
     if (this->goal_.theta_ == 999) {
       ROS_INFO("R%" PRIu64 " Skipping alned", this->robot_id_);
@@ -285,7 +260,7 @@ void RobotController::MoveTowardsGoal() {
     }
   }
 
-  // Move towards the goal position
+// Move towards the goal position
   if (this->gostep_ == GoStep::MOVING) {
     // Figure out the distance from the goal the robot currently is.
     double distance_to_goal = (this->goal_.position_ - this->pose_.position_)
@@ -304,7 +279,7 @@ void RobotController::MoveTowardsGoal() {
     }
   }
 
-  // Rotate into the given angle.
+// Rotate into the given angle.
   if (this->gostep_ == GoStep::ALIGNING) {
     if (this->goal_.theta_ == 999) {
       ROS_INFO("R%" PRIu64 " Skipping alned", this->robot_id_);
@@ -338,24 +313,18 @@ void RobotController::MoveTowardsGoal() {
     }
   }
 
-  // Update the lv and the av on Stage.
+// Update the lv and the av on Stage.
   this->PublishVelocity();
 }
 
-/**
- *
- *
- */
 void RobotController::Scan() {
-  if (this->state_ == RobotState::SCANNING) {
-    if (ros::Time::now().toSec() - scanningStart_ > 5) {
-      // TODO: call post scanning command
-      ROS_INFO("Scan Result: %d", this->scanResult_);
-      this->state_ = RobotState::IDLE;
-    }
-    // wait
+  if (ros::Time::now().toSec() - scanningStart_ > 5) {
+    // TODO: call post scanning command
+    ROS_INFO("Scan Result: %d", this->scanResult_);
+    this->state_ = RobotState::IDLE;
   }
 }
+
 /**
  * Set the robot to Go as per to Go message.
  *
@@ -363,10 +332,10 @@ void RobotController::Scan() {
  * should try and reach.
  */
 void RobotController::SetGoing(Go msg) {
-  // Set the robot state to going.
+// Set the robot state to going.
   this->state_ = RobotState::GOING;
 
-  // The go starts by pointing at the destination.
+// The go starts by pointing at the destination.
   this->gostep_ = GoStep::AIMING;
 
   Pose p;
@@ -449,13 +418,13 @@ void RobotController::DequeueCommand() {
  * @param cmd The command to interrupt the command queue with.
  */
 void RobotController::InterruptCommandQueue(Command cmd) {
-  // Clear the current command queue.
+// Clear the current command queue.
   this->commands_.clear();
 
-  // Stop Going and Doing.
+// Stop Going and Doing.
   this->state_ = RobotState::IDLE;
 
-  // Execute the interrupting command.
+// Execute the interrupting command.
   this->ExecuteCommand(cmd);
 }
 
