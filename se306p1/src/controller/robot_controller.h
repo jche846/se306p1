@@ -77,7 +77,7 @@ class RobotController {
   ros::Publisher ansPosPublisher_;
 
   // Stage pub/subs
-  ros::Subscriber clock_
+  ros::Subscriber clock_;
   ros::Subscriber odom_;
   ros::Subscriber baseScan_;
   ros::Publisher twist_;
