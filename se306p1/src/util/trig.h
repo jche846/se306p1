@@ -142,9 +142,32 @@ double AngleBetweenPoints(const Vector2 &p1, const Vector2 &p2) {
 * @return point The point that the function calculates.
 */
 Vector2 FindPointFromTheta (Vector2 center, double theta, double diameter) {
-
-
-  return null;
+  double x; // x value of the point that we are calculating
+  double y; // y value of the point that we are calculating
+  if (theta < 0.0 && theta >= -90.0) {
+    // Quad 1 (top right)
+    theta = fabs(theta);
+    x = center.x_ + (diameter * DegSin(theta));
+    y = center.y_ + (diameter * DegCos(theta));
+  } else if (theta < -90.0 && theta <= -180.0) {
+    // Quad 2 (bottom right)
+    theta = fabs(theta);
+    x = center.x_ + (diameter * DegCos(theta));
+    y = center.y_ - (diameter * DegSin(theta));
+  } else if (theta > 0.0 && theta <= 90.0) {
+    // Quad 3 (top left)
+    x = center.x_ - (diameter * DegSin(theta));
+    y = center.y_ + (diameter * DegCos(theta));
+  } else if (theta > 90.0 && theta <= 180.0) {
+    // Quad4 (bottom left) 
+    x = center.x_ - (diameter * DegCos(theta));
+    y = center.y_ - (diameter * DegSin(theta));
+  } else {
+    // Throw an error as the angle is invalid
+    x = std::numeric_limits<double>::quiet_NaN();
+    y = std::numeric_limits<double>::quiet_NaN();
+  }
+  return Vector2 (x, y);
 }
 
 }
