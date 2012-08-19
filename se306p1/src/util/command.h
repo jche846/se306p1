@@ -24,10 +24,10 @@ class Command {
   double y;
   double theta;
 
+  /**
+   * A null command.
+   */
   Command() {
-    /**
-     * Set the default values to 0 and make the command a Go command
-     */
     this->enqueue = false;
     this->type = CommandType::NONE;
     this->x = std::numeric_limits<double>::quiet_NaN();
@@ -37,33 +37,34 @@ class Command {
     this->av = std::numeric_limits<double>::quiet_NaN();
   }
 
+  /**
+   * Constructor for Do commands
+   */
   Command(Do msg) {
     this->x = std::numeric_limits<double>::quiet_NaN();
     this->y = std::numeric_limits<double>::quiet_NaN();
     this->theta = std::numeric_limits<double>::quiet_NaN();
-    /**
-     * Constructor for Do commands
-     */
     this->lv = msg.lv;
     this->av = msg.av;
-    /**
-     * isDo signifies if this->command is a Do or a Go.
-     */
-    this->type = CommandType::DO;
     this->enqueue = msg.enqueue;
+
+    // CommandType signifies if this->command is a Do or a Go.
+    this->type = CommandType::DO;
   }
 
+  /**
+   * Constructor for Go commands
+   */
   Command(Go msg) {
-    /**
-     * Constructor for Go commands
-     */
     this->x = msg.x;
     this->y = msg.y;
     this->theta = msg.theta;
+    this->enqueue = msg.enqueue;
+
     this->lv = std::numeric_limits<double>::quiet_NaN();
     this->av = std::numeric_limits<double>::quiet_NaN();
+
     this->type = CommandType::GO;
-    this->enqueue = msg.enqueue;
   }
 
   Command(Scan msg) {
@@ -77,9 +78,6 @@ class Command {
   }
 
   virtual ~Command() {
-    /**
-     * Deconstruct
-     */
   }
 };
 }

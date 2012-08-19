@@ -76,11 +76,11 @@ void RobotController::clock_callback(rosgraph_msgs::Clock msg) {
     this->MoveTowardsGoal();
   } else if (this->state_ == RobotState::DOING) {  // If the robot is doing, keep doing.
     this->PublishVelocity();
+  } else if (this->state_ == RobotState::SCANNING) {
+    this->Scan();
   } else if (this->state_ == RobotState::FINISHED) {  // Get the next command.
     this->DequeueCommand();
     this->AnswerPosition();
-  } else if (this->state_ == RobotState::SCANNING) {
-    this->Scan();
   }
 }
 
@@ -199,7 +199,7 @@ void RobotController::baseScan_callback(sensor_msgs::LaserScan msg) {
       }
     }
 
-    ROS_INFO( "R%" PRIu64 " SCANNED %d", this->robot_id_, barCount);
+//    ROS_INFO( "R%" PRIu64 " SCANNED %d", this->robot_id_, barCount);
 
     this->scanResult_ = barCount;
   }
@@ -246,7 +246,6 @@ void RobotController::MoveTowardsGoal() {
 // Aim at the goal position.
   if (this->gostep_ == GoStep::AIMING) {
     if (this->goal_.theta_ == 999) {
-      ROS_INFO("R%" PRIu64 " Skipping alned", this->robot_id_);
       this->gostep_ = GoStep::MOVING;
     } else {
       // Figure out the angle that the robot will need to be at to be facing
@@ -259,8 +258,8 @@ void RobotController::MoveTowardsGoal() {
 
       // If the difference is small, we have finished aiming.
       if (-0.001 < diff && diff < 0.001) {
-        ROS_INFO(
-            "R%" PRIu64 " aimed | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
+//        ROS_INFO(
+//            "R%" PRIu64 " aimed | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
 
         this->gostep_ = GoStep::MOVING;
       } else {
@@ -280,8 +279,8 @@ void RobotController::MoveTowardsGoal() {
 
     // If the distance is small, we have reached the goal position.
     if (distance_to_goal < 0.1) {
-      ROS_INFO(
-          "R%" PRIu64 " moved | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
+//      ROS_INFO(
+//          "R%" PRIu64 " moved | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
 
       this->gostep_ = GoStep::ALIGNING;
     } else {
@@ -294,8 +293,6 @@ void RobotController::MoveTowardsGoal() {
 // Rotate into the given angle.
   if (this->gostep_ == GoStep::ALIGNING) {
     if (this->goal_.theta_ == 999) {
-      ROS_INFO("R%" PRIu64 " Skipping alned", this->robot_id_);
-
       this->lv_ = 0.0;
       this->av_ = 0.0;
       this->state_ = RobotState::FINISHED;
@@ -307,9 +304,9 @@ void RobotController::MoveTowardsGoal() {
       // If the difference is small, the robot is aligned and the Go is
       // finished.
       if (-0.001 < diff && diff < 0.001) {
-        ROS_INFO(
-            "R%" PRIu64 " alned | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
-        ROS_INFO("R%" PRIu64 " FINISHED GO", this->robot_id_);
+//        ROS_INFO(
+//            "R%" PRIu64 " alned | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
+//        ROS_INFO("R%" PRIu64 " FINISHED GO", this->robot_id_);
 
         // Stop the robot moving.
         this->lv_ = 0.0;
@@ -396,8 +393,8 @@ void RobotController::SetDoing(Do msg) {
   this->lv_ = msg.lv;
   this->av_ = msg.av;
 
-  ROS_INFO(
-      "R%" PRIu64 " STARTING DO: lv: %f av: %f", this->robot_id_, msg.lv, msg.av);
+//  ROS_INFO(
+//      "R%" PRIu64 " STARTING DO: lv: %f av: %f", this->robot_id_, msg.lv, msg.av);
 
   this->PublishVelocity();
 }
@@ -409,6 +406,7 @@ void RobotController::SetDoing(Do msg) {
  */
 void RobotController::ExecuteCommand(Command cmd) {
   if (cmd.type == CommandType::DO) {
+    ROS_INFO("R%" PRIu64 " EXECUTING A DO", this->robot_id_);
     Do msg;
 
     msg.lv = cmd.lv;
@@ -416,6 +414,7 @@ void RobotController::ExecuteCommand(Command cmd) {
 
     this->SetDoing(msg);
   } else if (cmd.type == CommandType::GO) {
+    ROS_INFO("R%" PRIu64 " EXECUTING A GO", this->robot_id_);
     Go msg;
 
     msg.x = cmd.x;
@@ -424,6 +423,7 @@ void RobotController::ExecuteCommand(Command cmd) {
 
     this->SetGoing(msg);
   } else if (cmd.type == CommandType::SCAN) {
+    ROS_INFO("R%" PRIu64 " EXECUTING A SCAN", this->robot_id_);
     se306p1::Scan msg;
     this->SetScanning(msg);
   }
@@ -436,11 +436,14 @@ void RobotController::ExecuteCommand(Command cmd) {
  */
 void RobotController::DequeueCommand() {
   if (this->commands_.empty()) {  // Do nothing if there are no more commands.
+    ROS_INFO("R%" PRIu64 " COMMAND QUEUE EMPTY", this->robot_id_);
+
     Do msg;
     msg.lv = 0;
     msg.av = 0;
     SetDoing(msg);
   } else {
+    ROS_INFO("R%" PRIu64 " DEQUEUING CMD", this->robot_id_);
     Command cmd = this->commands_.front();
     this->commands_.pop_front();
     this->ExecuteCommand(cmd);

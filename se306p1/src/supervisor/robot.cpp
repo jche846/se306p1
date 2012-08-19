@@ -54,6 +54,11 @@ void Robot::DispatchCommand() {
     msg.av = c.av;
     msg.enqueue = c.enqueue;
 
+    if (c.enqueue)
+      ROS_INFO("R%" PRIu64 " | DISPATCHING DO, true", this->id_);
+    else
+      ROS_INFO("R%" PRIu64 " | DISPATCHING DO, false", this->id_);
+
     this->doPublisher_.publish(msg);
   } else if (c.type == CommandType::GO) {
     se306p1::Go msg;
@@ -61,6 +66,11 @@ void Robot::DispatchCommand() {
     msg.y = c.y;
     msg.theta = c.theta;
     msg.enqueue = c.enqueue;
+
+    if (c.enqueue)
+      ROS_INFO("R%" PRIu64 " | DISPATCHING GO, true", this->id_);
+    else
+      ROS_INFO("R%" PRIu64 " | DISPATCHING GO, false", this->id_);
 
     this->goPublisher_.publish(msg);
   }
