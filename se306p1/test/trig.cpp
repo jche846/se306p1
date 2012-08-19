@@ -4,32 +4,76 @@
 
 using namespace se306p1;
 namespace {
-class TrigTest : public testing::Test {
-   public:
+  class TrigTest : public testing::Test {
+    public:
 
-    TrigTest() {
-    }
+      TrigTest() {
+      }
 
-    virtual ~TrigTest() {
-    }
+      virtual ~TrigTest() {
+      }
 
-    virtual void SetUp() {
-    }
+      virtual void SetUp() {
+      }
 
-    virtual void TearDown() {
-    }
+      virtual void TearDown() {
+      }
   };
 
-  TEST_F(TrigTest, testDegreesToRadians) {
-    double result = M_PI/4;
-    ASSERT_NEAR(result, DegreesToRadians(45), 0.0001);
+  // DEGREES TO RADIANS
+
+  /**
+   * Tests that a positive double converts from degrees to radians
+   */
+  TEST_F(TrigTest, testPosDegreesToRadians) {
+    double result = M_PI / 16;
+    ASSERT_NEAR(result, DegreesToRadians(11.25), 0.0001);
   }
 
-  TEST_F(TrigTest, testRadiansToDegrees) {
-    double input = M_PI/10;
-    double result = 18;
+  /**
+   * Tests that a negative double converts from degrees to radians
+   */
+  TEST_F(TrigTest, testNegDegreesToRadians) {
+    double result = -(M_PI / 16);
+    ASSERT_NEAR(result, DegreesToRadians(-11.25), 0.0001);
+  }
+
+  /**
+   * Tests that a zero converts from degrees to radians
+   */
+  TEST_F(TrigTest, testZeroDegreesToRadians) {
+    ASSERT_EQ(0, DegreesToRadians(0));
+  }
+
+  // RADIANS TO DEGREES
+
+  /**
+   * Tests that a a positive double converts from radians to degrees
+   */
+  TEST_F(TrigTest, testPosRadiansToDegrees) {
+    double input = M_PI / 16;
+    double result = 11.25;
     ASSERT_NEAR(result, RadiansToDegrees(input), 0.0001);
   }
+
+  /**
+   * Tests that a negative double converts from radians to degrees
+   */
+  TEST_F(TrigTest, testNegRadiansToDegrees) {
+    double input = -(M_PI / 16);
+    double result = -11.25;
+    ASSERT_NEAR(result, RadiansToDegrees(input), 0.0001);
+  }
+
+
+
+  /**
+   * Tests that a zero converts from radians to degrees
+   */
+  TEST_F(TrigTest, testZeroRadiansToDegrees) {
+    ASSERT_EQ(0, RadiansToDegrees(0));
+  }
+
   TEST_F(TrigTest, testDegSin) {
     ASSERT_NEAR(0.5, DegSin(30), 0.0001);
   }
@@ -42,7 +86,7 @@ class TrigTest : public testing::Test {
   TEST_F(TrigTest, testDegATan) {
     ASSERT_NEAR(45, DegATan(1), 0.0001);
   }
-}//namespace
+} //namespace
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
