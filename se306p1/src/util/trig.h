@@ -19,7 +19,7 @@ inline double DegreesToRadians(double degrees) {
 /**
  * Converts a given double from radians to degrees.
  * Paranmeters: radians - a double representing an angle in radians
- * Returns: the same angle measured in degress
+ * Returns: the same angle measured in degrees
  */
 inline double RadiansToDegrees(double radians) {
   return radians * (180.0 / M_PI);
@@ -28,7 +28,7 @@ inline double RadiansToDegrees(double radians) {
 /**
  * Calculates the Sine of an angle in degrees
  * Parameters: degrees - the angle whose sine is to be computed in degrees
- * Returns: the sine of that angle in degres
+ * Returns: the sine of that angle in degrees
  */
 inline double DegSin(double degrees) {
   return sin(DegreesToRadians(degrees));
@@ -37,7 +37,7 @@ inline double DegSin(double degrees) {
 /**
  * Calculates the Cosine of an angle in degrees
  * Parameters: degrees - the angle whose Cosine is to be computed in degrees
- * Returns: the Cosine of that angle in degres
+ * Returns: the Cosine of that angle in degrees
  */
 inline double DegCos(double degrees) {
   return cos(DegreesToRadians(degrees));
@@ -46,7 +46,7 @@ inline double DegCos(double degrees) {
 /**
  * Calculates the Tan of an angle in degrees
  * Parameters: degrees - the angle whose tan is to be computed in degrees
- * Returns: the tan of that angle in degres
+ * Returns: the tan of that angle in degrees
  */
 inline double DegTan(double degrees) {
   return tan(DegreesToRadians(degrees));
@@ -55,7 +55,7 @@ inline double DegTan(double degrees) {
 /**
  * Calculates the Sine of an angle in degrees
  * Parameters: degrees - the angle whose sine is to be computed in degrees
- * Returns: the sine of that angle in degres
+ * Returns: the sine of that angle in degrees
  */
 inline double DegATan(double x) {
   return (double) RadiansToDegrees(atan(x));
