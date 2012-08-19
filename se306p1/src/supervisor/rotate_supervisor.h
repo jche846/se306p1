@@ -11,6 +11,7 @@ class RotateSupervisor : public Supervisor {
   std::vector<Pose> lineLocations_;
 
  public:
+  RotateSupervisor(ros::NodeHandle &);
   virtual ~RotateSupervisor();
   /**
    * Run the supervisor.
