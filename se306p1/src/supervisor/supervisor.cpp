@@ -29,7 +29,7 @@ Supervisor::Supervisor(ros::NodeHandle &nh) : nh_(nh) {
 
   this->sid_ = static_cast<uint64_t>(sid);
 
-  RegisterBehaviors(*this);
+  this->RegisterBehaviors();
 
   // TODO: remove this, it's hardcoded!
   this->SwitchBehavior(RotateBehavior::id());

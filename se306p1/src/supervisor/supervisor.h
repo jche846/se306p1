@@ -60,6 +60,13 @@ class Supervisor {
   void DispatchMessages();
   void SwitchBehavior(uint64_t id);
 
+  template<typename T>
+  inline void RegisterBehavior() {
+    this->behaviorFactories_[T::id()] = &Behavior::construct<T>;
+  };
+
+  void RegisterBehaviors();
+
  public:
   std::map<uint64_t, std::shared_ptr<Robot>> robots_;
   std::shared_ptr<Robot> clusterHead_;
@@ -86,10 +93,5 @@ class Supervisor {
    * Will call Run() after finding all the RobotControllers and electing a head.
    */
   void Start();
-  template<typename T>
-
-  inline void RegisterBehavior() {
-    this->behaviorFactories_[T::id()] = &Behavior::construct<T>;
-  };
 };
 }
