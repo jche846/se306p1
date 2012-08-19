@@ -6,10 +6,17 @@
 #include <limits>
 
 namespace se306p1 {
+enum class CommandType {
+  NONE,
+  DO,
+  GO,
+  SCAN
+};
+
 class Command {
  public:
   bool enqueue;
-  bool isDo;
+  CommandType type;
   double lv;
   double av;
   double x;
@@ -21,7 +28,7 @@ class Command {
      * Set the default values to 0 and make the command a Go command
      */
     this->enqueue = false;
-    this->isDo = false;
+    this->type = CommandType::NONE;
     this->x = std::numeric_limits<double>::quiet_NaN();
     this->y = std::numeric_limits<double>::quiet_NaN();
     this->theta = std::numeric_limits<double>::quiet_NaN();
@@ -40,7 +47,7 @@ class Command {
     /**
      * isDo signifies if this->command is a Do or a Go.
      */
-    this->isDo = true;
+    this->type = CommandType::DO;
     this->enqueue = msg.enqueue;
   }
 
@@ -53,13 +60,23 @@ class Command {
     this->theta = msg.theta;
     this->lv = std::numeric_limits<double>::quiet_NaN();
     this->av = std::numeric_limits<double>::quiet_NaN();
-    this->isDo = false;
+    this->type = CommandType::GO;
     this->enqueue = msg.enqueue;
+  }
+
+  Command(Scan msg) {
+    this->type = CommandType::SCAN;
+    this->enqueue = msg.enqueue;
+    this->x = std::numeric_limits<double>::quiet_NaN();
+    this->y = std::numeric_limits<double>::quiet_NaN();
+    this->theta = std::numeric_limits<double>::quiet_NaN();
+    this->lv = std::numeric_limits<double>::quiet_NaN();
+    this->av = std::numeric_limits<double>::quiet_NaN();
   }
 
   virtual ~Command() {
     /**
-     * Deconstrucot
+     * Deconstruct
      */
   }
 };
