@@ -17,10 +17,13 @@
 
 namespace se306p1 {
 class Supervisor {
+  /**
+   * Describes the state of the supervisor.
+   */
   enum class State {
     DISCOVERY,
     WAITING,
-    CONTROLLING,
+    CONTROLLING
   };
 
  private:
@@ -28,6 +31,7 @@ class Supervisor {
 
   void MoveNodesToDests(const std::vector<std::shared_ptr<Robot> > &nodes,
                         const std::vector<Pose> &poses);
+
   std::vector<Pose> FindRobotDests();
 
   std::map<uint64_t, std::shared_ptr<Robot>>::iterator dispatchIt_;
@@ -37,10 +41,25 @@ class Supervisor {
   ros::Publisher askPosPublisher_;
 
   std::map<uint64_t, Behavior::BehaviorFactory *> behaviorFactories_;
+
+  /**
+   * The behavior that the supervisor is currently executing.
+   */
   std::unique_ptr<Behavior> currentBehavior_;
 
+  /**
+   * The ID of the supervisor.
+   */
   uint64_t sid_;
+
+  /**
+   * The lower end of the supervised range.
+   */
   uint64_t rmin_;
+
+  /**
+   * The upper end of the supervised range.
+   */
   uint64_t rmax_;
 
   /**
@@ -58,20 +77,45 @@ class Supervisor {
    * This method must be called regularly to ensure that messages are sent to the Robot Controllers
    */
   void DispatchMessages();
+
+  /**
+   * Switch the behavior of the supervisor to one named by the given ID.
+   */
   void SwitchBehavior(uint64_t id);
 
+  /**
+   * Regstier a behavior with the map of factories.
+   */
   template<typename T>
   inline void RegisterBehavior() {
     this->behaviorFactories_[T::id()] = &Behavior::construct<T>;
   };
 
+  /**
+   * Register all behaviors with the map of factories. Implemented in
+   * behaviors/all.h
+   */
   void RegisterBehaviors();
 
  public:
+  /**
+   * The robots supervised in this cluster.
+   */
   std::map<uint64_t, std::shared_ptr<Robot>> robots_;
+
+  /**
+   * The head of the supervised cluster.
+   */
   std::shared_ptr<Robot> clusterHead_;
+
+  /**
+   * The non-head robots of the cluster.
+   */
   std::vector<std::shared_ptr<Robot>> nonHeadRobots_;
 
+  /**
+   * Create a supervisor attached to a given NodeHandle.
+   */
   Supervisor(ros::NodeHandle &);
 
   /**
