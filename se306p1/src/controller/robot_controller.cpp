@@ -5,10 +5,11 @@
 #define FREQUENCY 100 // The number of ticks per second the robot will execute.
 #define DEFAULT_LV 1.0
 #define DEFAULT_AV 2.0
+#define SCAN_TIME 5
 
 namespace se306p1 {
 RobotController::RobotController(ros::NodeHandle &nh, uint64_t id = 0) {
-  // Node handler ti talk to ROS.
+  // Node handler to talk to ROS.
   this->nh_ = nh;
 
   // Initialise the robot as stationary with a given ID.
@@ -70,9 +71,23 @@ RobotController::~RobotController() {
   // TODO Auto-generated destructor stub
 }
 
+/**
+ * On each clock callback, execute the robot behaviour according to its
+ * internal state.
+ *
+ * @param msg The current time since Stage was launched.
+ */
 void RobotController::clock_callback(rosgraph_msgs::Clock msg) {
-  // do stuff every stage tick
-  this->UpdateVelocity();
+  if (this->state_ == RobotState::GOING) {  // If the robot is going somewhere, keep trying to go there
+    this->MoveTowardsGoal();
+  } else if (this->state_ == RobotState::DOING) {  // If the robot is doing, keep doing.
+    this->PublishVelocity();
+  } else if (this->state_ == RobotState::SCANNING) {
+    this->Scan();
+  } else if (this->state_ == RobotState::FINISHED) {  // Get the next command.
+    this->DequeueCommand();
+    this->AnswerPosition();
+  }
 }
 
 /**
@@ -97,6 +112,19 @@ void RobotController::odom_callback(nav_msgs::Odometry msg) {
 
 //  ROS_INFO(
 //      "R%" PRIu64 " ODOM | x=%f, y=%f, theta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->pose_.theta_, this->lv_, this->av_);
+}
+
+void RobotController::scan_callback(se306p1::Scan msg) {
+  if (msg.enqueue
+      && (this->state_ != RobotState::IDLE
+          || this->state_ != RobotState::FINISHED)) {
+    this->commands_.push_back(Command(msg));
+    ROS_INFO( "R%" PRIu64 " SCAN | q=true", this->robot_id_);
+
+  } else {
+    this->InterruptCommandQueue(Command(msg));
+    ROS_INFO( "R%" PRIu64 " SCAN | q=false", this->robot_id_);
+  }
 }
 
 /**
@@ -156,47 +184,29 @@ void RobotController::askPosition_callback(AskPosition msg) {
 }
 
 /**
- *  When state is SCANNINGINIT, waits for an object to appear in the laser range finder,
- *  then enters SCANNING state.
- *  When state is SCANNING, sets the global variable scanResult based on what is currently being scanned.
+ * If the robot state is scanning, the scanResult will be set to the number of
+ * obstacles in the laser range.
  *
  * @param msg The LaserScan message containing laser scan data for this robot.
  */
 void RobotController::baseScan_callback(sensor_msgs::LaserScan msg) {
-  int barCount = 0;
-  if (this->state_ == RobotState::SCANNINGINIT) {
-    //
-    for (int i = 0; i < 180; i++) {
-      if (msg.ranges[i] != 5.0) {
-        this->state_ = RobotState::SCANNING;
-        this->scanningStart_ = ros::Time::now().toSec();
-        break;
-      }
-    }
-  } else if (this->state_ == RobotState::SCANNING) {
-    //count number of bars
+  if (this->state_ == RobotState::SCANNING) {
+    int barCount = 0;
+
     for (int i = 0; i < 180; i++) {
       if (msg.ranges[i] != 5.0) {
         barCount++;
-        for (; msg.ranges[i] != 5.0 && i < 180; i++)
-          ;
+
+        // Run over the current bar
+        while (msg.ranges[i] != 5.0 && i < 180) {
+          i++;
+        }
       }
     }
 
-    if (barCount == 0) {
-      this->state_ = RobotState::SCANNINGINIT;
-      ROS_WARN("Nothing Scanned at end of 5 seconds. Rescanning.");
-    } else {
-      if (barCount == 1) {
-        this->scanResult_ = 1;
-      } else if (barCount == 2) {
-        this->scanResult_ = 2;
-      } else if (barCount == 3) {
-        this->scanResult_ = 3;
-      } else if (barCount == 4) {
-        this->scanResult_ = 4;
-      }
-    }
+//    ROS_INFO( "R%" PRIu64 " SCANNED %d", this->robot_id_, barCount);
+
+    this->scanResult_ = barCount;
   }
 }
 
@@ -225,24 +235,6 @@ void RobotController::PublishVelocity() {
 }
 
 /**
- * Depending on the robot's state and goals, set the linear and angular
- * velocity for the next tick.
- */
-void RobotController::UpdateVelocity() {
-  if (this->state_ == RobotState::GOING) {  // If the robot is going somewhere, keep trying to go there
-    this->MoveTowardsGoal();
-  } else if (this->state_ == RobotState::DOING) {  // If the robot is doing, keep doing.
-    this->PublishVelocity();
-  } else if (this->state_ == RobotState::FINISHED) {  // Get the next command.
-    this->DequeueCommand();
-    this->AnswerPosition();
-  } else if (this->state_ == RobotState::SCANNING
-      || this->state_ == RobotState::SCANNINGINIT) {
-    this->Scan();
-  }
-}
-
-/**
  * Execute the next tick of movement when attempting to reach a goal position
  * while executing a Go command. When executing a Go command, the robot will
  * first rotate to point at it's destination. Next, the robot will begin to
@@ -250,16 +242,15 @@ void RobotController::UpdateVelocity() {
  * robot will align to the specified angle.
  */
 void RobotController::MoveTowardsGoal() {
-  // If the robot is already at the position, we can skip aiming at it and
-  // moving to it.
+// If the robot is already at the position, we can skip aiming at it and
+// moving to it.
   if ((this->goal_.position_ - this->pose_.position_).Length() < 0.01) {
     this->gostep_ = GoStep::ALIGNING;
   }
 
-  // Aim at the goal position.
+// Aim at the goal position.
   if (this->gostep_ == GoStep::AIMING) {
     if (this->goal_.theta_ == 999) {
-      ROS_INFO("R%" PRIu64 " Skipping alned", this->robot_id_);
       this->gostep_ = GoStep::MOVING;
     } else {
       // Figure out the angle that the robot will need to be at to be facing
@@ -272,8 +263,8 @@ void RobotController::MoveTowardsGoal() {
 
       // If the difference is small, we have finished aiming.
       if (-0.001 < diff && diff < 0.001) {
-        ROS_INFO(
-            "R%" PRIu64 " aimed | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
+//        ROS_INFO(
+//            "R%" PRIu64 " aimed | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
 
         this->gostep_ = GoStep::MOVING;
       } else {
@@ -285,7 +276,7 @@ void RobotController::MoveTowardsGoal() {
     }
   }
 
-  // Move towards the goal position
+// Move towards the goal position
   if (this->gostep_ == GoStep::MOVING) {
     // Figure out the distance from the goal the robot currently is.
     double distance_to_goal = (this->goal_.position_ - this->pose_.position_)
@@ -293,8 +284,8 @@ void RobotController::MoveTowardsGoal() {
 
     // If the distance is small, we have reached the goal position.
     if (distance_to_goal < 0.1) {
-      ROS_INFO(
-          "R%" PRIu64 " moved | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
+//      ROS_INFO(
+//          "R%" PRIu64 " moved | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
 
       this->gostep_ = GoStep::ALIGNING;
     } else {
@@ -304,11 +295,9 @@ void RobotController::MoveTowardsGoal() {
     }
   }
 
-  // Rotate into the given angle.
+// Rotate into the given angle.
   if (this->gostep_ == GoStep::ALIGNING) {
     if (this->goal_.theta_ == 999) {
-      ROS_INFO("R%" PRIu64 " Skipping alned", this->robot_id_);
-
       this->lv_ = 0.0;
       this->av_ = 0.0;
       this->state_ = RobotState::FINISHED;
@@ -320,9 +309,9 @@ void RobotController::MoveTowardsGoal() {
       // If the difference is small, the robot is aligned and the Go is
       // finished.
       if (-0.001 < diff && diff < 0.001) {
-        ROS_INFO(
-            "R%" PRIu64 " alned | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
-        ROS_INFO("R%" PRIu64 " FINISHED GO", this->robot_id_);
+//        ROS_INFO(
+//            "R%" PRIu64 " alned | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
+//        ROS_INFO("R%" PRIu64 " FINISHED GO", this->robot_id_);
 
         // Stop the robot moving.
         this->lv_ = 0.0;
@@ -338,24 +327,48 @@ void RobotController::MoveTowardsGoal() {
     }
   }
 
-  // Update the lv and the av on Stage.
+// Update the lv and the av on Stage.
   this->PublishVelocity();
 }
 
 /**
- *
- *
+ * Perform a scan for items. The scan will continue for SCAN_TIME. If nothing is
+ * found, the scan will restart from the beginning.
  */
 void RobotController::Scan() {
-  if (this->state_ == RobotState::SCANNING) {
-    if (ros::Time::now().toSec() - scanningStart_ > 5) {
-      // TODO: call post scanning command
-      ROS_INFO("Scan Result: %d", this->scanResult_);
-      this->state_ = RobotState::IDLE;
+  if (this->scanstep_ == ScanStep::INIT) {
+    this->scanningStart_ = ros::Time::now().toSec();
+    this->scanstep_ = ScanStep::SCANNING;
+  }
+
+  if (this->scanstep_ == ScanStep::SCANNING) {
+    if (ros::Time::now().toSec() - this->scanningStart_ >= SCAN_TIME) {
+      this->scanstep_ = ScanStep::FINISHED;
     }
-    // wait
+  }
+
+  if (this->scanstep_ == ScanStep::FINISHED) {
+    if (this->scanResult_ == 0) {
+      ROS_WARN("R%" PRIu64 " Scanned nothing", this->robot_id_);
+      this->scanstep_ = ScanStep::INIT;
+    } else {
+      ROS_INFO("R%" PRIu64 " Scanned %d", this->robot_id_, this->scanResult_);
+      this->state_ = RobotState::FINISHED;
+    }
   }
 }
+
+/**
+ * Change the state of the robot to scanning, and initialise the scanning state
+ * to init.
+ *
+ * @param msg
+ */
+void RobotController::SetScanning(se306p1::Scan msg) {
+  this->state_ = RobotState::SCANNING;
+  this->scanstep_ = ScanStep::INIT;
+}
+
 /**
  * Set the robot to Go as per to Go message.
  *
@@ -363,10 +376,10 @@ void RobotController::Scan() {
  * should try and reach.
  */
 void RobotController::SetGoing(Go msg) {
-  // Set the robot state to going.
+// Set the robot state to going.
   this->state_ = RobotState::GOING;
 
-  // The go starts by pointing at the destination.
+// The go starts by pointing at the destination.
   this->gostep_ = GoStep::AIMING;
 
   Pose p;
@@ -395,8 +408,8 @@ void RobotController::SetDoing(Do msg) {
   this->lv_ = msg.lv;
   this->av_ = msg.av;
 
-  ROS_INFO(
-      "R%" PRIu64 " STARTING DO: lv: %f av: %f", this->robot_id_, msg.lv, msg.av);
+//  ROS_INFO(
+//      "R%" PRIu64 " STARTING DO: lv: %f av: %f", this->robot_id_, msg.lv, msg.av);
 
   this->PublishVelocity();
 }
@@ -407,14 +420,16 @@ void RobotController::SetDoing(Do msg) {
  * @param cmd The Do or Go command to be executed.
  */
 void RobotController::ExecuteCommand(Command cmd) {
-  if (cmd.isDo) {
+  if (cmd.type == CommandType::DO) {
+    ROS_INFO("R%" PRIu64 " EXECUTING A DO", this->robot_id_);
     Do msg;
 
     msg.lv = cmd.lv;
     msg.av = cmd.av;
 
     this->SetDoing(msg);
-  } else {
+  } else if (cmd.type == CommandType::GO) {
+    ROS_INFO("R%" PRIu64 " EXECUTING A GO", this->robot_id_);
     Go msg;
 
     msg.x = cmd.x;
@@ -422,6 +437,10 @@ void RobotController::ExecuteCommand(Command cmd) {
     msg.theta = cmd.theta;
 
     this->SetGoing(msg);
+  } else if (cmd.type == CommandType::SCAN) {
+    ROS_INFO("R%" PRIu64 " EXECUTING A SCAN", this->robot_id_);
+    se306p1::Scan msg;
+    this->SetScanning(msg);
   }
 }
 
@@ -432,11 +451,14 @@ void RobotController::ExecuteCommand(Command cmd) {
  */
 void RobotController::DequeueCommand() {
   if (this->commands_.empty()) {  // Do nothing if there are no more commands.
+    ROS_INFO("R%" PRIu64 " COMMAND QUEUE EMPTY", this->robot_id_);
+
     Do msg;
     msg.lv = 0;
     msg.av = 0;
     SetDoing(msg);
   } else {
+    ROS_INFO("R%" PRIu64 " DEQUEUING CMD", this->robot_id_);
     Command cmd = this->commands_.front();
     this->commands_.pop_front();
     this->ExecuteCommand(cmd);
@@ -449,13 +471,13 @@ void RobotController::DequeueCommand() {
  * @param cmd The command to interrupt the command queue with.
  */
 void RobotController::InterruptCommandQueue(Command cmd) {
-  // Clear the current command queue.
+// Clear the current command queue.
   this->commands_.clear();
 
-  // Stop Going and Doing.
+// Stop Going and Doing.
   this->state_ = RobotState::IDLE;
 
-  // Execute the interrupting command.
+// Execute the interrupting command.
   this->ExecuteCommand(cmd);
 }
 
