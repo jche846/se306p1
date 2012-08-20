@@ -7,10 +7,10 @@
 namespace {
 class CommandTest : public testing::Test {
    public:
-   
+
     se306p1::Do msg_do;
     se306p1::Go msg_go;
-    
+
     CommandTest() {
       // You can do set-up work for each test here.
     }
@@ -23,7 +23,7 @@ class CommandTest : public testing::Test {
       msg_do.lv = 10;
       msg_do.av = 30;
       msg_do.enqueue = true;
-      
+
       msg_go.x = 7;
       msg_go.y = 15;
       msg_go.theta = 33;
@@ -51,12 +51,12 @@ class CommandTest : public testing::Test {
 
   TEST_F(CommandTest, testDoType) {
     se306p1::Command command(msg_do);
-    ASSERT_TRUE(command.isDo);
+    ASSERT_EQ(command.type, se306p1::CommandType::DO);
   }
 
   TEST_F(CommandTest, testGoType) {
     se306p1::Command command(msg_go);
-    ASSERT_FALSE(command.isDo);
+    ASSERT_EQ(command.type, se306p1::CommandType::GO);
   }
 }//namespace
 
