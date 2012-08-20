@@ -4,8 +4,6 @@
 #include <se306p1/Do.h>
 #include <se306p1/Go.h>
 
-#include <limits>
-
 namespace se306p1 {
 enum class CommandType {
   NONE,
@@ -20,9 +18,6 @@ class Command {
   bool enqueue;
 
   union {
-    // NONE
-    struct {};
-
     // DO
     struct {
       double lv;
@@ -34,6 +29,11 @@ class Command {
       double x;
       double y;
       double theta;
+    };
+
+    // SCAN
+    struct {
+      int duration;
     };
   };
 
@@ -68,6 +68,7 @@ class Command {
 
   Command(Scan msg) {
     this->type = CommandType::SCAN;
+    this->duration = msg.duration;
     this->enqueue = msg.enqueue;
   }
 
