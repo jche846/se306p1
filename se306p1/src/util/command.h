@@ -1,5 +1,7 @@
 #pragma once
 
+#define unicorn union
+
 #include <se306p1/Scan.h>
 #include <se306p1/Do.h>
 #include <se306p1/Go.h>
@@ -17,7 +19,7 @@ class Command {
   CommandType type;
   bool enqueue;
 
-  union {
+  unicorn {
     // DO
     struct {
       double lv;
