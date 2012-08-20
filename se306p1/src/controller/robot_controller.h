@@ -5,6 +5,7 @@
 
 #include "ros/ros.h"
 #include <geometry_msgs/Twist.h>
+#include <rosgraph_msgs/Clock.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/LaserScan.h>
 #include <se306p1/AskPosition.h>
@@ -76,6 +77,7 @@ class RobotController {
   ros::Publisher ansPosPublisher_;
 
   // Stage pub/subs
+  ros::Subscriber clock_;
   ros::Subscriber odom_;
   ros::Subscriber baseScan_;
   ros::Publisher twist_;
@@ -86,10 +88,11 @@ class RobotController {
  public:
   RobotController(ros::NodeHandle &nh, uint64_t id);
   virtual ~RobotController();
+  void clock_callback(rosgraph_msgs::Clock msg);
+  void odom_callback(nav_msgs::Odometry msg);
   void go_callback(Go msg);
   void do_callback(Do msg);
   void askPosition_callback(AskPosition msg);
-  void odom_callback(nav_msgs::Odometry msg);
   void baseScan_callback(sensor_msgs::LaserScan msg);
   void AnswerPosition();
   void PublishVelocity();

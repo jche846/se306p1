@@ -27,6 +27,11 @@ RobotController::RobotController(ros::NodeHandle &nh, uint64_t id = 0) {
   // Publish our position when asked by the supervisor.
   this->ansPosPublisher_ = nh_.advertise<Position>(ANS_POS_TOPIC, 1000);
 
+  // Subscribe to clock messages from Stage
+  this->clock_ = nh_.subscribe<rosgraph_msgs::Clock>(
+      "/clock", 1000, &RobotController::clock_callback, this,
+      ros::TransportHints().reliable());
+
   // Subscribe to pose messages from Stage
   std::stringstream odomss;
   odomss << "/robot_" << this->robot_id_ << "/odom";
@@ -63,6 +68,35 @@ RobotController::RobotController(ros::NodeHandle &nh, uint64_t id = 0) {
 
 RobotController::~RobotController() {
   // TODO Auto-generated destructor stub
+}
+
+void RobotController::clock_callback(rosgraph_msgs::Clock msg) {
+  // do stuff every stage tick
+  this->UpdateVelocity();
+}
+
+/**
+ * Called when stage publishes an odometry message. Updates the controller's
+ * knowledge of the robot's current position, and triggers the controller to
+ * update the linear and angular velocity to achieve the robot's goal.
+ *
+ * @param msg The odometry message containing position data for this robot.
+ */
+void RobotController::odom_callback(nav_msgs::Odometry msg) {
+  double roll;
+  double pitch;
+  double yaw;
+
+  // Set the position in 2D space.
+  this->pose_.position_.x_ = -1 * msg.pose.pose.position.y;
+  this->pose_.position_.y_ = msg.pose.pose.position.x;
+
+  // Set the rotation.
+  QuaternionMsgToRPY(msg.pose.pose.orientation, roll, pitch, yaw);
+  this->pose_.theta_ = RadiansToDegrees(yaw);
+
+//  ROS_INFO(
+//      "R%" PRIu64 " ODOM | x=%f, y=%f, theta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->pose_.theta_, this->lv_, this->av_);
 }
 
 /**
@@ -122,39 +156,12 @@ void RobotController::askPosition_callback(AskPosition msg) {
 }
 
 /**
- * Called when stage publishes an odometry message. Updates the controller's
- * knowledge of the robot's current position, and triggers the controller to
- * update the linear and angular velocity to achieve the robot's goal.
+ *  When state is SCANNINGINIT, waits for an object to appear in the laser range finder,
+ *  then enters SCANNING state.
+ *  When state is SCANNING, sets the global variable scanResult based on what is currently being scanned.
  *
- * @param msg The odometry message containing position data for this robot.
+ * @param msg The LaserScan message containing laser scan data for this robot.
  */
-void RobotController::odom_callback(nav_msgs::Odometry msg) {
-  double roll;
-  double pitch;
-  double yaw;
-
-  // Set the position in 2D space.
-  this->pose_.position_.x_ = -1 * msg.pose.pose.position.y;
-  this->pose_.position_.y_ = msg.pose.pose.position.x;
-
-  // Set the rotation.
-  QuaternionMsgToRPY(msg.pose.pose.orientation, roll, pitch, yaw);
-  this->pose_.theta_ = RadiansToDegrees(yaw);
-
-//  ROS_INFO(
-//      "R%" PRIu64 " ODOM | x=%f, y=%f, theta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->pose_.theta_, this->lv_, this->av_);
-
-// do stuff every stage tick
-  this->UpdateVelocity();
-}
-
-/**
-*  When state is SCANNINGINIT, waits for an object to appear in the laser range finder,
-*  then enters SCANNING state.
-*  When state is SCANNING, sets the global variable scanResult based on what is currently being scanned.
-*
-* @param msg The LaserScan message containing laser scan data for this robot.
-*/
 void RobotController::baseScan_callback(sensor_msgs::LaserScan msg) {
   int barCount = 0;
   if (this->state_ == RobotState::SCANNINGINIT) {
@@ -171,7 +178,8 @@ void RobotController::baseScan_callback(sensor_msgs::LaserScan msg) {
     for (int i = 0; i < 180; i++) {
       if (msg.ranges[i] != 5.0) {
         barCount++;
-        for (; msg.ranges[i] != 5.0 && i < 180; i++) ;
+        for (; msg.ranges[i] != 5.0 && i < 180; i++)
+          ;
       }
     }
 
@@ -179,7 +187,7 @@ void RobotController::baseScan_callback(sensor_msgs::LaserScan msg) {
       this->state_ = RobotState::SCANNINGINIT;
       ROS_WARN("Nothing Scanned at end of 5 seconds. Rescanning.");
     } else {
-     if (barCount == 1) {
+      if (barCount == 1) {
         this->scanResult_ = 1;
       } else if (barCount == 2) {
         this->scanResult_ = 2;
@@ -228,7 +236,8 @@ void RobotController::UpdateVelocity() {
   } else if (this->state_ == RobotState::FINISHED) {  // Get the next command.
     this->DequeueCommand();
     this->AnswerPosition();
-  } else if(this->state_ == RobotState::SCANNING || this->state_ == RobotState::SCANNINGINIT){
+  } else if (this->state_ == RobotState::SCANNING
+      || this->state_ == RobotState::SCANNINGINIT) {
     this->Scan();
   }
 }
@@ -338,8 +347,8 @@ void RobotController::MoveTowardsGoal() {
  *
  */
 void RobotController::Scan() {
-  if(this->state_ == RobotState::SCANNING) {
-    if(ros::Time::now().toSec() - scanningStart_ > 5){
+  if (this->state_ == RobotState::SCANNING) {
+    if (ros::Time::now().toSec() - scanningStart_ > 5) {
       // TODO: call post scanning command
       ROS_INFO("Scan Result: %d", this->scanResult_);
       this->state_ = RobotState::IDLE;
