@@ -1,5 +1,5 @@
 <launch>
-  <node name="rotate_supervisor" pkg="se306p1" type="rotate_supervisor" />
+  <node name="supervisor" pkg="se306p1" type="supervisor" />
 
   <test test-name="hztest_test" pkg="rostest" type="hztest" name="hztest1">
     <param name="topic" value="/supervisor/ask_pos" />
