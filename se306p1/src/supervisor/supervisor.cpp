@@ -32,7 +32,7 @@ Supervisor::Supervisor(ros::NodeHandle &nh) : nh_(nh) {
   this->RegisterBehaviors();
 
   // TODO: remove this, it's hardcoded!
-  this->SwitchBehavior(GotoSquareBehavior::id());
+  this->SwitchBehavior(RotateBehavior::id());
 }
 
 void Supervisor::ansPos_callback(Position msg) {

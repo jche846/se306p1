@@ -92,7 +92,6 @@ void RobotController::clock_callback(rosgraph_msgs::Clock msg) {
     this->Scan();
   } else if (this->state_ == RobotState::READY) {  // Get the next command.
     this->DequeueCommand();
-    this->AnswerPosition();
   }
 }
 
@@ -287,6 +286,10 @@ void RobotController::MoveTowardsGoal() {
     if (this->goal_.theta_ == 999) {
       this->lv_ = 0.0;
       this->av_ = 0.0;
+
+      // Report back to the supervisor.
+      this->AnswerPosition();
+
       this->state_ = RobotState::READY;
     } else {
 
@@ -303,6 +306,9 @@ void RobotController::MoveTowardsGoal() {
         // Stop the robot moving.
         this->lv_ = 0.0;
         this->av_ = 0.0;
+
+        // Report back to the supervisor.
+        this->AnswerPosition();
 
         this->state_ = RobotState::READY;
       } else {
@@ -345,6 +351,8 @@ void RobotController::Scan() {
       msg.scanResult = this->scanResult_;
       this->scanResultPublisher_.publish(msg);
 
+      // Report back to the supervisor.
+      this->AnswerPosition();
       this->state_ = RobotState::READY;
     }
   }
