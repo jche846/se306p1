@@ -49,11 +49,11 @@ double AngleBetweenPoints(const Vector2 &p1, const Vector2 &p2) {
 
 double NormalizeAngle (double theta) {
   // Ensures that the angle is within 360 and -360
-  while (theta > 360.0) theta-=360.0; 
+  while (theta > 360.0) theta-=360.0;
   while (theta < -360.0) theta += 360.0;
   // Fixes the sign and the angle amount so it is within 180 and -180
   if(theta > 180.0){
-    theta = -360.0 + theta; 
+    theta = -360.0 + theta;
   } else if (theta < -180.0){
     theta = 360.0 + theta;
   }
@@ -90,19 +90,19 @@ Vector2 FindPointFromTheta (Vector2 center, double theta, double diameter) {
 }
 
 std::vector<Vector2> FindRobotPositions (Vector2 center, double theta, double diameter, int numRobots, int numSides) {
-  // Handles special case of there being more sides than robots and 
-  // makes sure that there will be a robot on every corner by decreasing 
+  // Handles special case of there being more sides than robots and
+  // makes sure that there will be a robot on every corner by decreasing
   // the number of sides
   if (numSides > numRobots) {
     numSides = numRobots;
   }
-  // Handles the special case for a square. rotate the square 45 degrees 
+  // Handles the special case for a square. rotate the square 45 degrees
   // to make it a square as opposed to a diamond.
   if (numSides == 4) {
     theta += 45;
-    theta = NormalizeAngle(theta); 
+    theta = NormalizeAngle(theta);
   }
-  // Set the size of the angle change 
+  // Set the size of the angle change
   double angleStepSize = 360.0/numSides;
   std::vector<Vector2> positions;
   // Assign the positions of the vertexes of the polygon
@@ -111,18 +111,18 @@ std::vector<Vector2> FindRobotPositions (Vector2 center, double theta, double di
   }
   // We need to process the remaining robots that weren't used in vertices for the polygon
   numRobots -= numSides;
-  // If there is 1 left over robot, either after the vertices or after placing equal number of extra robots 
+  // If there is 1 left over robot, either after the vertices or after placing equal number of extra robots
   // on sides, then put it in the middle of the shape.
   if (numRobots%numSides == 1) {
     positions.push_back(center);
-    numRobots--;  
+    numRobots--;
   }
 
-  // Process any left over robots to positions along each side of the shape. 
+  // Process any left over robots to positions along each side of the shape.
 
   // The maximum difference in the number of Robots on sides should be 1
   // Each side should have at minimum the integer division of numRobots by numSides
-  // so the remainder is less than the number of sides. Then there should be 
+  // so the remainder is less than the number of sides. Then there should be
   // and additional robot on n sides where n is the remainder of the integer division
   int baseNumberOfRobotsOnEachEdge = numRobots / numSides;
   int numSidesWithAdditionalRobot = numRobots % numSides;
@@ -137,12 +137,12 @@ std::vector<Vector2> FindRobotPositions (Vector2 center, double theta, double di
     // The difference between these two vertexes so that we know where to place the robots
     double dx = vertex1.x_ - vertex2.x_;
     double dy = vertex1.y_ - vertex2.y_;
-    
+
     // Calculating the number of robots that will have to be added to the current edge
     int numRobotsToAdd = baseNumberOfRobotsOnEachEdge;
     if (i < numSidesWithAdditionalRobot){
       // Add basenumrobots + 1 to this edge
-      numRobotsToAdd++;    
+      numRobotsToAdd++;
     }
 
     //booyakasha (when dave did some mad refactoring skillz)!
@@ -158,19 +158,6 @@ std::vector<Vector2> FindRobotPositions (Vector2 center, double theta, double di
       positions.push_back(Vector2(x,y));
     }
   }
-  return positions;
-}
-
-std::vector<Vector2> FindCirclePositions (Vector2 center, double diameter, int numRobots) {
-  std::vector<Vector2> positions;
-
-  double radius = diameter / 2.0;
-
-  for(int i = 0; i < numRobots; ++i) {
-    double theta = (i / (double)numRobots) / (2 * M_PI);
-    positions.push_back(center + Vector2(std::polar<double>(radius, theta)));
-  }
-
   return positions;
 }
 }

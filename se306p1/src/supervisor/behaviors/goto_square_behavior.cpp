@@ -15,18 +15,16 @@
 namespace se306p1 {
 GotoSquareBehavior::GotoSquareBehavior(Supervisor &sup) : Behavior(sup) {
   ROS_INFO("Initialized goto square behavior.");
-  this->completed_ = false;
 }
 
 GotoSquareBehavior::~GotoSquareBehavior() {
 }
 
-void GotoSquareBehavior::Tick() {
-  if (this->completed_) return;
+void GotoSquareBehavior::Execute() {
   ROS_INFO("Going to a square.");
 
   std::vector<Vector2> positions = FindRobotPositions(
-    Vector2(DEFAULT_SQUARE_X, DEFAULT_SQUARE_Y), 
+    Vector2(DEFAULT_SQUARE_X, DEFAULT_SQUARE_Y),
     DEFAULT_SQUARE_THETA,
     DEFAULT_SQUARE_DIAMETER,
     this->supervisor_.robots_.size(),
@@ -35,7 +33,7 @@ void GotoSquareBehavior::Tick() {
 
   std::vector<Pose> poses;
   for (size_t i = 0; i < positions.size(); ++i) {
-    poses.push_back(Pose(positions[i], 0)); //take x and y from positions and make into a pose.
+    poses.push_back(Pose(positions[i], 0));
   }
 
   std::vector<std::shared_ptr<Robot>> nodes;
@@ -46,6 +44,5 @@ void GotoSquareBehavior::Tick() {
   }
 
   this->supervisor_.MoveNodesToDests(nodes, poses);
-  this->completed_ = true;
 }
 }

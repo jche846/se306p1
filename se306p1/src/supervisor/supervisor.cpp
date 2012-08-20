@@ -161,7 +161,10 @@ void Supervisor::Start() {
       }
     }
 
-    if (execDone) this->currentBehavior_->Tick();
+    if (execDone && !this->currentBehavior_->done_) {
+      this->currentBehavior_->Execute();
+      this->currentBehavior_->done_ = true;
+    }
 
     r.sleep();
     ros::spinOnce();
@@ -190,7 +193,7 @@ void Supervisor::ElectHead() {
       }
     }
   }
-  ROS_INFO("Elected R%ld as Cluster Head", this->clusterHead_->id_);
+  ROS_INFO("Elected R%" PRId64 " as Cluster Head", this->clusterHead_->id_);
 }
 
 void Supervisor::DispatchMessages() {

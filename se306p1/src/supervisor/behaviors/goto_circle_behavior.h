@@ -7,9 +7,6 @@
 
 namespace se306p1 {
 class GotoCircleBehavior : public Behavior {
-private:
-  bool completed_;
-
 public:
   GotoCircleBehavior(Supervisor &sup);
   virtual ~GotoCircleBehavior();
@@ -19,6 +16,6 @@ public:
    */
   inline static uint64_t id() { return 2; }
 
-  virtual void Tick();
+  virtual void Execute();
 };
 }

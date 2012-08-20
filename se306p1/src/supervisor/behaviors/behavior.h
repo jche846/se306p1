@@ -19,13 +19,13 @@ public:
   /**
    * Construct a behavior attached to the given supervisor.
    */
-  Behavior(Supervisor &sup) : supervisor_(sup) { };
+  Behavior(Supervisor &sup) : supervisor_(sup), done_(false) { };
   virtual ~Behavior() { };
 
   /**
-   * Operations to perform on every tick of the ROS loop.
+   * Operations to perform when the behavior is ready.
    */
-  virtual void Tick() = 0;
+  virtual void Execute() = 0;
 
   /**
    * Type which names a pointer to a specialization of Behavior::construct<T>.
@@ -40,5 +40,10 @@ public:
   static std::unique_ptr<Behavior> construct(Supervisor &sup) {
     return std::unique_ptr<Behavior>(dynamic_cast<Behavior *>(new T(sup)));
   };
+
+  /**
+   * Whether or not the behavior has been executed.
+   */
+  bool done_;
 };
 }

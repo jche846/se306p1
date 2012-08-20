@@ -10,14 +10,12 @@
 namespace se306p1 {
 RotateBehavior::RotateBehavior(Supervisor &sup) : Behavior(sup) {
   ROS_INFO("Initialized rotate behavior.");
-  this->rotating_ = false;
 }
 
 RotateBehavior::~RotateBehavior() {
 }
 
-void RotateBehavior::Tick() {
-  if (this->rotating_) return;
+void RotateBehavior::Execute() {
   ROS_INFO("Rotating.");
 
   this->supervisor_.clusterHead_->pose_.theta_ = 999;
@@ -31,6 +29,5 @@ void RotateBehavior::Tick() {
         CIRCLE_LV, CIRCLE_AV,
         cur_robot.second->id_ != this->supervisor_.clusterHead_->id_);
   }
-  this->rotating_ = true;
 }
 }

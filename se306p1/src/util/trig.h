@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cmath>
-#include <complex>
 #include <geometry_msgs/Quaternion.h>
 
 #include <tf/transform_datatypes.h>
@@ -94,7 +93,7 @@ double AngleBetweenPoints(const Vector2 &p1, const Vector2 &p2);
 
 /**
 * Normalizes an angle so that if it is outside the allowable range it fixes it.
-* 
+*
 * @param theta The angle to be normalized
 *
 * @return the normalized angle
@@ -129,10 +128,4 @@ Vector2 FindPointFromTheta (Vector2 center, double theta, double diameter);
 * @return A vector of Vector2s that determines the positions that the robots should take
 */
 std::vector<Vector2> FindRobotPositions (Vector2 center, double theta, double diameter, int numRobots, int numSides);
-
-/**
- * Find the points on a circle.
- */
-std::vector<Vector2> FindCirclePositions (Vector2 center, double diameter, int numRobots);
-
 }
