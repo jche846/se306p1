@@ -46,6 +46,11 @@ RobotController::RobotController(ros::NodeHandle &nh, uint64_t id = 0) {
       laserss.str(), 1000, &RobotController::baseScan_callback, this,
       ros::TransportHints().reliable());
 
+  // Publish ScanResults to the supervisor on completion
+  std::stringstream scanResultss;
+  scanResultss << "/robot_" << this->robot_id_ << "/scan_result";
+  this->scanResultPublisher_ = nh_.advertise<ScanResult>(scanResultss.str(), 1000);
+
   // Subscribe to Do messages in order to know when to move.
   std::stringstream doss;
   doss << "/robot_" << this->robot_id_ << "/do";
@@ -349,8 +354,12 @@ void RobotController::MoveTowardsGoal() {
 void RobotController::Scan() {
   if (this->state_ == RobotState::SCANNING) {
     if (ros::Time::now().toSec() - scanningStart_ > 5) {
-      // TODO: call post scanning command
-      ROS_INFO("Scan Result: %d", this->scanResult_);
+
+        se306p1::ScanResult msg;
+        msg.scanResult = this->scanResult_;
+        this->scanResultPublisher_.publish(msg);
+
+      ROS_INFO("R%" PRIu64 " Scan Result %d", this->robot_id_, this->scanResult_);
       this->state_ = RobotState::IDLE;
     }
     // wait
