@@ -10,6 +10,7 @@
 #include <sensor_msgs/LaserScan.h>
 #include <se306p1/AskPosition.h>
 #include <se306p1/Position.h>
+#include <se306p1/ScanResult.h>
 #include <se306p1/Scan.h>
 #include <se306p1/Do.h>
 #include <se306p1/Go.h>
@@ -84,6 +85,7 @@ class RobotController {
   ros::Subscriber doSubscriber_;
   ros::Subscriber goSubscriber_;
   ros::Publisher ansPosPublisher_;
+  ros::Publisher scanResultPublisher_;
 
   // Stage pub/subs
   ros::Subscriber clock_;
