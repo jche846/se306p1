@@ -1,21 +1,17 @@
 #pragma once
 
 #include "ros/ros.h"
-
-#include "behavior.h"
-#include "../../util/pose.h"
+#include <vector>
+#include <string>
+#include "goto_policy_behavior.h"
 
 namespace se306p1 {
-class GotoCircleBehavior : public Behavior {
+class CirclePolicy {
 public:
-  GotoCircleBehavior(Supervisor &sup);
-  virtual ~GotoCircleBehavior();
-
-  /**
-   * Get the ID of the behavior.
-   */
+  inline static std::string name() { return "circle"; }
   inline static uint64_t id() { return 2; }
-
-  virtual void Execute();
+  static std::vector<Vector2> FindRobotPositions(Supervisor &sup);
 };
+
+typedef GotoPolicyBehavior<CirclePolicy> GotoCircleBehavior;
 }
