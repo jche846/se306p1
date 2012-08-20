@@ -48,19 +48,29 @@ void Robot::DispatchCommand() {
   Command c = this->commands_.front();
   this->commands_.pop_front();
 
-  if (c.isDo) {
+  if (c.type == CommandType::DO) {
     se306p1::Do msg;
     msg.lv = c.lv;
     msg.av = c.av;
     msg.enqueue = c.enqueue;
 
+    if (c.enqueue)
+      ROS_INFO("R%" PRIu64 " | DISPATCHING DO, true", this->id_);
+    else
+      ROS_INFO("R%" PRIu64 " | DISPATCHING DO, false", this->id_);
+
     this->doPublisher_.publish(msg);
-  } else {
+  } else if (c.type == CommandType::GO) {
     se306p1::Go msg;
     msg.x = c.x;
     msg.y = c.y;
     msg.theta = c.theta;
     msg.enqueue = c.enqueue;
+
+    if (c.enqueue)
+      ROS_INFO("R%" PRIu64 " | DISPATCHING GO, true", this->id_);
+    else
+      ROS_INFO("R%" PRIu64 " | DISPATCHING GO, false", this->id_);
 
     this->goPublisher_.publish(msg);
   }
@@ -69,7 +79,7 @@ void Robot::DispatchCommand() {
 void Robot::Go(const Pose &pos, bool enqueue) {
   Command c;
   c.enqueue = enqueue;
-  c.isDo = false;
+  c.type = CommandType::GO;
   c.x = pos.position_.x_;
   c.y = pos.position_.y_;
   c.theta = pos.theta_;
@@ -85,7 +95,7 @@ void Robot::Stop() {
 void Robot::Do(double lv, double av, bool enqueue) {
   Command c;
   c.enqueue = enqueue;
-  c.isDo = true;
+  c.type = CommandType::DO;
   c.lv = lv;
   c.av = av;
   this->EnqueueCommand(c);

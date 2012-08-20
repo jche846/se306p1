@@ -7,15 +7,12 @@
 
 namespace se306p1 {
 class GotoSquareBehavior : public Behavior {
-private:
-  bool behaving_; //initally false;
-
 public:
   GotoSquareBehavior(Supervisor &sup);
   virtual ~GotoSquareBehavior();
 
   inline static uint64_t id() { return 3; }
 
-  virtual void Tick();
+  virtual void Execute();
 };
 }

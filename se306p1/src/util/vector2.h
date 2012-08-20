@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <complex>
 
 namespace se306p1 {
 class Vector2 {
@@ -16,6 +17,11 @@ class Vector2 {
   inline Vector2(const Vector2 &from)
       : x_(from.x_),
         y_(from.y_) {
+  }
+
+  inline Vector2(const std::complex<double> &from)
+      : x_(std::real(from)),
+        y_(std::imag(from)) {
   }
 
   ~Vector2() {

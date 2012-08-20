@@ -1,34 +1,32 @@
-#include "goto_square_behavior.h"
+#include "goto_circle_behavior.h"
 
 #include "../../util/pose.h"
 #include "../../util/trig.h"
 #include "../supervisor.h"
 
 #define DEFAULT_MOVE_SPEED 1
-
-#define DEFAULT_SQUARE_X -4
-#define DEFAULT_SQUARE_Y -4
-#define DEFAULT_SQUARE_THETA 0
-#define DEFAULT_SQUARE_DIAMETER 20
-#define DEFAULT_SQUARE_SIDES 4
+#define DEFAULT_CIRCLE_X 4
+#define DEFAULT_CIRCLE_Y 4
+#define DEFAULT_CIRCLE_THETA 0
+#define DEFAULT_CIRCLE_DIAMETER 100.0
 
 namespace se306p1 {
-GotoSquareBehavior::GotoSquareBehavior(Supervisor &sup) : Behavior(sup) {
-  ROS_INFO("Initialized goto square behavior.");
+GotoCircleBehavior::GotoCircleBehavior(Supervisor &sup) : Behavior(sup) {
+  ROS_INFO("Initialized goto circle behavior.");
 }
 
-GotoSquareBehavior::~GotoSquareBehavior() {
+GotoCircleBehavior::~GotoCircleBehavior() {
 }
 
-void GotoSquareBehavior::Execute() {
-  ROS_INFO("Going to a square.");
+void GotoCircleBehavior::Execute() {
+  ROS_INFO("Going to a circle.");
 
   std::vector<Vector2> positions = FindRobotPositions(
-    Vector2(DEFAULT_SQUARE_X, DEFAULT_SQUARE_Y),
-    DEFAULT_SQUARE_THETA,
-    DEFAULT_SQUARE_DIAMETER,
+    Vector2(DEFAULT_CIRCLE_X, DEFAULT_CIRCLE_Y),
+    DEFAULT_CIRCLE_THETA,
+    DEFAULT_CIRCLE_DIAMETER,
     this->supervisor_.robots_.size(),
-    DEFAULT_SQUARE_SIDES
+    this->supervisor_.robots_.size()
   );
 
   std::vector<Pose> poses;

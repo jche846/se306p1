@@ -6,15 +6,15 @@
 #include "../../util/pose.h"
 
 namespace se306p1 {
-class RotateBehavior : public Behavior {
+class GotoCircleBehavior : public Behavior {
 public:
-  RotateBehavior(Supervisor &sup);
-  virtual ~RotateBehavior();
+  GotoCircleBehavior(Supervisor &sup);
+  virtual ~GotoCircleBehavior();
 
   /**
    * Get the ID of the behavior.
    */
-  inline static uint64_t id() { return 1; }
+  inline static uint64_t id() { return 2; }
 
   virtual void Execute();
 };
