@@ -8,7 +8,7 @@
 #define DEFAULT_CIRCLE_X 4
 #define DEFAULT_CIRCLE_Y 4
 #define DEFAULT_CIRCLE_THETA 0
-#define DEFAULT_CIRCLE_DIAMETER 100.0
+#define DEFAULT_CIRCLE_DIAMETER 10.0
 
 namespace se306p1 {
 std::vector<Vector2> CirclePolicy::FindRobotPositions(Supervisor &sup) {
