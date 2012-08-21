@@ -24,7 +24,7 @@ void RotateBehavior::Execute() {
     }
     // enqueue rotate for after they have reached the cluster head pos
 
-    int num_of_robots =  robots_.size();
+    int num_of_robots =  this->supervisor_.robots_.size();
     double radius = (num_of_robots * 6 * 0.35) / (M_PI * 2);
 
     double circle_lv = 4.0;
