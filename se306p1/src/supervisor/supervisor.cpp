@@ -175,7 +175,7 @@ void Supervisor::Start() {
       }
       if (execDone) {
         
-        this->clusterHead_->Go(Pose(Vector2(0, 50), 0.0), true);
+        this->clusterHead_->Go(Pose(Vector2(-10 * static_cast<int>(this->sid_), 50), 0.0), true);
         this->clusterHead_->ScanBarcode(5, true);
         this->clusterHeadPose_ = this->clusterHead_->pose_;
         this->state_ = State::SCANNING;

@@ -334,7 +334,6 @@ void RobotController::MoveTowardsGoal() {
  * found, the scan will restart from the beginning.
  */
 void RobotController::Scan() {
-  ROS_INFO("R%" PRIu64 " Scan()", this->robot_id_);
   if (this->scanStep_ == ScanStep::INIT) {
     ROS_INFO("R%" PRIu64 " Starting Scanning", this->robot_id_);
 
