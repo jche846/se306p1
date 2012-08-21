@@ -5,6 +5,7 @@
 
 #include <se306p1/Do.h>
 #include <se306p1/Go.h>
+#include <se306p1/Scan.h>
 
 namespace se306p1 {
 Robot::Robot(uint64_t n) {
@@ -32,6 +33,10 @@ Robot::Robot(uint64_t n) {
   std::stringstream goss;
   goss << "/robot_" << n << "/go";
   goPublisher_ = nh_.advertise<se306p1::Go>(goss.str(), 1000, statusCb);
+
+  std::stringstream scanss;
+  scanss << "/robot_" << n << "/scan";
+  scanPublisher_ = nh_.advertise<se306p1::Scan>(scanss.str(), 1000, statusCb);
 }
 
 Robot::~Robot() {
@@ -73,7 +78,25 @@ void Robot::DispatchCommand() {
       ROS_INFO("R%" PRIu64 " | DISPATCHING GO, false", this->id_);
 
     this->goPublisher_.publish(msg);
+  } else if(c.type == CommandType::SCAN) {
+    se306p1::Scan msg;
+    msg.duration = c.duration;
+    msg.enqueue = c.enqueue;
+    this->scanPublisher_.publish(msg);
+    if (c.enqueue)
+      ROS_INFO("R%" PRIu64 " | DISPATCHING SCAN, true", this->id_);
+    else
+      ROS_INFO("R%" PRIu64 " | DISPATCHING SCAN, false", this->id_);
   }
+}
+
+void Robot::ScanBarcode(int time, bool enqueue) {
+  Scan msg;
+  msg.duration = time;
+  msg.enqueue = enqueue;
+  this->EnqueueCommand(Command(msg));
+
+  this->executing_ = true;
 }
 
 void Robot::Go(const Pose &pos, bool enqueue) {
@@ -87,6 +110,8 @@ void Robot::Go(const Pose &pos, bool enqueue) {
 
   this->executing_ = true;
 }
+
+
 
 void Robot::Stop() {
   this->Do(0, 0, false);

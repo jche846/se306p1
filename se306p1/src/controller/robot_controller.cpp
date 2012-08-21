@@ -54,7 +54,7 @@ RobotController::RobotController(ros::NodeHandle &nh, uint64_t id = 0) {
   // Subscribe to scan commands from the supervisor.
   std::stringstream scanss;
   scanss << "/robot_" << this->robot_id_ << "/scan";
-  this->doSubscriber_ = nh_.subscribe<se306p1::Scan>(
+  this->scanSubscriber_ = nh_.subscribe<se306p1::Scan>(
       scanss.str(), 1000, &RobotController::scan_callback, this,
       ros::TransportHints().reliable());
 
@@ -335,6 +335,8 @@ void RobotController::MoveTowardsGoal() {
  */
 void RobotController::Scan() {
   if (this->scanStep_ == ScanStep::INIT) {
+    ROS_INFO("R%" PRIu64 " Starting Scanning", this->robot_id_);
+
     this->scanningStart_ = ros::Time::now().toSec();
     this->scanStep_ = ScanStep::SCANNING;
   }
@@ -357,8 +359,6 @@ void RobotController::Scan() {
       msg.scanResult = this->scanResult_;
       this->scanResultPublisher_.publish(msg);
 
-      // Report back to the supervisor.
-      this->AnswerPosition();
       this->state_ = RobotState::READY;
     }
   }

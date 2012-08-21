@@ -18,11 +18,11 @@
 namespace se306p1 {
 Supervisor::Supervisor(ros::NodeHandle &nh) : nh_(nh) {
   // create publishers and subscribers
-  ansPosSubscriber_ = nh_.subscribe<Position>(ANS_POS_TOPIC, 1000,
+  this->ansPosSubscriber_ = nh_.subscribe<Position>(ANS_POS_TOPIC, 1000,
                                               &Supervisor::ansPos_callback,
                                               this,
                                               ros::TransportHints().reliable());
-  askPosPublisher_ = nh_.advertise<AskPosition>(ASK_POS_TOPIC, 1000);
+  this->askPosPublisher_ = nh_.advertise<AskPosition>(ASK_POS_TOPIC, 1000);
 
   int sid;
   nh_.getParam("sid", sid);
@@ -73,7 +73,17 @@ void Supervisor::ansPos_callback(Position msg) {
   // record its location
   robot_ptr->pose_ = Pose(Vector2(msg.x, msg.y), msg.theta);
   robot_ptr->executing_ = false;
+
 }
+
+void Supervisor::scanResult_callback(ScanResult msg) {
+  if (this->state_ == State::SCANNING) {
+    this->SwitchBehavior(msg.scanResult);
+    this->state_ = State::CONTROLLING;
+    this->clusterHead_->Go(this->clusterHeadPose_, true);
+  }
+}
+
 
 void Supervisor::Discover(int timeout) {
   int rmin, rmax;
@@ -150,20 +160,33 @@ void Supervisor::Start() {
 
   ROS_INFO("Supervisor %" PRId64 ": Spinning up.", this->sid_);
 
+  this->state_ = State::LINEINGUP;
+
   while (ros::ok()) {
     this->DispatchMessages();
 
-    bool execDone = true;
-    for (auto &robot : this->robots_) {
-      if (robot.second->executing_) {
-        execDone = false;
-        break;
+    if (this->state_ == State::LINEINGUP) {
+      bool execDone = true;
+      for (auto &robot : this->robots_) {
+        if (robot.second->executing_) {
+          execDone = false;
+          break;
+        }
       }
-    }
+      if (execDone) {
+        
+        this->clusterHead_->Go(Pose(Vector2(-10 * static_cast<int>(this->sid_), 50), 0.0), true);
+        this->clusterHead_->ScanBarcode(5, true);
+        this->clusterHeadPose_ = this->clusterHead_->pose_;
+        this->state_ = State::SCANNING;
+      }
 
-    if (execDone && !this->currentBehavior_->done_) {
-      this->currentBehavior_->Execute();
-      this->currentBehavior_->done_ = true;
+    } else if(this->state_ == State::CONTROLLING) {
+
+      if (!this->clusterHead_->executing_ && !this->currentBehavior_->done_) {
+        this->currentBehavior_->Execute();
+        this->currentBehavior_->done_ = true;
+      }
     }
 
     r.sleep();
@@ -193,6 +216,16 @@ void Supervisor::ElectHead() {
       }
     }
   }
+
+  // setup scan results subscription
+  std::stringstream scanResultss;
+  scanResultss << "/robot_" << this->clusterHead_->id_ << "/scan_result";
+  this->scanResultSubscriber_ = nh_.subscribe<ScanResult>(scanResultss.str(), 1000,
+                                              &Supervisor::scanResult_callback,
+                                              this,
+                                              ros::TransportHints().reliable());
+
+
   ROS_INFO("Elected R%" PRId64 " as Cluster Head", this->clusterHead_->id_);
 }
 
