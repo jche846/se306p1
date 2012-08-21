@@ -13,36 +13,13 @@
 #define DEFAULT_SQUARE_SIDES 4
 
 namespace se306p1 {
-GotoSquareBehavior::GotoSquareBehavior(Supervisor &sup) : Behavior(sup) {
-  ROS_INFO("Initialized goto square behavior.");
-}
-
-GotoSquareBehavior::~GotoSquareBehavior() {
-}
-
-void GotoSquareBehavior::Execute() {
-  ROS_INFO("Going to a square.");
-
-  std::vector<Vector2> positions = FindRobotPositions(
+std::vector<Vector2> SquarePolicy::FindRobotPositions(Supervisor &sup) {
+  return se306p1::FindRobotPositions(
     Vector2(DEFAULT_SQUARE_X, DEFAULT_SQUARE_Y),
     DEFAULT_SQUARE_THETA,
     DEFAULT_SQUARE_DIAMETER,
-    this->supervisor_.robots_.size(),
+    sup.robots_.size(),
     DEFAULT_SQUARE_SIDES
   );
-
-  std::vector<Pose> poses;
-  for (size_t i = 0; i < positions.size(); ++i) {
-    poses.push_back(Pose(positions[i], 0));
-  }
-
-  std::vector<std::shared_ptr<Robot>> nodes;
-  nodes.push_back(this->supervisor_.clusterHead_);
-
-  for(auto &robot : this->supervisor_.nonHeadRobots_) {
-    nodes.push_back(robot);
-  }
-
-  this->supervisor_.MoveNodesToDests(nodes, poses);
 }
 }
