@@ -93,6 +93,7 @@ class RobotController {
   ros::Publisher twist_;
 
   // Count down clock for Scanning
+  int scanningDuration_;
   double scanningStart_;
 
  public:
