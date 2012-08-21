@@ -2,10 +2,8 @@
 #include "../util/trig.h"
 #include <string>
 
-#define FREQUENCY 100 // The number of ticks per second the robot will execute.
 #define DEFAULT_LV 1.0
 #define DEFAULT_AV 2.0
-#define SCAN_TIME 5
 
 namespace se306p1 {
 RobotController::RobotController(ros::NodeHandle &nh, uint64_t id = 0) {
@@ -52,6 +50,13 @@ RobotController::RobotController(ros::NodeHandle &nh, uint64_t id = 0) {
   scanResultss << "/robot_" << this->robot_id_ << "/scan_result";
   this->scanResultPublisher_ = nh_.advertise<ScanResult>(scanResultss.str(),
                                                          1000);
+
+  // Subscribe to scan commands from the supervisor.
+  std::stringstream scanss;
+  scanss << "/robot_" << this->robot_id_ << "/scan";
+  this->doSubscriber_ = nh_.subscribe<se306p1::Scan>(
+      scanss.str(), 1000, &RobotController::scan_callback, this,
+      ros::TransportHints().reliable());
 
   // Subscribe to Do messages in order to know when to move.
   std::stringstream doss;
@@ -335,7 +340,8 @@ void RobotController::Scan() {
   }
 
   if (this->scanStep_ == ScanStep::SCANNING) {
-    if (ros::Time::now().toSec() - this->scanningStart_ >= SCAN_TIME) {
+    if (ros::Time::now().toSec() - this->scanningStart_
+        >= this->scanningDuration_) {
       this->scanStep_ = ScanStep::FINISHED;
     }
   }
@@ -365,6 +371,7 @@ void RobotController::Scan() {
  * @param msg
  */
 void RobotController::SetScanning(se306p1::Scan msg) {
+  this->scanningDuration_ = msg.duration;
   this->state_ = RobotState::SCANNING;
   this->scanStep_ = ScanStep::INIT;
 }
@@ -448,6 +455,9 @@ void RobotController::ExecuteCommand(Command cmd) {
   } else if (cmd.type == CommandType::SCAN) {
     ROS_INFO("R%" PRIu64 " EXECUTING A SCAN", this->robot_id_);
     se306p1::Scan msg;
+
+    msg.duration = cmd.duration;
+
     this->SetScanning(msg);
   }
 }
