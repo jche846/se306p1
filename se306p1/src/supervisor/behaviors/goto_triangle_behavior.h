@@ -6,12 +6,12 @@
 #include "goto_policy_behavior.h"
 
 namespace se306p1 {
-class SquarePolicy {
+class TrianglePolicy {
 public:
-  inline static std::string name() { return "square"; }
-  inline static uint64_t id() { return 4; }
+  inline static std::string name() { return "triangle"; }
+  inline static uint64_t id() { return 3; }
   static std::vector<Pose> FindRobotPoses(Supervisor &sup);
 };
 
-typedef GotoPolicyBehavior<SquarePolicy> GotoSquareBehavior;
+typedef GotoPolicyBehavior<TrianglePolicy> GotoTriangleBehavior;
 }

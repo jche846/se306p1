@@ -352,16 +352,16 @@ namespace {
   * degrees before being placed so that it resembles a square instead of a 
   * diamond.
   */
-  TEST_F(TrigTest, testFindRobotPositions_simpleSquare) {
-    std::vector<Vector2> v = FindRobotPositions(Vector2(0, 0), 0, 1.0, 4, 4);
-    ASSERT_NEAR(-0.7071067811, v.at(0).x_, 0.0001); 
-    ASSERT_NEAR(0.7071067811, v.at(0).y_, 0.0001);    
-    ASSERT_NEAR(-0.7071067811, v.at(1).x_, 0.0001); 
-    ASSERT_NEAR(-0.7071067811, v.at(1).y_, 0.0001); 
-    ASSERT_NEAR(0.7071067811, v.at(2).x_, 0.0001); 
-    ASSERT_NEAR(-0.7071067811, v.at(2).y_, 0.0001); 
-    ASSERT_NEAR(0.7071067811, v.at(3).x_, 0.0001); 
-    ASSERT_NEAR(0.7071067811, v.at(3).y_, 0.0001);
+  TEST_F(TrigTest, testFindRobotPoses_simpleSquare) {
+    std::vector<Pose> v = FindRobotPoses(Vector2(0, 0), 0, 1.0, 4, 4);
+    ASSERT_NEAR(-0.7071067811, v[0].position_.x_, 0.0001); 
+    ASSERT_NEAR(0.7071067811, v[0].position_.y_, 0.0001);    
+    ASSERT_NEAR(-0.7071067811, v[1].position_.x_, 0.0001); 
+    ASSERT_NEAR(-0.7071067811, v[1].position_.y_, 0.0001); 
+    ASSERT_NEAR(0.7071067811, v[2].position_.x_, 0.0001); 
+    ASSERT_NEAR(-0.7071067811, v[2].position_.y_, 0.0001); 
+    ASSERT_NEAR(0.7071067811, v[3].position_.x_, 0.0001); 
+    ASSERT_NEAR(0.7071067811, v[3].position_.y_, 0.0001);
 
   }
 
@@ -371,16 +371,16 @@ namespace {
   * degrees before being placed so that it resembles a square instead of a 
   * diamond.
   */
-  TEST_F(TrigTest, testFindRobotPositions_tooManySidesMadeSquare) {
-    std::vector<Vector2> v = FindRobotPositions(Vector2(0, 0), 0, 1.0, 4, 15);
-    ASSERT_NEAR(-0.7071067811, v.at(0).x_, 0.0001); 
-    ASSERT_NEAR(0.7071067811, v.at(0).y_, 0.0001);    
-    ASSERT_NEAR(-0.7071067811, v.at(1).x_, 0.0001); 
-    ASSERT_NEAR(-0.7071067811, v.at(1).y_, 0.0001); 
-    ASSERT_NEAR(0.7071067811, v.at(2).x_, 0.0001); 
-    ASSERT_NEAR(-0.7071067811, v.at(2).y_, 0.0001); 
-    ASSERT_NEAR(0.7071067811, v.at(3).x_, 0.0001); 
-    ASSERT_NEAR(0.7071067811, v.at(3).y_, 0.0001);
+  TEST_F(TrigTest, testFindRobotPoses_tooManySidesMadeSquare) {
+    std::vector<Pose> v = FindRobotPoses(Vector2(0, 0), 0, 1.0, 4, 15);
+    ASSERT_NEAR(-0.7071067811, v[0].position_.x_, 0.0001); 
+    ASSERT_NEAR(0.7071067811, v[0].position_.y_, 0.0001);    
+    ASSERT_NEAR(-0.7071067811, v[1].position_.x_, 0.0001); 
+    ASSERT_NEAR(-0.7071067811, v[1].position_.y_, 0.0001); 
+    ASSERT_NEAR(0.7071067811, v[2].position_.x_, 0.0001); 
+    ASSERT_NEAR(-0.7071067811, v[2].position_.y_, 0.0001); 
+    ASSERT_NEAR(0.7071067811, v[3].position_.x_, 0.0001); 
+    ASSERT_NEAR(0.7071067811, v[3].position_.y_, 0.0001);
 
   }
 
@@ -388,18 +388,18 @@ namespace {
   * Test that if there are too many sides we set the number of sides 
   * to the number of robots
   */
-  TEST_F(TrigTest, testFindRobotPositions_tooManyEdgesSetToNumberOfRobots) {
-    std::vector<Vector2> v = FindRobotPositions(Vector2(4, 4), 0, 100.0, 5, 15);
-    ASSERT_NEAR(4.0, v.at(0).x_, 0.0001); 
-    ASSERT_NEAR(104.0, v.at(0).y_, 0.0001);    
-    ASSERT_NEAR(-91.10565163, v.at(1).x_, 0.0001); 
-    ASSERT_NEAR(34.901699435, v.at(1).y_, 0.0001); 
-    ASSERT_NEAR(-54.77852523, v.at(2).x_, 0.0001); 
-    ASSERT_NEAR(-76.90169944, v.at(2).y_, 0.0001); 
-    ASSERT_NEAR(62.77852523, v.at(3).x_, 0.0001); 
-    ASSERT_NEAR(-76.90169944, v.at(3).y_, 0.0001);
-    ASSERT_NEAR(99.10565163, v.at(4).x_, 0.0001); 
-    ASSERT_NEAR(34.901699435, v.at(4).y_, 0.0001);
+  TEST_F(TrigTest, testFindRobotPoses_tooManyEdgesSetToNumberOfRobots) {
+    std::vector<Pose> v = FindRobotPoses(Vector2(4, 4), 0, 100.0, 5, 15);
+    ASSERT_NEAR(4.0, v[0].position_.x_, 0.0001); 
+    ASSERT_NEAR(104.0, v[0].position_.y_, 0.0001);    
+    ASSERT_NEAR(-91.10565163, v[1].position_.x_, 0.0001); 
+    ASSERT_NEAR(34.901699435, v[1].position_.y_, 0.0001); 
+    ASSERT_NEAR(-54.77852523, v[2].position_.x_, 0.0001); 
+    ASSERT_NEAR(-76.90169944, v[2].position_.y_, 0.0001); 
+    ASSERT_NEAR(62.77852523, v[3].position_.x_, 0.0001); 
+    ASSERT_NEAR(-76.90169944, v[3].position_.y_, 0.0001);
+    ASSERT_NEAR(99.10565163, v[4].position_.x_, 0.0001); 
+    ASSERT_NEAR(34.901699435, v[4].position_.y_, 0.0001);
     
   } 
 
@@ -407,20 +407,20 @@ namespace {
   * Test that 6 robots are put into a triangle nicely as that is going to 
   * be the custom behavior
   */
-  TEST_F(TrigTest, testFindRobotPositions_sixRobotsThreeEdges) {
-    std::vector<Vector2> v = FindRobotPositions(Vector2(0, 0), 0, 1.0, 6, 3);
-    ASSERT_NEAR(0.0, v.at(0).x_, 0.0001); 
-    ASSERT_NEAR(1.0, v.at(0).y_, 0.0001);    
-    ASSERT_NEAR(-0.866025403, v.at(1).x_, 0.0001); 
-    ASSERT_NEAR(-0.5, v.at(1).y_, 0.0001); 
-    ASSERT_NEAR( 0.866025403, v.at(2).x_, 0.0001); 
-    ASSERT_NEAR(-0.5, v.at(2).y_, 0.0001); 
-    ASSERT_NEAR(-0.4330127013, v.at(3).x_, 0.0001); 
-    ASSERT_NEAR(0.25, v.at(3).y_, 0.0001);
-    ASSERT_NEAR(0.0, v.at(4).x_, 0.0001); 
-    ASSERT_NEAR(-0.5, v.at(4).y_, 0.0001);
-    ASSERT_NEAR(0.433012701, v.at(5).x_, 0.0001); 
-    ASSERT_NEAR(0.25, v.at(5).y_, 0.0001);
+  TEST_F(TrigTest, testFindRobotPoses_sixRobotsThreeEdges) {
+    std::vector<Pose> v = FindRobotPoses(Vector2(0, 0), 0, 1.0, 6, 3);
+    ASSERT_NEAR(0.0, v[0].position_.x_, 0.0001); 
+    ASSERT_NEAR(1.0, v[0].position_.y_, 0.0001);    
+    ASSERT_NEAR(-0.866025403, v[1].position_.x_, 0.0001); 
+    ASSERT_NEAR(-0.5, v[1].position_.y_, 0.0001); 
+    ASSERT_NEAR( 0.866025403, v[2].position_.x_, 0.0001); 
+    ASSERT_NEAR(-0.5, v[2].position_.y_, 0.0001); 
+    ASSERT_NEAR(-0.4330127013, v[3].position_.x_, 0.0001); 
+    ASSERT_NEAR(0.25, v[3].position_.y_, 0.0001);
+    ASSERT_NEAR(0.0, v[4].position_.x_, 0.0001); 
+    ASSERT_NEAR(-0.5, v[4].position_.y_, 0.0001);
+    ASSERT_NEAR(0.433012701, v[5].position_.x_, 0.0001); 
+    ASSERT_NEAR(0.25, v[5].position_.y_, 0.0001);
 
     
   }   

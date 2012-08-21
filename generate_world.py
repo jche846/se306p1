@@ -96,8 +96,8 @@ def generate(n, gn):
     robots = []
 
     for i in range(n):
-        robot_positions.append((random.randint(52, 55),
-                                random.randint(-10, 10)))
+        robot_positions.append((random.randint(-40, 40),
+                                random.randint(-40, 40)))
 
     robot_positions.sort(key=lambda pos: math.sqrt(pos[0] * pos[0] + pos[1] * pos[1]))
 
