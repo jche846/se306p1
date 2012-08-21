@@ -281,6 +281,17 @@ namespace {
     }    
   }
 
+  /**
+  * Dave's filthy test case made good
+  */
+  TEST_F(TrigTest, testFindRobotPositions_davesfilthytest2) {
+    std::vector<Vector2> v = FindRobotPositions(Vector2(4, 4), 0, 100.0, 5, 5);
+    ASSERT_NEAR(4.0, v.at(0).x_, 0.0001); 
+    ASSERT_NEAR(104.0, v.at(0).y_, 0.0001);    
+    ASSERT_NEAR(-91.10565163, v.at(1).x_, 0.0001); 
+    ASSERT_NEAR(34.901699435, v.at(1).y_, 0.0001); 
+  }
+
 
   /** FIND ROBOT POSITIONS
   * Test for a goal in bottom left negative
