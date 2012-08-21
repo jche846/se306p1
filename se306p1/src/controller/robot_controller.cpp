@@ -234,24 +234,18 @@ void RobotController::PublishVelocity() {
  */
 bool RobotController::RotateInto(double theta) {
   // Figure out how far away from theta the robot currently is.
-
-  double diff = DegreesToRadians(AngleDiff(this->pose_.theta_, theta));
-
-  if (diff < 0.0) {
-    diff = diff + this->av_ / 10;
-  } else {
-    diff = diff - this->av_ / 10;
-  }
+  double diff = DegreesToRadians(AngleDiff(this->pose_.theta_, theta))
+      - this->av_ / 10;
 
   // If the difference is small, we have finished aiming.
-  if (-0.001 < diff && diff < 0.001) {
+  if (-0.00001 < diff && diff < 0.00001) {
     return true;
   } else {
     // We are not moving forward, so 0 lv. Setting av to the diff each tick
     // ensures we don't overshoot.
     this->lv_ = 0.0;
 
-    if (diff < this->av_ / 10) {
+    if (fabs(diff) < fabs(this->av_ / 10)) {
       this->av_ = diff * 10.0;
     } else {
       if (diff < 0.0) {
@@ -260,6 +254,7 @@ bool RobotController::RotateInto(double theta) {
         this->av_ = DEFAULT_AV;
       }
     }
+
     return false;
   }
 }
