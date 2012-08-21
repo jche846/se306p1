@@ -138,8 +138,8 @@ std::vector<Vector2> FindRobotPositions (Vector2 center, double theta, double di
     Vector2 vertex2 = positions.at((i+1) % numSides);
 
     // The difference between these two vertexes so that we know where to place the robots
-    double dx = vertex1.x_ - vertex2.x_;
-    double dy = vertex1.y_ - vertex2.y_;
+    double dx = vertex2.x_ - vertex1.x_;
+    double dy = vertex2.y_ - vertex1.y_;
 
     // Calculating the number of robots that will have to be added to the current edge
     int numRobotsToAdd = baseNumberOfRobotsOnEachEdge;
