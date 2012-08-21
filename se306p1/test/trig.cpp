@@ -274,76 +274,76 @@ namespace {
   /**
   * Dave's filthy test case
   */
-  TEST_F(TrigTest, testFindRobotPositions_davesfilthytest) {
-    std::vector<Vector2> v = FindRobotPositions(Vector2(4, 4), 0, 100.0, 5, 5);
+  TEST_F(TrigTest, testFindRobotPoses_davesfilthytest) {
+    std::vector<Pose> v = FindRobotPoses(Vector2(4, 4), 0, 100.0, 5, 5);
     for (auto &x : v) {
-      ROS_INFO("%f %f", x.x_, x.y_);
+      ROS_INFO("%f %f", x.position_.x_, x.position_.y_);
     }    
   }
 
   /**
   * Dave's filthy test case made good
   */
-  TEST_F(TrigTest, testFindRobotPositions_davesfilthytest2) {
-    std::vector<Vector2> v = FindRobotPositions(Vector2(4, 4), 0, 100.0, 5, 5);
-    ASSERT_NEAR(4.0, v.at(0).x_, 0.0001); 
-    ASSERT_NEAR(104.0, v.at(0).y_, 0.0001);    
-    ASSERT_NEAR(-91.10565163, v.at(1).x_, 0.0001); 
-    ASSERT_NEAR(34.901699435, v.at(1).y_, 0.0001); 
-    ASSERT_NEAR(-54.77852523, v.at(2).x_, 0.0001); 
-    ASSERT_NEAR(-76.90169944, v.at(2).y_, 0.0001); 
-    ASSERT_NEAR(62.77852523, v.at(3).x_, 0.0001); 
-    ASSERT_NEAR(-76.90169944, v.at(3).y_, 0.0001);
-    ASSERT_NEAR(99.10565163, v.at(4).x_, 0.0001); 
-    ASSERT_NEAR(34.901699435, v.at(4).y_, 0.0001); 
+  TEST_F(TrigTest, testFindRobotPoses_davesfilthytest2) {
+    std::vector<Pose> v = FindRobotPoses(Vector2(4, 4), 0, 100.0, 5, 5);
+    ASSERT_NEAR(4.0, v[0].position_.x_, 0.0001); 
+    ASSERT_NEAR(104.0, v[0].position_.y_, 0.0001);    
+    ASSERT_NEAR(-91.10565163, v[1].position_.x_, 0.0001); 
+    ASSERT_NEAR(34.901699435, v[1].position_.y_, 0.0001); 
+    ASSERT_NEAR(-54.77852523, v[2].position_.x_, 0.0001); 
+    ASSERT_NEAR(-76.90169944, v[2].position_.y_, 0.0001); 
+    ASSERT_NEAR(62.77852523, v[3].position_.x_, 0.0001); 
+    ASSERT_NEAR(-76.90169944, v[3].position_.y_, 0.0001);
+    ASSERT_NEAR(99.10565163, v[4].position_.x_, 0.0001); 
+    ASSERT_NEAR(34.901699435, v[4].position_.y_, 0.0001); 
   }
 
   /**
   * Test same pentagon as in the previous test, but add an extra robot, 
   * ensuring that it is placed in the middle of the pentagon
   */
-  TEST_F(TrigTest, testFindRobotPositions_pentagonwithcenternoedges) {
-    std::vector<Vector2> v = FindRobotPositions(Vector2(4, 4), 0, 100.0, 6, 5);
-    ASSERT_NEAR(4.0, v.at(0).x_, 0.0001); 
-    ASSERT_NEAR(104.0, v.at(0).y_, 0.0001);    
-    ASSERT_NEAR(-91.10565163, v.at(1).x_, 0.0001); 
-    ASSERT_NEAR(34.901699435, v.at(1).y_, 0.0001); 
-    ASSERT_NEAR(-54.77852523, v.at(2).x_, 0.0001); 
-    ASSERT_NEAR(-76.90169944, v.at(2).y_, 0.0001); 
-    ASSERT_NEAR(62.77852523, v.at(3).x_, 0.0001); 
-    ASSERT_NEAR(-76.90169944, v.at(3).y_, 0.0001);
-    ASSERT_NEAR(99.10565163, v.at(4).x_, 0.0001); 
-    ASSERT_NEAR(34.901699435, v.at(4).y_, 0.0001);
-    ASSERT_NEAR(4.0, v.at(5).x_, 0.0001);
-    ASSERT_NEAR(4.0, v.at(5).y_, 0.0001); 
+  TEST_F(TrigTest, testFindRobotPoses_pentagonwithcenternoedges) {
+    std::vector<Pose> v = FindRobotPoses(Vector2(4, 4), 0, 100.0, 6, 5);
+    ASSERT_NEAR(4.0, v[0].position_.x_, 0.0001); 
+    ASSERT_NEAR(104.0, v[0].position_.y_, 0.0001);    
+    ASSERT_NEAR(-91.10565163, v[1].position_.x_, 0.0001); 
+    ASSERT_NEAR(34.901699435, v[1].position_.y_, 0.0001); 
+    ASSERT_NEAR(-54.77852523, v[2].position_.x_, 0.0001); 
+    ASSERT_NEAR(-76.90169944, v[2].position_.y_, 0.0001); 
+    ASSERT_NEAR(62.77852523, v[3].position_.x_, 0.0001); 
+    ASSERT_NEAR(-76.90169944, v[3].position_.y_, 0.0001);
+    ASSERT_NEAR(99.10565163, v[4].position_.x_, 0.0001); 
+    ASSERT_NEAR(34.901699435, v[4].position_.y_, 0.0001);
+    ASSERT_NEAR(4.0, v[5].position_.x_, 0.0001);
+    ASSERT_NEAR(4.0, v[5].position_.y_, 0.0001); 
   }
 
   /**
   * Test same pentagon as in the previous test, but add an extra robot, 
   * ensuring that it is placed in the middle of the pentagon
   */
-  TEST_F(TrigTest, testFindRobotPositions_pentagonOneRobotOnEdges) {
-    std::vector<Vector2> v = FindRobotPositions(Vector2(4, 4), 0, 100.0, 10, 5);
-    ASSERT_NEAR(4.0, v.at(0).x_, 0.0001); 
-    ASSERT_NEAR(104.0, v.at(0).y_, 0.0001);    
-    ASSERT_NEAR(-91.10565163, v.at(1).x_, 0.0001); 
-    ASSERT_NEAR(34.901699435, v.at(1).y_, 0.0001); 
-    ASSERT_NEAR(-54.77852523, v.at(2).x_, 0.0001); 
-    ASSERT_NEAR(-76.90169944, v.at(2).y_, 0.0001); 
-    ASSERT_NEAR(62.77852523, v.at(3).x_, 0.0001); 
-    ASSERT_NEAR(-76.90169944, v.at(3).y_, 0.0001);
-    ASSERT_NEAR(99.10565163, v.at(4).x_, 0.0001); 
-    ASSERT_NEAR(34.901699435, v.at(4).y_, 0.0001);
-    ASSERT_NEAR(-43.552825815, v.at(5).x_, 0.0001);
-    ASSERT_NEAR(69.4508497175 , v.at(5).y_, 0.0001);
-    ASSERT_NEAR(-72.94208843, v.at(6).x_, 0.0001);
-    ASSERT_NEAR(-21.0000000025, v.at(6).y_, 0.0001);
-    ASSERT_NEAR(4.0, v.at(7).x_, 0.0001);
-    ASSERT_NEAR(-76.90169944, v.at(7).y_, 0.0001);
-    ASSERT_NEAR(80.94208843, v.at(8).x_, 0.0001);
-    ASSERT_NEAR(-21.0000000025, v.at(8).y_, 0.0001);
-    ASSERT_NEAR(51.552825815, v.at(9).x_, 0.0001);
-    ASSERT_NEAR(69.4508497175 , v.at(9).y_, 0.0001);
+  TEST_F(TrigTest, testFindRobotPoses_pentagonOneRobotOnEdges) {
+    std::vector<Pose> v = FindRobotPoses(Vector2(4, 4), 0, 100.0, 10, 5);
+    ASSERT_NEAR(4.0, v[0].position_.x_, 0.0001); 
+    ASSERT_NEAR(104.0, v[0].position_.y_, 0.0001);    
+    ASSERT_NEAR(-91.10565163, v[1].position_.x_, 0.0001); 
+    ASSERT_NEAR(34.901699435, v[1].position_.y_, 0.0001); 
+    ASSERT_NEAR(-54.77852523, v[2].position_.x_, 0.0001); 
+    ASSERT_NEAR(-76.90169944, v[2].position_.y_, 0.0001); 
+    ASSERT_NEAR(62.77852523, v[3].position_.x_, 0.0001); 
+    ASSERT_NEAR(-76.90169944, v[3].position_.y_, 0.0001);
+    ASSERT_NEAR(99.10565163, v[4].position_.x_, 0.0001); 
+    ASSERT_NEAR(34.901699435, v[4].position_.y_, 0.0001);
+    ASSERT_NEAR(-43.552825815, v[5].position_.x_, 0.0001);
+    ASSERT_NEAR(69.4508497175 , v[5].position_.y_, 0.0001);
+    ASSERT_NEAR(-72.94208843, v[6].position_.x_, 0.0001);
+    ASSERT_NEAR(-21.0000000025, v[6].position_.y_, 0.0001);
+    ASSERT_NEAR(4.0, v[7].position_.x_, 0.0001);
+    ASSERT_NEAR(-76.90169944, v[7].position_.y_, 0.0001);
+    ASSERT_NEAR(80.94208843, v[8].position_.x_, 0.0001);
+    ASSERT_NEAR(-21.0000000025, v[8].position_.y_, 0.0001);
+    ASSERT_NEAR(51.552825815, v[9].position_.x_, 0.0001);
+    ASSERT_NEAR(69.4508497175 , v[9].position_.y_, 0.0001);
 
   }  
 

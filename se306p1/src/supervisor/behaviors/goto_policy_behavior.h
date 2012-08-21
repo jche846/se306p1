@@ -23,12 +23,7 @@ public:
   virtual void Execute() {
       ROS_INFO("Going to a %s.", Policy::name().c_str());
 
-      std::vector<Vector2> positions = Policy::FindRobotPositions(this->supervisor_);
-
-      std::vector<Pose> poses;
-      for (size_t i = 0; i < positions.size(); ++i) {
-        poses.push_back(Pose(positions[i], 0));
-      }
+      std::vector<Pose> poses = Policy::FindRobotPoses(this->supervisor_);
 
       std::vector<std::shared_ptr<Robot>> nodes;
       nodes.push_back(this->supervisor_.clusterHead_);

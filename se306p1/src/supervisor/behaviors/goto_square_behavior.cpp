@@ -13,8 +13,8 @@
 #define DEFAULT_SQUARE_SIDES 4
 
 namespace se306p1 {
-std::vector<Vector2> SquarePolicy::FindRobotPositions(Supervisor &sup) {
-  return se306p1::FindRobotPositions(
+std::vector<Pose> SquarePolicy::FindRobotPoses(Supervisor &sup) {
+  return se306p1::FindRobotPoses(
     Vector2(DEFAULT_SQUARE_X, DEFAULT_SQUARE_Y),
     DEFAULT_SQUARE_THETA,
     DEFAULT_SQUARE_DIAMETER,

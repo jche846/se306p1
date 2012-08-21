@@ -1,5 +1,9 @@
 #include "trig.h"
 
+#include "ros/ros.h"
+
+#include <cmath>
+
 namespace se306p1 {
 double AngleDiff(double theta, double phi) {
   double diff;
@@ -92,7 +96,7 @@ Vector2 FindPointFromTheta (Vector2 center, double theta, double diameter) {
   return Vector2 (x, y);
 }
 
-std::vector<Vector2> FindRobotPositions (Vector2 center, double theta, double diameter, int numRobots, int numSides) {
+std::vector<Pose> FindRobotPoses (Vector2 center, double theta, double diameter, int numRobots, int numSides) {
   // Handles special case of there being more sides than robots and
   // makes sure that there will be a robot on every corner by decreasing
   // the number of sides
@@ -107,21 +111,23 @@ std::vector<Vector2> FindRobotPositions (Vector2 center, double theta, double di
   }
   // Set the size of the angle change
   double angleStepSize = 360.0/numSides;
-  std::vector<Vector2> positions;
-  // Assign the positions of the vertexes of the polygon
+  std::vector<Pose> poses;
+  // Assign the poses of the vertexes of the polygon
   for (int i = 0 ; i < numSides ; i++) {
-    positions.push_back(FindPointFromTheta(center, (theta + i*angleStepSize), diameter));
+    Vector2 point = FindPointFromTheta(center, (theta + i*angleStepSize), diameter);
+    double theta = AngleBetweenPoints(point, center);
+    poses.push_back(Pose(point, theta));
   }
   // We need to process the remaining robots that weren't used in vertices for the polygon
   numRobots -= numSides;
   // If there is 1 left over robot, either after the vertices or after placing equal number of extra robots
   // on sides, then put it in the middle of the shape.
   if (numRobots%numSides == 1) {
-    positions.push_back(center);
+    poses.push_back(Pose(center, 0));
     numRobots--;
   }
 
-  // Process any left over robots to positions along each side of the shape.
+  // Process any left over robots to poses along each side of the shape.
 
   // The maximum difference in the number of Robots on sides should be 1
   // Each side should have at minimum the integer division of numRobots by numSides
@@ -134,8 +140,8 @@ std::vector<Vector2> FindRobotPositions (Vector2 center, double theta, double di
   for (int i = 0; i < numSides ; i++) {
 
     // The two vertexes that we are positioning the robots between
-    Vector2 vertex1 = positions.at(i);
-    Vector2 vertex2 = positions.at((i+1) % numSides);
+    Vector2 &vertex1 = poses[i].position_;
+    Vector2 &vertex2 = poses[(i+1) % numSides].position_;
 
     // The difference between these two vertexes so that we know where to place the robots
     double dx = vertex2.x_ - vertex1.x_;
@@ -154,13 +160,16 @@ std::vector<Vector2> FindRobotPositions (Vector2 center, double theta, double di
     double xSplit = dx/(numRobotsToAdd+1);
     double ySplit = dy/(numRobotsToAdd+1);
 
-    // Add the robots to the positions vector spaced equally along the edge
+    // Add the robots to the poses vector spaced equally along the edge
     for (int j = 0 ; j<numRobotsToAdd ; j++) {
       double x = vertex1.x_ + ((j+1) * xSplit);
       double y = vertex1.y_ + ((j+1) * ySplit);
-      positions.push_back(Vector2(x,y));
+
+      Vector2 point = Vector2(x, y);
+      double theta = AngleBetweenPoints(point, center);
+      poses.push_back(Pose(point, theta));
     }
   }
-  return positions;
+  return poses;
 }
 }

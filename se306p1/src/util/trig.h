@@ -5,6 +5,7 @@
 
 #include <tf/transform_datatypes.h>
 #include "vector2.h"
+#include "pose.h"
 
 namespace se306p1 {
 /**
@@ -127,5 +128,5 @@ Vector2 FindPointFromTheta (Vector2 center, double theta, double diameter);
 *
 * @return A vector of Vector2s that determines the positions that the robots should take
 */
-std::vector<Vector2> FindRobotPositions (Vector2 center, double theta, double diameter, int numRobots, int numSides);
+std::vector<Pose> FindRobotPoses (Vector2 center, double theta, double diameter, int numRobots, int numSides);
 }
