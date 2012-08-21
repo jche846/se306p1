@@ -196,6 +196,82 @@ namespace {
   }
 
   /**
+  * Tests normalizeAngle for the case of greater than 180
+  */
+  TEST_F(TrigTest, testNormalizeAngle_positive) {
+    ASSERT_NEAR(-160.0, normalizeAngle(200.0), 0.0001);
+  }
+
+  /**
+  * Tests normalizeAngle for the case of less than -180
+  */
+  TEST_F(TrigTest, testNormalizeAngle_negative) {
+    ASSERT_NEAR(160, normalizeAngle(-200.0), 0.0001);
+  }
+
+  /**
+  * Tests normalizeAngle for the case of greater than 360
+  */
+  TEST_F(TrigTest, testNormalizeAngle_gt360) {
+    ASSERT_NEAR(40, normalizeAngle(400.0), 0.0001);
+  }
+
+  /**
+  * Tests normalizeAngle for the case of greater than 720, i.e. more that 2*360
+  */
+  TEST_F(TrigTest, testNormalizeAngle_gt720) {
+    ASSERT_NEAR(50, normalizeAngle(770.0), 0.0001);
+  }
+
+  /**
+  * Tests normalizeAngle for the case of less than -720, i.e. more that 2*360
+  */
+  TEST_F(TrigTest, testNormalizeAngle_ltNeg720) {
+    ASSERT_NEAR(-60, normalizeAngle(-1140.0), 0.0001);
+  }
+
+  /**
+  * Tests normalizeAngle for the case of less than -720 that will go positive,
+  * i.e. more that 2*360
+  */
+  TEST_F(TrigTest, testNormalizeAngle_ltNeg720topos) {
+    ASSERT_NEAR(130, normalizeAngle(-2030.0), 0.0001);
+  }
+
+  /**
+  * Tests FindPointFromTheta for the case of the topleft sector at 45 degs
+  */
+  TEST_F(TrigTest, testFindPointFromTheta_easytopleft) {
+    ASSERT_NEAR(-0.70710678, FindPointFromTheta(Vector2(0.0, 0.0), 45.0, 1.0).x_, 0.0001);
+  ASSERT_NEAR(0.70710678, FindPointFromTheta(Vector2(0.0, 0.0), 45.0, 1.0).y_, 0.0001);
+  }
+
+  /**
+  * Tests FindPointFromTheta for the case of the topleft sector at 45 degs
+  */
+  TEST_F(TrigTest, testFindPointFromTheta_easybottomleft) {
+    ASSERT_NEAR(-0.70710678, FindPointFromTheta(Vector2(0.0, 0.0), 135.0, 1.0).x_, 0.0001);
+    ASSERT_NEAR(-0.70710678, FindPointFromTheta(Vector2(0.0, 0.0), 135.0, 1.0).y_, 0.0001);
+  }
+
+  /**
+  * Tests FindPointFromTheta for the case of the topleft sector at 45 degs
+  */
+  TEST_F(TrigTest, testFindPointFromTheta_easytopright) {
+    ASSERT_NEAR(0.70710678, FindPointFromTheta(Vector2(0.0, 0.0), -45.0, 1.0).x_, 0.0001);
+    ASSERT_NEAR(0.70710678, FindPointFromTheta(Vector2(0.0, 0.0), -45.0, 1.0).y_, 0.0001);
+  }
+
+  /**
+  * Tests FindPointFromTheta for the case of the topleft sector at 45 degs
+  */
+  TEST_F(TrigTest, testFindPointFromTheta_easybottomright) {
+    ASSERT_NEAR(0.70710678, FindPointFromTheta(Vector2(0.0, 0.0), -135.0, 1.0).x_, 0.0001);
+    ASSERT_NEAR(-0.70710678, FindPointFromTheta(Vector2(0.0, 0.0), -135.0, 1.0).y_, 0.0001);
+  }
+  
+
+  /** FIND ROBOT POSITIONS
   * Test for a goal in bottom left negative
   */
   TEST_F(TrigTest, testNegAngleDiff_BL ){
