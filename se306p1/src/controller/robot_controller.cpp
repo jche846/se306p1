@@ -19,8 +19,8 @@ RobotController::RobotController(ros::NodeHandle &nh, uint64_t id = 0) {
 
   // Initialise the robot as stationary with a given ID.
   this->robot_id_ = id;
-  this->lv_ = 0;
-  this->av_ = 0;
+  this->lv_ = 0.0;
+  this->av_ = 0.0;
 
   // Initialise as waiting for new commands.
   this->state_ = RobotState::READY;
@@ -99,18 +99,18 @@ RobotController::~RobotController() {
 void RobotController::clock_callback(rosgraph_msgs::Clock msg) {
 
   double moved = (pose_.position_ - prevpos_).Length();
-  double roted = pose_.theta_ - prevtheta_;
+//  double roted = pose_.theta_ - prevtheta_;
 //  double laccel = lv_ - prevlv_;
 //  double aaccel = av_ - prevav_;
 
-  if (this->robot_id_ == 0) {
+  if (this->robot_id_ == 1) {
     if (moved > 0.0)
       ROS_INFO(
           "R%ld | travlld %f in %f at lv=%f | prevlv = %f", this->robot_id_, moved, msg.clock.toSec() - prevtime_.toSec(), this->lv_, prevlv_);
 
-    if (roted > 0.0)
-      ROS_INFO(
-          "R%ld | rotated %f in %f at av=%f", this->robot_id_, roted, msg.clock.toSec() - prevtime_.toSec(), this->av_);
+//    if (roted > 0.0)
+//      ROS_INFO(
+//          "R%ld | rotated %f in %f at av=%f", this->robot_id_, roted, msg.clock.toSec() - prevtime_.toSec(), this->av_);
   }
 
   prevpos_ = this->pose_.position_;
@@ -268,7 +268,7 @@ void RobotController::PublishVelocity() {
  */
 bool RobotController::RotateInto(double theta) {
   // Figure out how far away from theta the robot currently is.
-  double diff = AngleDiff(this->pose_.theta_, theta);
+  double diff = AngleDiff(this->pose_.theta_, theta) - this->av_ / 10;
 
   // If the difference is small, we have finished aiming.
   if (-0.001 < diff && diff < 0.001) {
@@ -278,8 +278,12 @@ bool RobotController::RotateInto(double theta) {
     // ensures we don't overshoot.
     this->lv_ = 0.0;
 
-    if (DegreesToRadians(diff) > this->av_ / 10) {
-      this->av_ = DegreesToRadians(diff);
+    if (DegreesToRadians(diff) < this->av_ / 10) {
+      this->av_ = DegreesToRadians(diff) * 10.0;
+
+      if (this->robot_id_ == 1)
+        ROS_INFO("R%ld | SETTING av TO %f, av was %f, diff=%f", this->robot_id_, diff * 10, this->av_, diff);
+
     } else {
       this->av_ = DEFAULT_AV;
     }
@@ -295,21 +299,18 @@ bool RobotController::RotateInto(double theta) {
  * @return True if the robot is at the given point, false otherwise.
  */
 bool RobotController::MoveTo(Vector2 point) {
-  double distance = (point - this->pose_.position_).Length();
+  // Distance one tick ahead
+  double distance = (point - this->pose_.position_).Length() - this->lv_ / 10.0;
 
-  if ((point - this->pose_.position_).Length() < 0.1) {
-
-    if (this->robot_id_ == 0)
-      ROS_INFO("R%ld ended up %f away from goal.", this->robot_id_, distance);
-
+  if (distance < 0.00001) {
     // If the robot is near the goal position, move to the aligning step.
     return true;
   } else {
     // Otherwise, continue moving at the default lv.
     this->av_ = 0.0;
 
-    if (distance > this->lv_ / 10) {
-      this->lv_ = distance * 10;
+    if (distance < this->lv_ / 10.0) {
+      this->lv_ = distance * 10.0;
     } else {
       this->lv_ = DEFAULT_LV;
     }
@@ -325,8 +326,8 @@ bool RobotController::MoveTo(Vector2 point) {
  * robot will align to the specified angle.
  */
 void RobotController::MoveTowardsGoal() {
-// If the robot is already at the position, we can skip aiming at it and
-// moving to it.
+  // If the robot is already at the position, we can skip aiming at it and
+  // moving to it.
   if ((this->goal_.position_ - this->pose_.position_).Length() < 0.01) {
     this->goStep_ = GoStep::ALIGNING;
   }
