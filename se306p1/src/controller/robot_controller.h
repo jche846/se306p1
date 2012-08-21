@@ -28,8 +28,7 @@
  */
 namespace se306p1 {
 enum class RobotState {
-  FINISHED,
-  IDLE,
+  READY,
   DOING,
   GOING,
   SCANNING
@@ -69,10 +68,10 @@ class RobotController {
   RobotState state_;
 
   // Current step of Go command
-  GoStep gostep_;
+  GoStep goStep_;
 
   // Current step of Scan command
-  ScanStep scanstep_;
+  ScanStep scanStep_;
 
   // Command queue
   std::deque<Command> commands_;
@@ -114,6 +113,7 @@ class RobotController {
   void SetGoing(Go msg);
   void SetDoing(Do msg);
   void ExecuteCommand(Command cmd);
+  void ReceiveCommand(Command cmd);
   void DequeueCommand();
   void InterruptCommandQueue(Command cmd);
   void Run();

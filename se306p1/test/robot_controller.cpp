@@ -166,7 +166,7 @@ class RobotControllerTest : public testing::Test {
     //check state
     ASSERT_EQ(rc.state_,RobotState::GOING);
     //check aiming set
-    ASSERT_EQ(rc.gostep_,GoStep::AIMING);
+    ASSERT_EQ(rc.goStep_,GoStep::AIMING);
 
     //prove SetGoing has been called
     ASSERT_TRUE(rc.goal_.theta_==theta);
@@ -203,7 +203,7 @@ class RobotControllerTest : public testing::Test {
 
     rc.SetDoing(msg_do);
     //check state
-    ASSERT_EQ(rc.state_,RobotState::IDLE);
+    ASSERT_EQ(rc.state_,RobotState::READY);
     //check lv is set for the robot
     ASSERT_EQ(rc.lv_,msg_do.lv);
     //check av is set for the robot
@@ -218,7 +218,7 @@ class RobotControllerTest : public testing::Test {
     rc.commands_.clear();
     rc.DequeueCommand();
     //check state
-    ASSERT_EQ(rc.state_,RobotState::IDLE);
+    ASSERT_EQ(rc.state_,RobotState::READY);
     //check lv is set for the robot has been set to 0
     ASSERT_EQ(rc.lv_,0);
     //check av is set for the robot has been set to 0
