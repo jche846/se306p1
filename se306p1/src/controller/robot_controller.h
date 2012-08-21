@@ -48,13 +48,6 @@ enum class ScanStep {
 
 class RobotController {
  private:
-  // testing variables
-  Vector2 prevpos_;
-  ros::Time prevtime_;
-  double prevtheta_;
-  double prevlv_;
-  double prevav_;
-
   // Robot identification
   uint64_t robot_id_;
 

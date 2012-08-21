@@ -3,17 +3,10 @@
 #include <string>
 
 #define DEFAULT_LV 4.0
-#define DEFAULT_AV 2.0
+#define DEFAULT_AV 1.0
 
 namespace se306p1 {
 RobotController::RobotController(ros::NodeHandle &nh, uint64_t id = 0) {
-
-  prevpos_ = Vector2(0.0, 0.0);
-  prevtime_ = ros::Time::now();
-  prevtheta_ = 0.0;
-  prevlv_ = 0.0;
-  prevav_ = 0.0;
-
   // Node handler to talk to ROS.
   this->nh_ = nh;
 
@@ -97,28 +90,6 @@ RobotController::~RobotController() {
  * @param msg The current time since Stage was launched.
  */
 void RobotController::clock_callback(rosgraph_msgs::Clock msg) {
-
-  double moved = (pose_.position_ - prevpos_).Length();
-//  double roted = pose_.theta_ - prevtheta_;
-//  double laccel = lv_ - prevlv_;
-//  double aaccel = av_ - prevav_;
-
-  if (this->robot_id_ == 1) {
-    if (moved > 0.0)
-      ROS_INFO(
-          "R%ld | travlld %f in %f at lv=%f | prevlv = %f", this->robot_id_, moved, msg.clock.toSec() - prevtime_.toSec(), this->lv_, prevlv_);
-
-//    if (roted > 0.0)
-//      ROS_INFO(
-//          "R%ld | rotated %f in %f at av=%f", this->robot_id_, roted, msg.clock.toSec() - prevtime_.toSec(), this->av_);
-  }
-
-  prevpos_ = this->pose_.position_;
-  prevtime_ = msg.clock;
-  prevtheta_ = this->pose_.theta_;
-  prevav_ = av_;
-  prevlv_ = lv_;
-
   if (this->state_ == RobotState::GOING) {
     // If the robot is going somewhere, keep trying to go there
     this->MoveTowardsGoal();
@@ -153,9 +124,6 @@ void RobotController::odom_callback(nav_msgs::Odometry msg) {
   // Set the rotation.
   QuaternionMsgToRPY(msg.pose.pose.orientation, roll, pitch, yaw);
   this->pose_.theta_ = RadiansToDegrees(yaw);
-
-//  ROS_INFO(
-//      "R%" PRIu64 " ODOM | x=%f, y=%f, theta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->pose_.theta_, this->lv_, this->av_);
 }
 
 /**
@@ -229,8 +197,6 @@ void RobotController::baseScan_callback(sensor_msgs::LaserScan msg) {
       }
     }
 
-//    ROS_INFO( "R%" PRIu64 " SCANNED %d", this->robot_id_, barCount);
-
     this->scanResult_ = barCount;
   }
 }
@@ -268,7 +234,14 @@ void RobotController::PublishVelocity() {
  */
 bool RobotController::RotateInto(double theta) {
   // Figure out how far away from theta the robot currently is.
-  double diff = AngleDiff(this->pose_.theta_, theta) - this->av_ / 10;
+
+  double diff = DegreesToRadians(AngleDiff(this->pose_.theta_, theta));
+
+  if (diff < 0.0) {
+    diff = diff + this->av_ / 10;
+  } else {
+    diff = diff - this->av_ / 10;
+  }
 
   // If the difference is small, we have finished aiming.
   if (-0.001 < diff && diff < 0.001) {
@@ -278,14 +251,14 @@ bool RobotController::RotateInto(double theta) {
     // ensures we don't overshoot.
     this->lv_ = 0.0;
 
-    if (DegreesToRadians(diff) < this->av_ / 10) {
-      this->av_ = DegreesToRadians(diff) * 10.0;
-
-      if (this->robot_id_ == 1)
-        ROS_INFO("R%ld | SETTING av TO %f, av was %f, diff=%f", this->robot_id_, diff * 10, this->av_, diff);
-
+    if (diff < this->av_ / 10) {
+      this->av_ = diff * 10.0;
     } else {
-      this->av_ = DEFAULT_AV;
+      if (diff < 0.0) {
+        this->av_ = -DEFAULT_AV;
+      } else {
+        this->av_ = DEFAULT_AV;
+      }
     }
     return false;
   }
