@@ -110,6 +110,7 @@ class RobotController {
   void AnswerPosition();
   void PublishVelocity();
   void Scan();
+  bool RotateInto(double theta);
   void MoveTowardsGoal();
   void SetScanning(se306p1::Scan msg);
   void SetGoing(Go msg);

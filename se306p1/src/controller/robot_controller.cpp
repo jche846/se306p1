@@ -226,6 +226,29 @@ void RobotController::PublishVelocity() {
 }
 
 /**
+ * Update the robot angular velocity so that it will rotate into the given
+ * angle.
+ *
+ * @param theta The angle that the robot is attempting to rotate into.
+ * @return True if the robot is at the given angle, false otherwise.
+ */
+bool RobotController::RotateInto(double theta) {
+  // Figure out how far away from theta the robot currently is.
+  double diff = AngleDiff(this->pose_.theta_, theta);
+
+  // If the difference is small, we have finished aiming.
+  if (-0.001 < diff && diff < 0.001) {
+    return true;
+  } else {
+    // We are not moving forward, so 0 lv. Setting av to the diff each tick
+    // ensures we don't overshoot.
+    this->lv_ = 0.0;
+    this->av_ = DegreesToRadians(diff);
+    return false;
+  }
+}
+
+/**
  * Execute the next tick of movement when attempting to reach a goal position
  * while executing a Go command. When executing a Go command, the robot will
  * first rotate to point at it's destination. Next, the robot will begin to
@@ -233,41 +256,31 @@ void RobotController::PublishVelocity() {
  * robot will align to the specified angle.
  */
 void RobotController::MoveTowardsGoal() {
-// If the robot is already at the position, we can skip aiming at it and
-// moving to it.
+  // If the robot is already at the position, we can skip aiming at it and
+  // moving to it.
   if ((this->goal_.position_ - this->pose_.position_).Length() < 0.01) {
     this->goStep_ = GoStep::ALIGNING;
   }
 
-// Aim at the goal position.
+  // If the escape code was given, skip aiming and aligning and move straight
+  // forward into the position.
+  if (this->goal_.theta_ == 999) {
+    this->goStep_ = GoStep::MOVING;
+  }
+
+  // Aim at the goal position.
   if (this->goStep_ == GoStep::AIMING) {
-    if (this->goal_.theta_ == 999) {
+    // Figure out the angle that the robot will need to be at to be facing
+    // the goal position.
+    double angle_to_goal = AngleBetweenPoints(this->pose_.position_,
+                                              this->goal_.position_);
+
+    if (this->RotateInto(angle_to_goal)) {
       this->goStep_ = GoStep::MOVING;
-    } else {
-      // Figure out the angle that the robot will need to be at to be facing
-      // the goal position.
-      double angle_to_goal = AngleBetweenPoints(this->pose_.position_,
-                                                this->goal_.position_);
-
-      // Figure out how far away from that angle the robot currently is.
-      double diff = AngleDiff(this->pose_.theta_, angle_to_goal);
-
-      // If the difference is small, we have finished aiming.
-      if (-0.001 < diff && diff < 0.001) {
-//        ROS_INFO(
-//            "R%" PRIu64 " aimed | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
-
-        this->goStep_ = GoStep::MOVING;
-      } else {
-        // We are not moving forward, so 0 lv. Setting av to the diff each tick
-        // ensures we don't overshoot.
-        this->lv_ = 0.0;
-        this->av_ = DegreesToRadians(diff);
-      }
     }
   }
 
-// Move towards the goal position
+  // Move towards the goal position
   if (this->goStep_ == GoStep::MOVING) {
     // Figure out the distance from the goal the robot currently is.
     double distance_to_goal = (this->goal_.position_ - this->pose_.position_)
@@ -275,9 +288,6 @@ void RobotController::MoveTowardsGoal() {
 
     // If the distance is small, we have reached the goal position.
     if (distance_to_goal < 0.1) {
-//      ROS_INFO(
-//          "R%" PRIu64 " moved | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
-
       this->goStep_ = GoStep::ALIGNING;
     } else {
       // The robot is not rotating, so 0 av. The lv is constant.
@@ -286,9 +296,9 @@ void RobotController::MoveTowardsGoal() {
     }
   }
 
-// Rotate into the given angle.
+  // Rotate into the given angle.
   if (this->goStep_ == GoStep::ALIGNING) {
-    if (this->goal_.theta_ == 999) {
+    if (this->goal_.theta_ == 999 || this->RotateInto(this->goal_.theta_)) {
       this->lv_ = 0.0;
       this->av_ = 0.0;
 
@@ -296,38 +306,13 @@ void RobotController::MoveTowardsGoal() {
       this->AnswerPosition();
 
       this->state_ = RobotState::READY;
-    } else {
-
-      // Figure out how far from the angle the robot currently is.
-      double diff = AngleDiff(this->pose_.theta_, this->goal_.theta_);
-
-      // If the difference is small, the robot is aligned and the Go is
-      // finished.
-      if (-0.001 < diff && diff < 0.001) {
-//        ROS_INFO(
-//            "R%" PRIu64 " alned | x=%f, y=%f, gx =%f, gy=%f, theta=%f, gtheta=%f, lv=%f, av=%f", this->robot_id_, this->pose_.position_.x_, this->pose_.position_.y_, this->goal_.position_.x_, this->goal_.position_.y_, (this->pose_.theta_), (this->goal_.theta_), this->lv_, this->av_);
-//        ROS_INFO("R%" PRIu64 " FINISHED GO", this->robot_id_);
-
-        // Stop the robot moving.
-        this->lv_ = 0.0;
-        this->av_ = 0.0;
-
-        // Report back to the supervisor.
-        this->AnswerPosition();
-
-        this->state_ = RobotState::READY;
-      } else {
-        // We are not moving forward, so 0 lv. Setting av to the diff each tick
-        // ensures we don't overshoot.
-        this->lv_ = 0.0;
-        this->av_ = DegreesToRadians(diff);
-      }
     }
   }
 
-// Update the lv and the av on Stage.
+  // Update the lv and the av on Stage.
   this->PublishVelocity();
 }
+
 
 /**
  * Perform a scan for items. The scan will continue for SCAN_TIME. If nothing is
