@@ -63,6 +63,7 @@ double NormalizeAngle (double theta) {
 Vector2 FindPointFromTheta (Vector2 center, double theta, double diameter) {
   double x; // x value of the point that we are calculating
   double y; // y value of the point that we are calculating
+  theta = NormalizeAngle(theta);
   if (theta < 0.0 && theta >= -90.0) {
     // Quad 1 (top right)
     theta = fabs(theta);
@@ -74,7 +75,7 @@ Vector2 FindPointFromTheta (Vector2 center, double theta, double diameter) {
     theta -= 90.0;
     x = center.x_ + (diameter * DegCos(theta));
     y = center.y_ - (diameter * DegSin(theta));
-  } else if (theta > 0.0 && theta <= 90.0) {
+  } else if (theta >= 0.0 && theta <= 90.0) {
     // Quad 3 (top left)
     x = center.x_ - (diameter * DegSin(theta));
     y = center.y_ + (diameter * DegCos(theta));

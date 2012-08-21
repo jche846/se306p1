@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "../src/util/trig.h"
 #include <cmath>
+#include <iostream>
 
 using namespace se306p1;
 namespace {
@@ -270,6 +271,16 @@ namespace {
     ASSERT_NEAR(-0.70710678, FindPointFromTheta(Vector2(0.0, 0.0), -135.0, 1.0).y_, 0.0001);
   }
   
+  /**
+  * Dave's filthy test case
+  */
+  TEST_F(TrigTest, testFindRobotPositions_davesfilthytest) {
+    std::vector<Vector2> v = FindRobotPositions(Vector2(4, 4), 0, 100.0, 5, 5);
+    for (auto &x : v) {
+      ROS_INFO("%f %f", x.x_, x.y_);
+    }    
+  }
+
 
   /** FIND ROBOT POSITIONS
   * Test for a goal in bottom left negative
