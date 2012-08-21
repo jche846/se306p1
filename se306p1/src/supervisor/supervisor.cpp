@@ -199,18 +199,31 @@ void Supervisor::ElectHead() {
 
   double clusterHeadDist = -1;
 
+  //PAIR IS NOT A PAIR OF ROBOTS
   for (auto &pair : this->robots_) {
     double distToOrig = pair.second->pose_.position_.Length();
     if (clusterHeadDist == -1 && distToOrig != 0) {
+      // Assign the robot to the current clusterHead
       this->clusterHead_ = pair.second;
       clusterHeadDist = distToOrig;
     } else {
+      // If the robot object that we are currently at has a shorter
+      // distance to the orgin than the current cluster head then set this
+      // to be the current cluster head
       if (distToOrig != 0 && distToOrig < clusterHeadDist) {
-
+        
+        // Make the cluster head that we have just succeeded no longer the
+        // cluster head and add it to the non-head robots.
         this->nonHeadRobots_.push_back(this->clusterHead_);
 
+        // Make the current robot that succeeded the old cluster head the new 
+        // cluster head
         this->clusterHead_ = pair.second;
         clusterHeadDist = distToOrig;
+        
+      // If its distance to orgin is longer than the current cluster heads 
+      // distance to origin or the robot is located at the origin add it to the 
+      // list of non head robots.
       } else {
         this->nonHeadRobots_.push_back(pair.second);
       }
