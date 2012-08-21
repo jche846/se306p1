@@ -48,6 +48,13 @@ enum class ScanStep {
 
 class RobotController {
  private:
+  // testing variables
+  Vector2 prevpos_;
+  ros::Time prevtime_;
+  double prevtheta_;
+  double prevlv_;
+  double prevav_;
+
   // Robot identification
   uint64_t robot_id_;
 
@@ -102,17 +109,18 @@ class RobotController {
   virtual ~RobotController();
   void clock_callback(rosgraph_msgs::Clock msg);
   void odom_callback(nav_msgs::Odometry msg);
-  void scan_callback(se306p1::Scan msg);
+  void scan_callback(Scan msg);
   void go_callback(Go msg);
   void do_callback(Do msg);
   void askPosition_callback(AskPosition msg);
   void baseScan_callback(sensor_msgs::LaserScan msg);
   void AnswerPosition();
   void PublishVelocity();
-  void Scan();
+  void WaitForScan();
   bool RotateInto(double theta);
+  bool MoveTo(Vector2 point);
   void MoveTowardsGoal();
-  void SetScanning(se306p1::Scan msg);
+  void SetScanning(Scan msg);
   void SetGoing(Go msg);
   void SetDoing(Do msg);
   void ExecuteCommand(Command cmd);
