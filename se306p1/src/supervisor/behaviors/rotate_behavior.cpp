@@ -4,9 +4,6 @@
 
 #define DEFAULT_MOVE_SPEED 1
 
-#define CIRCLE_AV 0.62
-#define CIRCLE_LV 1.0
-
 namespace se306p1 {
 RotateBehavior::RotateBehavior(Supervisor &sup) : Behavior(sup) {
   ROS_INFO("Initialized rotate behavior.");
@@ -26,8 +23,15 @@ void RotateBehavior::Execute() {
       cur_robot.second->Go(clusterHeadPose, false);
     }
     // enqueue rotate for after they have reached the cluster head pos
+
+    int num_of_robots =  robots_.size();
+    double radius = (num_of_robots * 6 * 0.35) / (M_PI * 2);
+
+    double circle_lv = 4.0;
+    double circle_av = circle_lv / (radius);
+
     cur_robot.second->Do(
-        CIRCLE_LV, CIRCLE_AV,
+        circle_lv, circle_av,
         cur_robot.second->id_ != this->supervisor_.clusterHead_->id_);
   }
 }
