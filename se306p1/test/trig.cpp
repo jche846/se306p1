@@ -196,46 +196,46 @@ namespace {
   }
 
   /**
-  * Tests normalizeAngle for the case of greater than 180
+  * Tests NormalizeAngle for the case of greater than 180
   */
   TEST_F(TrigTest, testNormalizeAngle_positive) {
-    ASSERT_NEAR(-160.0, normalizeAngle(200.0), 0.0001);
+    ASSERT_NEAR(-160.0, NormalizeAngle(200.0), 0.0001);
   }
 
   /**
-  * Tests normalizeAngle for the case of less than -180
+  * Tests NormalizeAngle for the case of less than -180
   */
   TEST_F(TrigTest, testNormalizeAngle_negative) {
-    ASSERT_NEAR(160, normalizeAngle(-200.0), 0.0001);
+    ASSERT_NEAR(160, NormalizeAngle(-200.0), 0.0001);
   }
 
   /**
-  * Tests normalizeAngle for the case of greater than 360
+  * Tests NormalizeAngle for the case of greater than 360
   */
   TEST_F(TrigTest, testNormalizeAngle_gt360) {
-    ASSERT_NEAR(40, normalizeAngle(400.0), 0.0001);
+    ASSERT_NEAR(40, NormalizeAngle(400.0), 0.0001);
   }
 
   /**
-  * Tests normalizeAngle for the case of greater than 720, i.e. more that 2*360
+  * Tests NormalizeAngle for the case of greater than 720, i.e. more that 2*360
   */
   TEST_F(TrigTest, testNormalizeAngle_gt720) {
-    ASSERT_NEAR(50, normalizeAngle(770.0), 0.0001);
+    ASSERT_NEAR(50, NormalizeAngle(770.0), 0.0001);
   }
 
   /**
-  * Tests normalizeAngle for the case of less than -720, i.e. more that 2*360
+  * Tests NormalizeAngle for the case of less than -720, i.e. more that 2*360
   */
   TEST_F(TrigTest, testNormalizeAngle_ltNeg720) {
-    ASSERT_NEAR(-60, normalizeAngle(-1140.0), 0.0001);
+    ASSERT_NEAR(-60, NormalizeAngle(-1140.0), 0.0001);
   }
 
   /**
-  * Tests normalizeAngle for the case of less than -720 that will go positive,
+  * Tests NormalizeAngle for the case of less than -720 that will go positive,
   * i.e. more that 2*360
   */
   TEST_F(TrigTest, testNormalizeAngle_ltNeg720topos) {
-    ASSERT_NEAR(130, normalizeAngle(-2030.0), 0.0001);
+    ASSERT_NEAR(130, NormalizeAngle(-2030.0), 0.0001);
   }
 
   /**

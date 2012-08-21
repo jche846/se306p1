@@ -68,9 +68,10 @@ Vector2 FindPointFromTheta (Vector2 center, double theta, double diameter) {
     theta = fabs(theta);
     x = center.x_ + (diameter * DegSin(theta));
     y = center.y_ + (diameter * DegCos(theta));
-  } else if (theta < -90.0 && theta <= -180.0) {
+  } else if (theta < -90.0 && theta >= -180.0) {
     // Quad 2 (bottom right)
     theta = fabs(theta);
+    theta -= 90.0;
     x = center.x_ + (diameter * DegCos(theta));
     y = center.y_ - (diameter * DegSin(theta));
   } else if (theta > 0.0 && theta <= 90.0) {
@@ -79,6 +80,7 @@ Vector2 FindPointFromTheta (Vector2 center, double theta, double diameter) {
     y = center.y_ + (diameter * DegCos(theta));
   } else if (theta > 90.0 && theta <= 180.0) {
     // Quad4 (bottom left)
+    theta -= 90.0;
     x = center.x_ - (diameter * DegCos(theta));
     y = center.y_ - (diameter * DegSin(theta));
   } else {
