@@ -18,10 +18,6 @@
 #include "../util/command.h"
 #include <deque>
 
-#define ASSOCIATE_TOPIC "/supervisor/associate"
-#define ASK_POS_TOPIC "/supervisor/ask_pos"
-#define ANS_POS_TOPIC "/supervisor/ans_pos"
-
 /**
  * This header file defines the state variables and methods available to control
  * a robot.
@@ -93,6 +89,7 @@ class RobotController {
   ros::Publisher twist_;
 
   // Count down clock for Scanning
+  int scanningDuration_;
   double scanningStart_;
 
  public:
