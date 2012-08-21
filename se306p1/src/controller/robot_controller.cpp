@@ -270,27 +270,20 @@ void RobotController::MoveTowardsGoal() {
 
   // Aim at the goal position.
   if (this->goStep_ == GoStep::AIMING) {
-    // Figure out the angle that the robot will need to be at to be facing
-    // the goal position.
-    double angle_to_goal = AngleBetweenPoints(this->pose_.position_,
-                                              this->goal_.position_);
-
-    if (this->RotateInto(angle_to_goal)) {
+    if (this->RotateInto(
+        AngleBetweenPoints(this->pose_.position_, this->goal_.position_))) {
+      // If the robot is aiming at the goal position, go to the moving step.
       this->goStep_ = GoStep::MOVING;
     }
   }
 
   // Move towards the goal position
   if (this->goStep_ == GoStep::MOVING) {
-    // Figure out the distance from the goal the robot currently is.
-    double distance_to_goal = (this->goal_.position_ - this->pose_.position_)
-        .Length();
-
-    // If the distance is small, we have reached the goal position.
-    if (distance_to_goal < 0.1) {
+    if ((this->goal_.position_ - this->pose_.position_).Length() < 0.1) {
+      // If the robot is near the goal position, move to the aligning step.
       this->goStep_ = GoStep::ALIGNING;
     } else {
-      // The robot is not rotating, so 0 av. The lv is constant.
+      // Otherwise, continue moving at the default lv.
       this->av_ = 0.0;
       this->lv_ = DEFAULT_LV;
     }
@@ -299,6 +292,8 @@ void RobotController::MoveTowardsGoal() {
   // Rotate into the given angle.
   if (this->goStep_ == GoStep::ALIGNING) {
     if (this->goal_.theta_ == 999 || this->RotateInto(this->goal_.theta_)) {
+      // If the escape code was given or the robot is aligned correctly, stop
+      // moving.
       this->lv_ = 0.0;
       this->av_ = 0.0;
 
@@ -312,7 +307,6 @@ void RobotController::MoveTowardsGoal() {
   // Update the lv and the av on Stage.
   this->PublishVelocity();
 }
-
 
 /**
  * Perform a scan for items. The scan will continue for SCAN_TIME. If nothing is
