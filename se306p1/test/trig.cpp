@@ -281,6 +281,71 @@ namespace {
     }    
   }
 
+  /**
+  * Dave's filthy test case made good
+  */
+  TEST_F(TrigTest, testFindRobotPositions_davesfilthytest2) {
+    std::vector<Vector2> v = FindRobotPositions(Vector2(4, 4), 0, 100.0, 5, 5);
+    ASSERT_NEAR(4.0, v.at(0).x_, 0.0001); 
+    ASSERT_NEAR(104.0, v.at(0).y_, 0.0001);    
+    ASSERT_NEAR(-91.10565163, v.at(1).x_, 0.0001); 
+    ASSERT_NEAR(34.901699435, v.at(1).y_, 0.0001); 
+    ASSERT_NEAR(-54.77852523, v.at(2).x_, 0.0001); 
+    ASSERT_NEAR(-76.90169944, v.at(2).y_, 0.0001); 
+    ASSERT_NEAR(62.77852523, v.at(3).x_, 0.0001); 
+    ASSERT_NEAR(-76.90169944, v.at(3).y_, 0.0001);
+    ASSERT_NEAR(99.10565163, v.at(4).x_, 0.0001); 
+    ASSERT_NEAR(34.901699435, v.at(4).y_, 0.0001); 
+  }
+
+  /**
+  * Test same pentagon as in the previous test, but add an extra robot, 
+  * ensuring that it is placed in the middle of the pentagon
+  */
+  TEST_F(TrigTest, testFindRobotPositions_pentagonwithcenternoedges) {
+    std::vector<Vector2> v = FindRobotPositions(Vector2(4, 4), 0, 100.0, 6, 5);
+    ASSERT_NEAR(4.0, v.at(0).x_, 0.0001); 
+    ASSERT_NEAR(104.0, v.at(0).y_, 0.0001);    
+    ASSERT_NEAR(-91.10565163, v.at(1).x_, 0.0001); 
+    ASSERT_NEAR(34.901699435, v.at(1).y_, 0.0001); 
+    ASSERT_NEAR(-54.77852523, v.at(2).x_, 0.0001); 
+    ASSERT_NEAR(-76.90169944, v.at(2).y_, 0.0001); 
+    ASSERT_NEAR(62.77852523, v.at(3).x_, 0.0001); 
+    ASSERT_NEAR(-76.90169944, v.at(3).y_, 0.0001);
+    ASSERT_NEAR(99.10565163, v.at(4).x_, 0.0001); 
+    ASSERT_NEAR(34.901699435, v.at(4).y_, 0.0001);
+    ASSERT_NEAR(4.0, v.at(5).x_, 0.0001);
+    ASSERT_NEAR(4.0, v.at(5).y_, 0.0001); 
+  }
+
+  /**
+  * Test same pentagon as in the previous test, but add an extra robot, 
+  * ensuring that it is placed in the middle of the pentagon
+  */
+  TEST_F(TrigTest, testFindRobotPositions_pentagonOneRobotOnEdges) {
+    std::vector<Vector2> v = FindRobotPositions(Vector2(4, 4), 0, 100.0, 10, 5);
+    ASSERT_NEAR(4.0, v.at(0).x_, 0.0001); 
+    ASSERT_NEAR(104.0, v.at(0).y_, 0.0001);    
+    ASSERT_NEAR(-91.10565163, v.at(1).x_, 0.0001); 
+    ASSERT_NEAR(34.901699435, v.at(1).y_, 0.0001); 
+    ASSERT_NEAR(-54.77852523, v.at(2).x_, 0.0001); 
+    ASSERT_NEAR(-76.90169944, v.at(2).y_, 0.0001); 
+    ASSERT_NEAR(62.77852523, v.at(3).x_, 0.0001); 
+    ASSERT_NEAR(-76.90169944, v.at(3).y_, 0.0001);
+    ASSERT_NEAR(99.10565163, v.at(4).x_, 0.0001); 
+    ASSERT_NEAR(34.901699435, v.at(4).y_, 0.0001);
+    ASSERT_NEAR(-43.552825815, v.at(5).x_, 0.0001);
+    ASSERT_NEAR(69.4508497175 , v.at(5).y_, 0.0001);
+    ASSERT_NEAR(-72.94208843, v.at(6).x_, 0.0001);
+    ASSERT_NEAR(-21.0000000025, v.at(6).y_, 0.0001);
+    ASSERT_NEAR(4.0, v.at(7).x_, 0.0001);
+    ASSERT_NEAR(-76.90169944, v.at(7).y_, 0.0001);
+    ASSERT_NEAR(80.94208843, v.at(8).x_, 0.0001);
+    ASSERT_NEAR(-21.0000000025, v.at(8).y_, 0.0001);
+    ASSERT_NEAR(51.552825815, v.at(9).x_, 0.0001);
+    ASSERT_NEAR(69.4508497175 , v.at(9).y_, 0.0001);
+
+  }  
 
   /** FIND ROBOT POSITIONS
   * Test for a goal in bottom left negative
