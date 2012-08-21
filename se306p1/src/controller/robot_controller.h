@@ -81,6 +81,7 @@ class RobotController {
 
   // Supervisor pub/subs
   ros::Subscriber askPosSubscriber_;
+  ros::Subscriber scanSubscriber_;
   ros::Subscriber doSubscriber_;
   ros::Subscriber goSubscriber_;
   ros::Publisher ansPosPublisher_;

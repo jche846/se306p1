@@ -18,11 +18,12 @@ RotateBehavior::~RotateBehavior() {
 void RotateBehavior::Execute() {
   ROS_INFO("Rotating.");
 
-  this->supervisor_.clusterHead_->pose_.theta_ = 999;
+  Pose clusterHeadPose = this->supervisor_.clusterHeadPose_;
+  clusterHeadPose.theta_ = 999;
   for (auto &cur_robot : this->supervisor_.robots_) {
     if (cur_robot.second->id_ != this->supervisor_.clusterHead_->id_) {
       // tell robot to move to cluster head pos
-      cur_robot.second->Go(this->supervisor_.clusterHead_->pose_, false);
+      cur_robot.second->Go(clusterHeadPose, false);
     }
     // enqueue rotate for after they have reached the cluster head pos
     cur_robot.second->Do(

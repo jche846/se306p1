@@ -7,6 +7,7 @@
 #include "robot.h"
 
 #include <se306p1/Position.h>
+#include <se306p1/ScanResult.h>
 #include "../util/pose.h"
 
 #include "behaviors/behavior.h"
@@ -23,6 +24,8 @@ class Supervisor {
   enum class State {
     DISCOVERY,
     WAITING,
+    SCANNING,
+    LINEINGUP,
     CONTROLLING
   };
 
@@ -36,6 +39,8 @@ class Supervisor {
   ros::NodeHandle nh_;
   ros::Subscriber ansPosSubscriber_;
   ros::Publisher askPosPublisher_;
+  ros::Subscriber scanResultSubscriber_;
+
 
   std::map<uint64_t, Behavior::BehaviorFactory *> behaviorFactories_;
 
@@ -59,7 +64,7 @@ class Supervisor {
    */
   uint64_t rmax_;
 
-  /**
+   /**
    * The callback for the position answer, used to either:
    *
    * * Initially register the position during the population phase.
@@ -67,6 +72,12 @@ class Supervisor {
    * * Accepting the position for queuing the next task.
    */
   void ansPos_callback(Position msg);
+
+  /**
+   * The callbackfor scan results from the cluster head
+   *
+   */
+  void scanResult_callback(ScanResult msg);
 
   /**
    * Atempt to send a message to a robot Controller
@@ -104,6 +115,11 @@ class Supervisor {
    * The head of the supervised cluster.
    */
   std::shared_ptr<Robot> clusterHead_;
+
+ /**
+   * Location of cluster head in the line
+   */
+  Pose clusterHeadPose_;
 
   /**
    * The non-head robots of the cluster.

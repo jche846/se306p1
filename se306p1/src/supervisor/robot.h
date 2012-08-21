@@ -20,6 +20,7 @@ class Robot {
   ros::NodeHandle nh_;
   ros::Publisher doPublisher_;
   ros::Publisher goPublisher_;
+  ros::Publisher scanPublisher_;
 
   void EnqueueCommand(Command c);
 
@@ -55,5 +56,7 @@ class Robot {
    * Request the robot repeatedly does something.
    */
   void Do(double lv, double av, bool enqueue);
+
+  void ScanBarcode(int time, bool enqueue);
 };
 }
