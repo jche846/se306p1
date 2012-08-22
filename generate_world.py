@@ -77,10 +77,10 @@ def append_barcodes(barcodes, i, filename):
   barcodes.append("""\
 barcode
 (
-name "{name}"
-bitmap "images/{image_file}"
-size [ 6 4.5 0.5 ]
-pose [ 60.0 {y}.0 0.0 0.0 ]
+  name "{name}"
+  bitmap "images/{image_file}"
+  size [ 6 4.5 0.5 ]
+  pose [ 60.0 {y}.0 0.0 0.0 ]
 )
 
 """.format(
