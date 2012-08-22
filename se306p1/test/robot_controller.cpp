@@ -313,6 +313,27 @@ class RobotControllerTest : public testing::Test {
 
     ASSERT_FALSE(rc.MoveTo(position2));
   }
+
+  /**
+   * Tests that RotateInto returns true when the robot is at the angle.
+   */
+  TEST_F(RobotControllerTest, testRotateIntoAtAngle){
+    double theta = 90;
+    rc.pose_.theta_ = theta;
+
+    ASSERT_TRUE(rc.RotateInto(theta));
+  }
+
+  /**
+   * Tests that RotateInto returns false when the robot is not at the angle.
+   */
+  TEST_F(RobotControllerTest, testRotateIntoNotAtAngle){
+    double theta = 90;
+    double phi = 45;
+    rc.pose_.theta_ = theta;
+
+    ASSERT_FALSE(rc.RotateInto(phi));
+  }
 }//namespace
 
 int main(int argc, char **argv) {
