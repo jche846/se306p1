@@ -5,7 +5,8 @@ import os
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        sys.stderr.write("usage: {} [supervisor|controller]\n".format(sys.argv[0]))
+        sys.stderr.write(
+            "usage: {} [supervisor|controller]\n".format(sys.argv[0]))
         sys.exit(1)
 
     node_to_launch = sys.argv[1]
@@ -20,9 +21,8 @@ if __name__ == '__main__':
         num_members = int(round(num_robots / float(num_groups)))
 
         for i in range(num_groups):
-            os.system("se306p1/bin/supervisor _sid:={} _rmin:={} _rmax:={} &".format(
-                i, i * num_members, (i + 1) * num_members - 1
-            ))
+            os.system("se306p1/bin/supervisor _sid:={} _rmin:={} _rmax:={} &".
+                format(i, i * num_members, (i + 1) * num_members - 1))
     elif node_to_launch == "controller":
         for i in range(num_robots):
             os.system("se306p1/bin/robot_controller _rid:={} &".format(i))
@@ -38,4 +38,3 @@ if __name__ == '__main__':
         raise Exception
     except:
         os.killpg(os.getpgid(os.getpid()), 9)
-

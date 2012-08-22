@@ -50,7 +50,8 @@ window
 
 """
 
-COLORS = [line.split("\t")[-1].strip() for line in open("/etc/X11/rgb.txt").readlines()[1:]]
+COLORS = [line.split(
+    "\t")[-1].strip() for line in open("/etc/X11/rgb.txt").readlines()[1:]]
 
 
 def append_robot(robots, num_clusters, cluster_size, cluster_index, x, y):
@@ -68,9 +69,9 @@ def append_robot(robots, num_clusters, cluster_size, cluster_index, x, y):
   )
 
   """.format(
-      i=len(robots), x=x, y=y,
-      color=random.choice(COLORS[min_color:max_color])
-    ))
+                  i=len(robots), x=x, y=y,
+                  color=random.choice(COLORS[min_color:max_color])
+                  ))
 
 
 def append_barcodes(barcodes, i, filename):
@@ -89,7 +90,8 @@ def append_barcodes(barcodes, i, filename):
 
 
 def generate(num_robots, num_groups):
-    # Generate all the robot positions. No robot is allowed to be on the origin.
+    # Generate all the robot positions. No robot is allowed to be on the
+    # origin.
     robot_positions = []
     for i in range(num_robots):
         (x, y) = (0, 0)
@@ -99,7 +101,8 @@ def generate(num_robots, num_groups):
         robot_positions.append((x, y))
 
     # Sort them by distance from the origin
-    robot_positions.sort(key=lambda pos: math.sqrt(pos[0] * pos[0] + pos[1] * pos[1]))
+    robot_positions.sort(
+        key=lambda pos: math.sqrt(pos[0] * pos[0] + pos[1] * pos[1]))
 
     # Cluster heads are the robots closest to the origin.
     cluster_heads = robot_positions[:num_groups]
