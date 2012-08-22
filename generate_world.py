@@ -8,6 +8,9 @@ import os
 COLORS = ["blue", "green", "black", "yellow", "red", "brown"]
 
 HEADER = """\
+resolution 0.02
+interval_sim 100
+
 define mylaser laser
 (
   range_max 5.0
@@ -40,21 +43,17 @@ define barcode model
   laser_return 1
 )
 
-resolution 0.02
-interval_sim 100
-
 window
-( 
+(
   show_data 1
   size [ 745.000 448.000 ]
   scale 30
 )
 
-
 """
 
-
 robot_positions = []
+
 
 def append_robot(robots, n, x, y):
     robots.append("""\
@@ -67,13 +66,15 @@ myrobot
 """.format(
         i=len(robots), x=x, y=y, color=COLORS[n % len(COLORS)]
     ))
+
+
 def append_barcodes():
   barcodes = []
   count = 0
   for filename in os.listdir("images"):
     barcodes.append("""\
 barcode
-( 
+(
   name "{name}"
   bitmap "images/{fileName}"
   size [ 6 4.5 0.5 ]
@@ -105,7 +106,8 @@ def generate(n, gn):
         append_robot(robots, i, x, y)
 
         for _ in range(num_members - 1):
-            if not members: break
+            if not members:
+              break
             x, y = members.pop()
 
             append_robot(robots, i, x, y)
@@ -118,5 +120,3 @@ if __name__ == '__main__':
         sys.exit(1)
 
     print(generate(int(sys.argv[1]), int(sys.argv[2])))
-
-
