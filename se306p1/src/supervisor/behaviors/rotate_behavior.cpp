@@ -19,7 +19,6 @@ void RotateBehavior::Execute() {
   ROS_INFO("Rotating.");
 
   Pose clusterHeadPose = this->supervisor_.clusterHeadPose_;
-  clusterHeadPose.theta_ = 999;
   for (auto &cur_robot : this->supervisor_.robots_) {
     if (cur_robot.second->id_ != this->supervisor_.clusterHead_->id_) {
       // tell robot to move to cluster head pos

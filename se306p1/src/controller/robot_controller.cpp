@@ -306,12 +306,6 @@ void RobotController::MoveTowardsGoal() {
     this->goStep_ = GoStep::ALIGNING;
   }
 
-  // If the escape code was given, skip aiming and aligning and move straight
-  // forward into the position.
-  if (this->goal_.theta_ == 999) {
-    this->goStep_ = GoStep::MOVING;
-  }
-
   // Aim at the goal position.
   if (this->goStep_ == GoStep::AIMING) {
     if (this->RotateInto(
@@ -335,9 +329,8 @@ void RobotController::MoveTowardsGoal() {
 
   // Rotate into the given angle.
   if (this->goStep_ == GoStep::ALIGNING) {
-    if (this->goal_.theta_ == 999 || this->RotateInto(this->goal_.theta_)) {
-      // If the escape code was given or the robot is aligned correctly, stop
-      // moving.
+    if (this->RotateInto(this->goal_.theta_)) {
+      // If the robot is aligned correctly, stop moving.
       this->lv_ = 0.0;
       this->av_ = 0.0;
 
