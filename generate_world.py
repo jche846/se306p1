@@ -50,13 +50,7 @@ window
   scale 30
 )
 
-floorplan
-( 
-  name "swarm"
-  bitmap "swarm_world.pgm"
-  size [ 54.0 58.7 0.5 ]
-  pose [ 0.0 0.0 0.0 0.0 ]
-)
+
 """
 
 
