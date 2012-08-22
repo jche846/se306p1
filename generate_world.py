@@ -54,93 +54,93 @@ COLORS = [line.split("\t")[-1].strip() for line in open("/etc/X11/rgb.txt").read
 
 
 def append_robot(robots, num_clusters, cluster_size, cluster_index, x, y):
-  num_colors = len(COLORS)
-  slice_size = num_colors / num_clusters
-  min_color = (cluster_index * slice_size) % num_colors
-  max_color = (min_color + cluster_size) % num_colors
+    num_colors = len(COLORS)
+    slice_size = num_colors / num_clusters
+    min_color = (cluster_index * slice_size) % num_colors
+    max_color = (min_color + cluster_size) % num_colors
 
-  robots.append("""\
-myrobot
-(
-  name "r{i}"
-  pose [ {x}.0 {y}.0 0.0 0.0 ]
-  color "{color}"
-)
+    robots.append("""\
+  myrobot
+  (
+    name "r{i}"
+    pose [ {x}.0 {y}.0 0.0 0.0 ]
+    color "{color}"
+  )
 
-""".format(
-    i=len(robots), x=x, y=y,
-    color=random.choice(COLORS[min_color:max_color])
-  ))
+  """.format(
+      i=len(robots), x=x, y=y,
+      color=random.choice(COLORS[min_color:max_color])
+    ))
 
 
 def append_barcodes(barcodes, i, filename):
-  barcodes.append("""\
-barcode
-(
-  name "{name}"
-  bitmap "images/{image_file}"
-  size [ 6 4.5 0.5 ]
-  pose [ 60.0 {y}.0 0.0 0.0 ]
-)
+    barcodes.append("""\
+  barcode
+  (
+    name "{name}"
+    bitmap "images/{image_file}"
+    size [ 6 4.5 0.5 ]
+    pose [ 60.0 {y}.0 0.0 0.0 ]
+  )
 
-""".format(
-      name=filename.replace(".pgm", "", 1), image_file=filename, y=i * 8
-  ))
+  """.format(
+        name=filename.replace(".pgm", "", 1), image_file=filename, y=i * 8
+    ))
 
 
 def generate(num_robots, num_groups):
-  # Generate all the robot positions. No robot is allowed to be on the origin.
-  robot_positions = []
-  for i in range(num_robots):
-    (x, y) = (0, 0)
-    while (x, y) == (0, 0):
-      (x, y) = (random.randint(-40, 40), random.randint(-40, 40))
+    # Generate all the robot positions. No robot is allowed to be on the origin.
+    robot_positions = []
+    for i in range(num_robots):
+        (x, y) = (0, 0)
+        while (x, y) == (0, 0):
+            (x, y) = (random.randint(-40, 40), random.randint(-40, 40))
 
-    robot_positions.append((x, y))
+        robot_positions.append((x, y))
 
-  # Sort them by distance from the origin
-  robot_positions.sort(key=lambda pos: math.sqrt(pos[0] * pos[0] + pos[1] * pos[1]))
+    # Sort them by distance from the origin
+    robot_positions.sort(key=lambda pos: math.sqrt(pos[0] * pos[0] + pos[1] * pos[1]))
 
-  # Cluster heads are the robots closest to the origin.
-  cluster_heads = robot_positions[:num_groups]
-  cluster_members = robot_positions[num_groups:]
-  cluster_size = num_robots / num_groups
+    # Cluster heads are the robots closest to the origin.
+    cluster_heads = robot_positions[:num_groups]
+    cluster_members = robot_positions[num_groups:]
+    cluster_size = num_robots / num_groups
 
-  random.shuffle(cluster_members)
+    random.shuffle(cluster_members)
 
-  # Generate robots
-  robots = []
-  for i, (x, y) in enumerate(cluster_heads):
-    append_robot(robots, len(cluster_heads), cluster_size, i, x, y)
+    # Generate robots
+    robots = []
+    for i, (x, y) in enumerate(cluster_heads):
+        append_robot(robots, len(cluster_heads), cluster_size, i, x, y)
 
-    for _ in range(cluster_size - 1):
-      if not cluster_members:
-        break
-      x, y = cluster_members.pop()
+        for _ in range(cluster_size - 1):
+            if not cluster_members:
+                break
+            x, y = cluster_members.pop()
 
-      append_robot(robots, len(cluster_heads), cluster_size, i, x, y)
+            append_robot(robots, len(cluster_heads), cluster_size, i, x, y)
 
-  # Generate barcodes
-  barcodes = []
-  for i, filename in enumerate(os.listdir("images")):
-    append_barcodes(barcodes, i, filename)
+    # Generate barcodes
+    barcodes = []
+    for i, filename in enumerate(os.listdir("images")):
+        append_barcodes(barcodes, i, filename)
 
-  # Return the generated robots and barcodes with the header.
-  return HEADER + "\n".join(robots) + "\n".join(barcodes)
+    # Return the generated robots and barcodes with the header.
+    return HEADER + "\n".join(robots) + "\n".join(barcodes)
 
 if __name__ == '__main__':
-  if len(sys.argv) == 3:
-    num_robots = int(sys.argv[1])
-    num_groups = int(sys.argv[2])
-  elif len(sys.argv) == 1:
-    num_robots = 24
-    num_groups = 4
-  else:
-    sys.stderr.write("usage: {} NUM_ROBOTS (default: 24) NUM_GROUPS (default: 6)\n".format(sys.argv[0]))
-    sys.exit(1)
+    if len(sys.argv) == 3:
+        num_robots = int(sys.argv[1])
+        num_groups = int(sys.argv[2])
+    elif len(sys.argv) == 1:
+        num_robots = 24
+        num_groups = 4
+    else:
+        sys.stderr.write("usage: {} NUM_ROBOTS (default: 24) NUM_GROUPS (default: 6)\n".format(sys.argv[0]))
+        sys.exit(1)
 
-  if num_robots % num_groups != 0:
-    sys.stderr.write("{} does not divide evenly by {}. There must be an equal number of robots per group.\n".format(num_robots, num_groups))
-    sys.exit(1)
+    if num_robots % num_groups != 0:
+        sys.stderr.write("{} does not divide evenly by {}. There must be an equal number of robots per group.\n".format(num_robots, num_groups))
+        sys.exit(1)
 
-  print(generate(num_robots, num_groups))
+    print(generate(num_robots, num_groups))
