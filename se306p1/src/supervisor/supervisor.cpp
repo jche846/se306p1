@@ -30,9 +30,6 @@ Supervisor::Supervisor(ros::NodeHandle &nh) : nh_(nh) {
   this->sid_ = static_cast<uint64_t>(sid);
 
   this->RegisterBehaviors();
-
-  // TODO: remove this, it's hardcoded!
-  this->SwitchBehavior(RotateBehavior::id());
 }
 
 void Supervisor::ansPos_callback(Position msg) {
@@ -174,7 +171,7 @@ void Supervisor::Start() {
         }
       }
       if (execDone) {
-        
+
         this->clusterHead_->Go(Pose(Vector2(-10 * static_cast<int>(this->sid_), 50), 0.0), true);
         this->clusterHead_->ScanBarcode(5, true);
         this->clusterHeadPose_ = this->clusterHead_->pose_;

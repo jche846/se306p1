@@ -31,6 +31,8 @@ class Command {
       double x;
       double y;
       double theta;
+      double errDist;
+      double errTheta;
     };
 
     // SCAN
@@ -65,6 +67,8 @@ class Command {
     this->x = msg.x;
     this->y = msg.y;
     this->theta = msg.theta;
+    this->errDist = msg.errDist;
+    this->errTheta = msg.errTheta;
     this->enqueue = msg.enqueue;
   }
 
