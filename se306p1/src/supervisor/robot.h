@@ -43,7 +43,8 @@ class Robot {
   /**
    * Request the robot to go to a position via a child controller.
    */
-  void Go(const Pose &pos, bool enqueue);
+  void Go(const Pose &pos, bool enqueue,
+          double errDist=0.00001, double errTheta=0.00001);
 
   void DispatchCommand();
 

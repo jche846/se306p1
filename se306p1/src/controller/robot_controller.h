@@ -63,6 +63,10 @@ class RobotController {
   // Where the robot is currently trying to end up after receiving a go.
   Pose goal_;
 
+  // The current tolerances for the action.
+  double errDist_;
+  double errTheta_;
+
   // Movement fields
   double lv_;  // Linear velocity
   double av_;  // Angular velocity (counter clockwise)
