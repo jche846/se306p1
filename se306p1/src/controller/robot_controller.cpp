@@ -15,6 +15,10 @@ RobotController::RobotController(ros::NodeHandle &nh, uint64_t id = 0) {
   this->lv_ = 0.0;
   this->av_ = 0.0;
 
+  // Initialize tolerances.
+  this->errDist_ = 0.00001;
+  this->errTheta_ = 0.00001;
+
   // Initialise as waiting for new commands.
   this->state_ = RobotState::READY;
 
