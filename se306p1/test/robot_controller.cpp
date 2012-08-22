@@ -16,18 +16,18 @@
 using namespace se306p1;
 namespace {
 class RobotControllerTest : public testing::Test {
-   
+
    public:
-    
+
     ros::NodeHandle nh;
     RobotController rc;
-    
+
     RobotControllerTest() : nh("~"), rc(nh,1) {
-      
+
     }
 
     virtual ~RobotControllerTest() {
-      
+
     }
 
     virtual void SetUp() {
@@ -35,7 +35,7 @@ class RobotControllerTest : public testing::Test {
     }
 
     virtual void TearDown() {
-      
+
     }
     void setGoal(double x, double y);
     void setPose(double x, double y, double theta);
@@ -106,7 +106,7 @@ class RobotControllerTest : public testing::Test {
     rc.InterruptCommandQueue(interrupt);
     //checks deque is cleared
     ASSERT_EQ(rc.commands_.size(),0);
-    
+
     Vector2 position = Vector2(2.0,3.0);
     double theta = 4.0;
     Pose pose = Pose (position,theta);
@@ -238,7 +238,7 @@ class RobotControllerTest : public testing::Test {
     msg_go.y = 10;
     msg_go.theta = 30;
     msg_go.enqueue = true;
-    
+
     Command cmd = Command(msg_go);
     rc.commands_.push_back(cmd);
     rc.DequeueCommand();
@@ -293,6 +293,26 @@ class RobotControllerTest : public testing::Test {
     ASSERT_EQ(rc.av_,msg_do.av);
   }
 
+  /**
+   * Tests that MoveTo returns true when the robot is at the point.
+   */
+  TEST_F(RobotControllerTest, testMoveToAtPoint){
+    Vector2 position (0, 0);
+    rc.pose_.position_ = position;
+
+    ASSERT_TRUE(rc.MoveTo(position));
+  }
+
+  /**
+   * Tests that MoveTo returns false when the robot is not at the point.
+   */
+  TEST_F(RobotControllerTest, testMoveToNotAtPoint){
+    Vector2 position1 (0, 0);
+    Vector2 position2 (0, 1);
+    rc.pose_.position_ = position1;
+
+    ASSERT_FALSE(rc.MoveTo(position2));
+  }
 }//namespace
 
 int main(int argc, char **argv) {
