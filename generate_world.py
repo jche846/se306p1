@@ -56,8 +56,8 @@ COLORS = [line.split("\t")[-1].strip() for line in open("/etc/X11/rgb.txt").read
 def append_robot(robots, num_clusters, cluster_size, cluster_index, x, y):
   num_colors = len(COLORS)
   slice_size = num_colors / num_clusters
-  min_color = cluster_index * slice_size
-  max_color = min_color + cluster_size
+  min_color = (cluster_index * slice_size) % num_colors
+  max_color = (min_color + cluster_size) % num_colors
 
   robots.append("""\
 myrobot
