@@ -150,7 +150,8 @@ void RobotController::scan_callback(Scan msg) {
 void RobotController::go_callback(Go msg) {
   this->ReceiveCommand(Command(msg));
   ROS_INFO(
-      "R%" PRIu64 " GO | x=%f, y=%f, theta=%f", this->robot_id_, msg.x, msg.y, msg.theta);
+      "R%" PRIu64 " GO | x=%f, y=%f, theta=%f, errDist=%f, errTheta=%f",
+      this->robot_id_, msg.x, msg.y, msg.theta, msg.errDist, msg.errTheta);
 }
 
 /**
@@ -241,7 +242,7 @@ bool RobotController::RotateInto(double theta) {
       - this->av_ / 10;
 
   // If the difference is small, we have finished aiming.
-  if (-0.00001 < diff && diff < 0.00001) {
+  if (-this->errTheta_ < diff && diff < this->errTheta_) {
     return true;
   } else {
     // We are not moving forward, so 0 lv,
@@ -275,7 +276,7 @@ bool RobotController::MoveTo(Vector2 point) {
   // Distance one tick ahead
   double distance = (point - this->pose_.position_).Length() - this->lv_ / 10.0;
 
-  if (distance < 0.00001) {
+  if (distance < this->errDist_) {
     // If the robot is near the goal position, move to the aligning step.
     return true;
   } else {
@@ -302,7 +303,7 @@ void RobotController::MoveTowardsGoal() {
   Vector2 offset = this->goal_.position_ - this->pose_.position_;
   // If the robot is already at the position, we can skip aiming at it and
   // moving to it.
-  if (offset.Length() < 0.01) {
+  if (offset.Length() < this->errDist_) {
     this->goStep_ = GoStep::ALIGNING;
   }
 
@@ -409,12 +410,13 @@ void RobotController::SetGoing(Go msg) {
   this->goStep_ = GoStep::AIMING;
 
   Pose p;
-
   p.position_.x_ = msg.x;
   p.position_.y_ = msg.y;
   p.theta_ = msg.theta;
-
   this->goal_ = p;
+
+  this->errDist_ = msg.errDist;
+  this->errTheta_ = msg.errTheta;
 }
 
 /**
@@ -469,6 +471,8 @@ void RobotController::ExecuteCommand(Command cmd) {
     msg.x = cmd.x;
     msg.y = cmd.y;
     msg.theta = cmd.theta;
+    msg.errDist = cmd.errDist;
+    msg.errTheta = cmd.errTheta;
 
     this->SetGoing(msg);
   } else if (cmd.type == CommandType::SCAN) {

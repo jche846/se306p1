@@ -71,6 +71,8 @@ void Robot::DispatchCommand() {
     msg.y = c.y;
     msg.theta = c.theta;
     msg.enqueue = c.enqueue;
+    msg.errDist = c.errDist;
+    msg.errTheta = c.errTheta;
 
     if (c.enqueue)
       ROS_INFO("R%" PRIu64 " | DISPATCHING GO, true", this->id_);
@@ -99,13 +101,15 @@ void Robot::ScanBarcode(int time, bool enqueue) {
   this->executing_ = true;
 }
 
-void Robot::Go(const Pose &pos, bool enqueue) {
+void Robot::Go(const Pose &pos, bool enqueue, double errDist, double errTheta) {
   Command c;
   c.enqueue = enqueue;
   c.type = CommandType::GO;
   c.x = pos.position_.x_;
   c.y = pos.position_.y_;
   c.theta = pos.theta_;
+  c.errDist = errDist;
+  c.errTheta = errTheta;
   this->EnqueueCommand(c);
 
   this->executing_ = true;

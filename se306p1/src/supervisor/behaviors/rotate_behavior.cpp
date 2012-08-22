@@ -1,5 +1,7 @@
 #include "rotate_behavior.h"
 
+#include <limits>
+
 #include "../supervisor.h"
 
 #define DEFAULT_LV 4.0
@@ -18,7 +20,8 @@ void RotateBehavior::Execute() {
   Pose clusterHeadPose = this->supervisor_.clusterHeadPose_;
 
   for (auto &cur_robot : this->supervisor_.robots_) {
-    cur_robot.second->Go(clusterHeadPose, false);
+    cur_robot.second->Go(clusterHeadPose, false, 0.01,
+                         std::numeric_limits<double>::infinity());
 
     int num_of_robots =  this->supervisor_.robots_.size();
     double radius = (num_of_robots * 6.0 * 0.35) / (M_PI * 2.0);
@@ -28,5 +31,6 @@ void RotateBehavior::Execute() {
     		DEFAULT_LV / radius,
     		true);
   }
+
 }
 }
