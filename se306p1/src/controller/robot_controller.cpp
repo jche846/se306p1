@@ -233,7 +233,10 @@ void RobotController::PublishVelocity() {
  * @return True if the robot is at the given angle, false otherwise.
  */
 bool RobotController::RotateInto(double theta) {
-  // Figure out how far away from theta the robot currently is.
+  // Figure out how far away from theta the robot will be. We subtract the av/10
+  // because we need to stay one tick ahead of Stage and the robot will rotate
+  // by one tenth of it's av each tick (sometimes it will rotate 1/5th of it's
+  // av).
   double diff = DegreesToRadians(AngleDiff(this->pose_.theta_, theta))
       - this->av_ / 10;
 
@@ -241,11 +244,13 @@ bool RobotController::RotateInto(double theta) {
   if (-0.00001 < diff && diff < 0.00001) {
     return true;
   } else {
-    // We are not moving forward, so 0 lv. Setting av to the diff each tick
-    // ensures we don't overshoot.
+    // We are not moving forward, so 0 lv,
     this->lv_ = 0.0;
 
     if (fabs(diff) < fabs(this->av_ / 10)) {
+      // If the robot will over-rotate next tick, change the av in order to hit
+      // the goal angle exactly. This is 10 times the diff because the robot
+      // rotates by 1/10 of it's av each tick.
       this->av_ = diff * 10.0;
     } else {
       if (diff < 0.0) {
@@ -294,9 +299,10 @@ bool RobotController::MoveTo(Vector2 point) {
  * robot will align to the specified angle.
  */
 void RobotController::MoveTowardsGoal() {
+  Vector2 offset = this->goal_.position_ - this->pose_.position_;
   // If the robot is already at the position, we can skip aiming at it and
   // moving to it.
-  if ((this->goal_.position_ - this->pose_.position_).Length() < 0.01) {
+  if (offset.Length() < 0.01) {
     this->goStep_ = GoStep::ALIGNING;
   }
 
@@ -318,7 +324,12 @@ void RobotController::MoveTowardsGoal() {
   // Move towards the goal position
   if (this->goStep_ == GoStep::MOVING) {
     if (this->MoveTo(this->goal_.position_)) {
+      // If the robot is at the goal position, go to align step.
       this->goStep_ = GoStep::ALIGNING;
+    } else if (offset.Normalized() != this->prevDirection_) {
+      // If the direction to the goal point has changed, we have overshot and
+      // need to aim at the point again.
+      this->goStep_ = GoStep::AIMING;
     }
   }
 
@@ -336,6 +347,9 @@ void RobotController::MoveTowardsGoal() {
       this->state_ = RobotState::READY;
     }
   }
+
+  // Reset the previous direction to the current direction.
+  this->prevDirection_ = offset.Normalized();
 
   // Update the lv and the av on Stage.
   this->PublishVelocity();

@@ -48,6 +48,9 @@ enum class ScanStep {
 
 class RobotController {
  private:
+
+  Vector2 prevDirection_;
+
   // Robot identification
   uint64_t robot_id_;
 
