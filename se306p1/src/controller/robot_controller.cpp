@@ -296,7 +296,10 @@ bool RobotController::MoveTo(Vector2 point) {
 void RobotController::MoveTowardsGoal() {
   // If the robot is already at the position, we can skip aiming at it and
   // moving to it.
-  if ((this->goal_.position_ - this->pose_.position_).Length() < 0.01) {
+  Vector2 offset = this->goal_.position_ - this->pose_.position_;
+  Vector2 curDirection = offset.Normalized();
+
+  if (offset.Length() < 0.01) {
     this->goStep_ = GoStep::ALIGNING;
   }
 
@@ -319,6 +322,8 @@ void RobotController::MoveTowardsGoal() {
   if (this->goStep_ == GoStep::MOVING) {
     if (this->MoveTo(this->goal_.position_)) {
       this->goStep_ = GoStep::ALIGNING;
+    } else if (curDirection != this->prevDirection_) {
+      this->goStep_ = GoStep::AIMING;
     }
   }
 
@@ -339,6 +344,9 @@ void RobotController::MoveTowardsGoal() {
 
   // Update the lv and the av on Stage.
   this->PublishVelocity();
+
+  // Reset the previous direction to the current direction.
+  this->prevDirection_ = curDirection;
 }
 
 /**
