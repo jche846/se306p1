@@ -1,9 +1,15 @@
 ## Contents
-1. Getting the software
-2. Build
-3. Configure
-4. Running
+1. Prerequisites
+2. Getting the software
+3. Build
+4. Configure
+5. Running
 
+
+### Prerequisites:
+Before installing the system you will need two things installed
+* Ubuntu Linux (11.10)
+* ROS electric
 
 ### Getting the software:
 The easiest way to get the software is to clone a copy from github using  
