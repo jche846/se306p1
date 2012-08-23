@@ -58,6 +58,16 @@ rosbuild_add_gtest(test_trig
     test/trig.cpp)
 rosbuild_add_gtest(test_supervisor
     src/util/trig.cpp
+    src/supervisor/robot.cpp
+    src/supervisor/supervisor.cpp
+    src/supervisor/behaviors/rotate_behavior.cpp
+    src/supervisor/behaviors/goto_circle_behavior.cpp
+    src/supervisor/behaviors/goto_triangle_behavior.cpp
+    src/supervisor/behaviors/goto_square_behavior.cpp
+    src/supervisor/behaviors/goto_pentagon_behavior.cpp
+    src/supervisor/behaviors/goto_hexagon_behavior.cpp
+    src/supervisor/behaviors/goto_heptagon_behavior.cpp
+    src/supervisor/behaviors/goto_octagon_behavior.cpp
     test/supervisor.cpp)
 rosbuild_add_gtest(test_pose
     test/pose.cpp)
@@ -67,6 +77,8 @@ rosbuild_add_gtest(test_robot_controller
     test/robot_controller.cpp
     src/util/trig.cpp
     src/controller/robot_controller.cpp)
+rosbuild_add_gtest(test_supervisor
+    test/supervisor.cpp)
 rosbuild_add_rostest(test/supervisor.test)
 
 #target_link_libraries(example ${PROJECT_NAME})

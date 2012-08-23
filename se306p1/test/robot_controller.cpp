@@ -31,7 +31,7 @@ class RobotControllerTest : public testing::Test {
     }
 
     virtual void SetUp() {
-      //rc = new RobotController(nh,1);
+      
     }
 
     virtual void TearDown() {
