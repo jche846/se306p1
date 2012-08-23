@@ -4,3 +4,4 @@ float64 theta
 float64 errDist
 float64 errTheta
 bool enqueue
+float64 goTick

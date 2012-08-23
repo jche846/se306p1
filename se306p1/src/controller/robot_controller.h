@@ -56,6 +56,7 @@ enum class ScanStep {
  */
 class RobotController {
  private:
+  bool IsDoNext();
 
   /// Robot identification.
   uint64_t robot_id_;
@@ -112,6 +113,9 @@ class RobotController {
   // Count down clock for Scanning
   int scanningDuration_; ///< How long the robot is scanning for.
   double scanningStart_; ///< When the scanning started.
+
+  // Wait until this tick before executing the commane
+  double goTick_;
 
  public:
   /**

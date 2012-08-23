@@ -40,6 +40,7 @@ class Command {
       double theta; ///< Orientation.
       double errDist; ///< Error for distance.
       double errTheta; ///< Error for theta.
+      double goTick;  ///< Time to wait till before executing.
     };
 
     /// Scan command.
@@ -76,6 +77,7 @@ class Command {
     this->theta = msg.theta;
     this->errDist = msg.errDist;
     this->errTheta = msg.errTheta;
+    this->goTick = msg.goTick;
     this->enqueue = msg.enqueue;
   }
 

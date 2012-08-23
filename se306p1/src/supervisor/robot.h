@@ -63,6 +63,8 @@ class Robot {
   void Go(const Pose &pos, bool enqueue,
           double errDist=0.00001, double errTheta=0.00001);
 
+  void Go(const Pose &pos, bool enqueue, double errDist, double errTheta, double goTick);
+
   /**
    * Dispatch a command waiting on the command queue.
    */

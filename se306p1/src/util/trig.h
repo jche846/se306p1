@@ -73,6 +73,15 @@ inline void QuaternionMsgToRPY(const geometry_msgs::Quaternion &q, double &roll,
 }
 
 /**
+ * The signum function. Returns the sign of the number if it is non-zero,
+ * otherwise 0.
+ */
+template<typename T>
+inline int sgn(T val) {
+  return (T(0) < val) - (val < T(0));
+}
+
+/**
  * Finds the difference from theta to phi in degrees, including direction.
  *
  * @param theta The angle we are moving from.
