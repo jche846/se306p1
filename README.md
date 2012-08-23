@@ -1,38 +1,26 @@
 ## Contents
 1. Prerequisites
 2. Getting the software
-3. Build
-4. Configure
-5. Running
+3. Building
+4. Running
 
 
-### Prerequisites:
-Before installing the system you will need two things installed
+### Prerequisites
+Before installing the system you will need two things installed:
 * Ubuntu Linux (11.10)
-* ROS electric
+* ROS Electric
 
-### Getting the software:
-The easiest way to get the software is to clone a copy from github using  
+### Getting the Software
+The easiest way to get the software is to clone a copy from GitHub using:  
 ````git clone git@github.com:rfw/se306p1.git````  
-Then navigate into the project directory using cd se306p1  
-You will now have a copy of all the code that is ready to be built.  
+Navigate into the project directory using `cd se306p1`. You will now have a copy of all the code that is ready to be built.  
 
-### Build:
-To build the project, run ````./build.sh```` in a terminal.  
-This will build all the code and run all the tests.   
-In the process of build it will start roscore for use by the testing system.  
-It will output if it was successful, then stop the roscore it started.  
+### Building
+To build the project, run ````./build.sh```` in a terminal from the se306p1 directory. This will build all the code and run all the tests. In the process of building it will start roscore for use by the testing system. The build will output a message indicating success or failure, then stop roscore.  
 
-### Configure:  
-In the top folder there is a file called launch.config  
-it should contain a single line with two integers separated by a space:  
-````<number of robots in the system> <number of swarms to break into>````  
-Configure the settings in this file and save.  
-
-### Running:
-To run the system 3 things must be loaded in separate terminals.  
+### Running
+To run the system 2 things must be loaded in separate terminals:  
 Terminal 1: ````roscore````  
-Terminal 2: ````./launch.py controller````  
-Terminal 3: ````./launch.py supervisor````  
-
-
+Terminal 2: ````./launch.py````  
+The launch script takes a number of arguments allowing you to configure the number of robots, the number of robot groups, and the distance of the robots from the origin. For usage information about the launch script, run:  
+````./launch.py -h````
