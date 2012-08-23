@@ -99,12 +99,13 @@ def generate(num_robots, num_groups, x_range, y_range, zeronode):
             (x, y) = (random.randint(-x_range, x_range), random.randint(-y_range, y_range))
 
         robot_positions.append((x, y))
-    if zeronode:
-      robot_positions[num_groups] = (0, 0)
     # Sort them by distance from the origin
     robot_positions.sort(
         key=lambda pos: math.sqrt(pos[0] * pos[0] + pos[1] * pos[1]))
-
+    
+    if zeronode:
+      robot_positions[num_groups] = (0, 0)
+  
     # Cluster heads are the robots closest to the origin.
     cluster_heads = robot_positions[:num_groups]
     cluster_members = robot_positions[num_groups:]
