@@ -7,11 +7,11 @@ import argparse
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Launch the controller and supervisor nodes.')
-    parser.add_argument('-nr', '--numrobots', default=24, help='The number of robots to spawn. (default 24)')
-    parser.add_argument('-ns', '--numsupervisors', default=4, help='The number of supervisors to spawn. The number of supervisors dictates the number of robot groups. The size of the groups will be equal to the number of robots divided by the number of supervisors. (default 4)')
-    parser.add_argument('-x', '--xrange', default=40, help='The maximum distance away from the origin along the x axis to spawn robots. (default 40)')
-    parser.add_argument('-y', '--yrange', default=40, help='The maximum distance away from the origin along the y axis to spawn robots. (default 40)')
+    parser = argparse.ArgumentParser(description='Launch the controller and supervisor nodes. Roscore must be running in a seperate terminal in order for the controllers and supervisors to register with it.')
+    parser.add_argument('-nr', '--numrobots', type=int, default=24, help='The number of robots to spawn. (default 24)')
+    parser.add_argument('-ns', '--numsupervisors', type=int, default=4, help='The number of supervisors to spawn. The number of supervisors dictates the number of robot groups. The size of the groups will be equal to the number of robots divided by the number of supervisors. (default 4)')
+    parser.add_argument('-x', '--xrange', type=int, default=40, help='The maximum distance away from the origin along the x axis to spawn robots. (default 40)')
+    parser.add_argument('-y', '--yrange', type=int, default=40, help='The maximum distance away from the origin along the y axis to spawn robots. (default 40)')
 
     args = parser.parse_args()
     print(args)
@@ -22,21 +22,27 @@ if __name__ == '__main__':
 
     num_members = args.numrobots / args.numsupervisors
 
-    # Launch stage
+    # Generate 
     os.system("./generate_world.py {} {} {} {} > se306p1.world".format(
         args.numrobots, args.numsupervisors, args.xrange, args.yrange
     ))
 
+    # Launch stage
     os.system("rosrun stage stageros se306p1.world &")
 
-    time.sleep(2.0)
+    # Wait for stage to launch
+    time.sleep(1.0)
 
     # Launch controllers
     print("Launching controllers...")
     for i in range(args.numrobots):
         os.system("se306p1/bin/robot_controller _rid:={} &".format(i))
 
-    time.sleep(3.0)
+    # Wait for the controller to launch
+    if args.numrobots < 20:
+        time.sleep(10)
+    else:
+        time.sleep(args.numrobots / 2)
 
     # Launch supervisors
     print("Launching supervisors...")
