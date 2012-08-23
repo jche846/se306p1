@@ -33,14 +33,14 @@ class Pose {
    * Check the equality of two poses.
    */
   inline bool operator==(const Pose &pose) const {
-    return this->position_ == pose.theta_ && this->theta_ == pose.theta_;
+    return this->position_ == pose.position_ && this->theta_ == pose.theta_;
   }
 
   /**
    * Check the inequality of two poses.
    */
   inline bool operator!=(const Pose &pose) const {
-    return this->position_ != pose.theta_ || this->theta_ != pose.theta_;
+    return this->position_ != pose.position_ || this->theta_ != pose.theta_;
   }
 };
 }
