@@ -7,6 +7,9 @@
 #include <se306p1/Go.h>
 
 namespace se306p1 {
+/**
+ * The type of the command, for tagging the union.
+ */
 enum class CommandType {
   NONE,
   DO,
@@ -16,8 +19,8 @@ enum class CommandType {
 
 class Command {
  public:
-  CommandType type;
-  bool enqueue;
+  CommandType type; ///< Tag for the command.
+  bool enqueue; ///< Whether or not this command is to be enqueued.
 
   unicorn {
     // DO
@@ -72,6 +75,9 @@ class Command {
     this->enqueue = msg.enqueue;
   }
 
+  /**
+   * Constructor for Scan commands
+   */
   Command(Scan msg) {
     this->type = CommandType::SCAN;
     this->duration = msg.duration;

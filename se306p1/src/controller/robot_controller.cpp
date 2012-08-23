@@ -447,6 +447,11 @@ void RobotController::SetDoing(Do msg) {
   this->PublishVelocity();
 }
 
+/**
+ * Process a command and enqueue it on the command queue, if necessary.
+ *
+ * @param cmd The command to process.
+ */
 void RobotController::ReceiveCommand(Command cmd) {
   if (cmd.enqueue) {
     this->commands_.push_back(cmd);

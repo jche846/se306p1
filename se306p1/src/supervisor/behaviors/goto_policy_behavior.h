@@ -6,9 +6,14 @@
 #include "../../util/pose.h"
 
 namespace se306p1 {
+class GotoPolicy { };
+
 template<typename Policy>
 class GotoPolicyBehavior : public Behavior {
 public:
+  /**
+   * Create a policy-based goto behavior.
+   */
   GotoPolicyBehavior(Supervisor &sup) : Behavior(sup) {
     ROS_INFO("Initialized goto %s behavior.", Policy::name().c_str());
   }

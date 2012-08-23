@@ -30,18 +30,23 @@ class Supervisor {
   };
 
  private:
-  State state_;
+  State state_; ///< The state of the supervisor.
 
+
+  /**
+   * Find poses for robots when lining up.
+   */
   std::vector<Pose> FindRobotDests();
 
+  /// Iterator to keep track of the current robot that's sending messages.
   std::map<uint64_t, std::shared_ptr<Robot>>::iterator dispatchIt_;
 
-  ros::NodeHandle nh_;
-  ros::Subscriber ansPosSubscriber_;
-  ros::Publisher askPosPublisher_;
-  ros::Subscriber scanResultSubscriber_;
+  ros::NodeHandle nh_; ///< ROS node handle.
+  ros::Subscriber ansPosSubscriber_; ///< Subscriber for Position.
+  ros::Publisher askPosPublisher_; ///< Publisher for AskPosition.
+  ros::Subscriber scanResultSubscriber_; ///< Subscriber for ScanResult.
 
-
+  /// Registry of factories of behaviors.
   std::map<uint64_t, Behavior::BehaviorFactory *> behaviorFactories_;
 
   /**
@@ -153,7 +158,7 @@ class Supervisor {
 
   /**
    * Moves Robots to most optimal location
-   * 
+   *
    * Moves robots to a location from the list such that all the robots reach there destination in the smallest amout of time.
    * This may mean robots move from valid positions to another position if that will make overall convergence faster.
    * The implementation is not perfect but is a best effort atempt without exploring all possible combinations

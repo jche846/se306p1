@@ -8,6 +8,9 @@
 namespace se306p1 {
 class RotateBehavior : public Behavior {
 public:
+  /**
+   * Create the rotate behavior.
+   */
   RotateBehavior(Supervisor &sup);
   virtual ~RotateBehavior();
 
