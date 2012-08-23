@@ -144,6 +144,11 @@ class Supervisor {
    */
   void ElectHead();
 
+  /**
+   * 
+   * 
+   * 
+   */
   void MoveNodesToDests(const std::vector<std::shared_ptr<Robot> > &nodes,
                         const std::vector<Pose> &poses);
 
