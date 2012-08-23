@@ -8,8 +8,6 @@
 #include <cstdint>
 #include <queue>
 
-#include "../macros.h"
-
 #include "../util/command.h"
 #include "../util/vector2.h"
 #include "../util/pose.h"
