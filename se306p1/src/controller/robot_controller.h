@@ -105,6 +105,9 @@ class RobotController {
   int scanningDuration_;
   double scanningStart_;
 
+  // Wait until this tick before executing the commane
+  double goTick_;
+
  public:
   RobotController(ros::NodeHandle &nh, uint64_t id);
   virtual ~RobotController();

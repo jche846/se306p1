@@ -154,8 +154,8 @@ void RobotController::scan_callback(Scan msg) {
 void RobotController::go_callback(Go msg) {
   this->ReceiveCommand(Command(msg));
   ROS_INFO(
-      "R%" PRIu64 " GO | x=%f, y=%f, theta=%f, errDist=%f, errTheta=%f",
-      this->robot_id_, msg.x, msg.y, msg.theta, msg.errDist, msg.errTheta);
+      "R%" PRIu64 " GO | x=%f, y=%f, theta=%f, errDist=%f, errTheta=%f goTick=%f",
+      this->robot_id_, msg.x, msg.y, msg.theta, msg.errDist, msg.errTheta, msg.goTick);
 }
 
 /**
@@ -297,7 +297,7 @@ bool RobotController::MoveTo(Vector2 point) {
     // Alternatively, if the robot has a Do queued up and it has passed the
     // goal position, we want to dispatch the Do command.
     if (this->IsDoNext()) {
-      ROS_INFO("R%" PRIu64 " | changed sign!", this->robot_id_);
+      ROS_INFO("R%" PRIu64 " | changed sign! %d %d", this->robot_id_, signChange, distance < this->errDist_);
     }
     return true;
   } else {
@@ -322,49 +322,63 @@ bool RobotController::MoveTo(Vector2 point) {
  */
 void RobotController::MoveTowardsGoal() {
   Vector2 offset = this->goal_.position_ - this->pose_.position_;
-  // If the robot is already at the position, we can skip aiming at it and
-  // moving to it.
-  if (offset.Length() < this->errDist_) {
-    this->goStep_ = GoStep::ALIGNING;
-  }
-
-  // Aim at the goal position.
-  if (this->goStep_ == GoStep::AIMING) {
-    if (this->IsDoNext() ||
-        this->RotateInto(
-          AngleBetweenPoints(this->pose_.position_, this->goal_.position_)
-        )) {
-      // If the robot is aiming at the goal position, go to the moving step.
-      this->goStep_ = GoStep::MOVING;
+  
+  double currTime = ros::Time::now().toSec();
+  //ROS_INFO("this->goTick_: %f", this->goTick_);
+  if (this->goTick_ > currTime) {
+   this->lv_ = 0.0;
+   this->av_ = 0.0;
+  } else {
+    if (this->goTick_ > 0){
+      ROS_INFO("R%" PRIu64 " | Moving towards goal!", this->robot_id_);
     }
-  }
-
-  // Move towards the goal position
-  if (this->goStep_ == GoStep::MOVING) {
-    if (this->MoveTo(this->goal_.position_)) {
-      // If the robot is at the goal position, go to align step.
+    // If the robot is already at the position, we can skip aiming at it and
+    // moving to it.
+    if (offset.Length() < this->errDist_) {
       this->goStep_ = GoStep::ALIGNING;
-    } else if (offset.Normalized() != this->prevDirection_) {
-      // If the direction to the goal point has changed, we have overshot and
-      // need to aim at the point again.
-      this->goStep_ = GoStep::AIMING;
     }
-  }
 
-  // Rotate into the given angle.
-  if (this->goStep_ == GoStep::ALIGNING) {
-    if (this->IsDoNext() || this->RotateInto(this->goal_.theta_)) {
-      // If the robot is aligned correctly, stop moving.
-      this->lv_ = 0.0;
-      this->av_ = 0.0;
-
-      // Report back to the supervisor.
-      this->AnswerPosition();
-
-      this->state_ = RobotState::READY;
+    // Aim at the goal position.
+    if (this->goStep_ == GoStep::AIMING) {
+      if (this->IsDoNext() ||
+          this->RotateInto(
+            AngleBetweenPoints(this->pose_.position_, this->goal_.position_)
+          )) {
+        // If the robot is aiming at the goal position, go to the moving step.
+        this->goStep_ = GoStep::MOVING;
+      }
     }
-  }
 
+    // Move towards the goal position
+    if (this->goStep_ == GoStep::MOVING) {
+      if (this->MoveTo(this->goal_.position_)) {
+        // If the robot is at the goal position, go to align step.
+        this->goStep_ = GoStep::ALIGNING;
+      } else if (offset.Normalized() != this->prevDirection_) {
+        // If the direction to the goal point has changed, we have overshot and
+        // need to aim at the point again.
+        this->goStep_ = GoStep::AIMING;
+      }
+    }
+
+    // Rotate into the given angle.
+    if (this->goStep_ == GoStep::ALIGNING) {
+      if(this->IsDoNext()){
+          this->DequeueCommand();
+      } else if (this->RotateInto(this->goal_.theta_)) {
+        // If the robot is aligned correctly, stop moving.
+
+        this->lv_ = 0.0;
+        this->av_ = 0.0;
+
+        // Report back to the supervisor.
+        this->AnswerPosition();
+
+        this->state_ = RobotState::READY;
+      }
+    }
+
+  }
   // Reset the previous direction to the current direction.
   this->prevDirection_ = offset.Normalized();
 
@@ -438,6 +452,7 @@ void RobotController::SetGoing(Go msg) {
 
   this->errDist_ = msg.errDist;
   this->errTheta_ = msg.errTheta;
+  this->goTick_ = msg.goTick;
 }
 
 /**
@@ -494,6 +509,7 @@ void RobotController::ExecuteCommand(Command cmd) {
     msg.theta = cmd.theta;
     msg.errDist = cmd.errDist;
     msg.errTheta = cmd.errTheta;
+    msg.goTick = cmd.goTick;
 
     this->SetGoing(msg);
   } else if (cmd.type == CommandType::SCAN) {
@@ -552,7 +568,11 @@ void RobotController::Run() {
 int main(int argc, char *argv[]) {
   ros::init(argc, argv, "rotate_supervisor", ros::init_options::AnonymousName);
 
+
+
   ros::NodeHandle nh("~");
+
+  while (ros::Time::now().isZero());
 
   int r_id;
   nh.getParam("rid", r_id);

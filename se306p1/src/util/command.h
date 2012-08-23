@@ -33,6 +33,7 @@ class Command {
       double theta;
       double errDist;
       double errTheta;
+      double goTick;
     };
 
     // SCAN
@@ -69,6 +70,7 @@ class Command {
     this->theta = msg.theta;
     this->errDist = msg.errDist;
     this->errTheta = msg.errTheta;
+    this->goTick = msg.goTick;
     this->enqueue = msg.enqueue;
   }
 
