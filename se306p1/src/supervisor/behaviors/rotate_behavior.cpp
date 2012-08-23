@@ -20,8 +20,7 @@ void RotateBehavior::Execute() {
   Pose clusterHeadPose = this->supervisor_.clusterHeadPose_;
 
   for (auto &cur_robot : this->supervisor_.robots_) {
-    cur_robot.second->Go(clusterHeadPose, false, 0.01,
-                         std::numeric_limits<double>::infinity());
+    cur_robot.second->Go(clusterHeadPose, false);
 
     int num_of_robots =  this->supervisor_.robots_.size();
     double radius = (num_of_robots * 6.0 * 0.35) / (M_PI * 2.0);

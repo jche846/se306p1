@@ -230,6 +230,10 @@ void RobotController::PublishVelocity() {
   this->twist_.publish(msg);
 }
 
+bool RobotController::IsDoNext() {
+  return this->commands_.front().type == CommandType::DO;
+}
+
 /**
  * Update the robot angular velocity so that it will rotate into the given
  * angle.
@@ -279,9 +283,19 @@ bool RobotController::RotateInto(double theta) {
 bool RobotController::MoveTo(Vector2 point) {
   // Distance one tick ahead
   double distance = (point - this->pose_.position_).Length() - this->lv_ / 10.0;
+  Vector2 offset = this->goal_.position_ - this->pose_.position_;
 
-  if (distance < this->errDist_) {
+  // Check for a sign change.
+  bool signChange = sgn(offset.x_) != sgn(this->prevDirection_.x_) ||
+                    sgn(offset.y_) != sgn(this->prevDirection_.y_);
+
+  if ((this->IsDoNext() && signChange) || distance < this->errDist_) {
     // If the robot is near the goal position, move to the aligning step.
+    // Alternatively, if the robot has a Do queued up and it has passed the
+    // goal position, we want to dispatch the Do command.
+    if (this->IsDoNext()) {
+      ROS_INFO("R%" PRIu64 " | changed sign!", this->robot_id_);
+    }
     return true;
   } else {
     // Otherwise, continue moving at the default lv.
@@ -313,8 +327,10 @@ void RobotController::MoveTowardsGoal() {
 
   // Aim at the goal position.
   if (this->goStep_ == GoStep::AIMING) {
-    if (this->RotateInto(
-        AngleBetweenPoints(this->pose_.position_, this->goal_.position_))) {
+    if (this->IsDoNext() ||
+        this->RotateInto(
+          AngleBetweenPoints(this->pose_.position_, this->goal_.position_)
+        )) {
       // If the robot is aiming at the goal position, go to the moving step.
       this->goStep_ = GoStep::MOVING;
     }
@@ -334,7 +350,7 @@ void RobotController::MoveTowardsGoal() {
 
   // Rotate into the given angle.
   if (this->goStep_ == GoStep::ALIGNING) {
-    if (this->RotateInto(this->goal_.theta_)) {
+    if (this->IsDoNext() || this->RotateInto(this->goal_.theta_)) {
       // If the robot is aligned correctly, stop moving.
       this->lv_ = 0.0;
       this->av_ = 0.0;
