@@ -116,7 +116,7 @@ class SupervisorTest : public testing::Test {
   /**
   * Check that a for two robots that spawn close together, the corect head is chosen.
   */
-  TEST_F(SupervisorTest, testElectHeadWithARobotAtOrigin) {
+  TEST_F(SupervisorTest, testElectHeadCloseHeads) {
     // we need to create a set of robots and check
     // that they get assigned to the correct supervisor fields
     //    i.e. to clusterHead and to nonClusterHeads
@@ -133,7 +133,7 @@ class SupervisorTest : public testing::Test {
     super.ElectHead();
     
     //check that the cluster head is not the robot that started at the origin.
-    ASSERT_EQ(super.clusterHead_->id_,9);
+    ASSERT_EQ(super.clusterHead_->id_,0);
     // Add asserts to check taht the nonHeads contain the correct robots
     for (int ID = 1 ; ID < 5 ; ID++ ) {
       std::map<uint64_t, std::shared_ptr<Robot>>::iterator it = super.robots_.find(2);
