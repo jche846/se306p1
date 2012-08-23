@@ -17,30 +17,34 @@ enum class CommandType {
   SCAN
 };
 
+/**
+ * A tagged union for representing the Scan, Do and Go commands.
+ */
 class Command {
  public:
   CommandType type; ///< Tag for the command.
   bool enqueue; ///< Whether or not this command is to be enqueued.
 
+  /// Union for commands.
   unicorn {
-    // DO
+    /// Do command.
     struct {
-      double lv;
-      double av;
+      double lv; ///< Linear velocity.
+      double av; ///< Angular velocity.
     };
 
-    // GO
+    /// Go command.
     struct {
-      double x;
-      double y;
-      double theta;
-      double errDist;
-      double errTheta;
+      double x; ///< x coordinate.
+      double y; ///< y coordinate.
+      double theta; ///< Orientation.
+      double errDist; ///< Error for distance.
+      double errTheta; ///< Error for theta.
     };
 
-    // SCAN
+    /// Scan command.
     struct {
-      int duration;
+      int duration; ///< Duration of the scan.
     };
   };
 

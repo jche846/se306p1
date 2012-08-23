@@ -6,6 +6,9 @@
 #include "goto_policy_behavior.h"
 
 namespace se306p1 {
+/**
+ * Policy implementation.
+ */
 class TrianglePolicy : public GotoPolicy {
 public:
   /**

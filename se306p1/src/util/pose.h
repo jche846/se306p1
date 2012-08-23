@@ -2,6 +2,9 @@
 #include "vector2.h"
 
 namespace se306p1 {
+/**
+ * A structure representing the combination of a position and an orientation.
+ */
 class Pose {
  public:
   /// Robot position.

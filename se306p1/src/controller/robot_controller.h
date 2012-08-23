@@ -22,10 +22,6 @@
 #define ASK_POS_TOPIC "/supervisor/ask_pos"
 #define ANS_POS_TOPIC "/supervisor/ans_pos"
 
-/**
- * This header file defines the state variables and methods available to control
- * a robot.
- */
 namespace se306p1 {
 /**
  * The robot's state.
@@ -55,6 +51,9 @@ enum class ScanStep {
   FINISHED
 };
 
+/**
+ * The controller class for robots on Stage.
+ */
 class RobotController {
  private:
 

@@ -6,8 +6,14 @@
 #include "../../util/pose.h"
 
 namespace se306p1 {
+/**
+ * A policy-based behavior.
+ */
 class GotoPolicy { };
 
+/**
+ * A policy-based template class for implementing GotoPolicy-based behaviors.
+ */
 template<typename Policy>
 class GotoPolicyBehavior : public Behavior {
 public:

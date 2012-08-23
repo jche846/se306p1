@@ -3,6 +3,9 @@
 #include <cmath>
 
 namespace se306p1 {
+/**
+ * A 2-dimensional vector.
+ */
 class Vector2 {
  public:
   double x_; ///< x value.

@@ -17,6 +17,9 @@
 #define ANS_POS_TOPIC "/supervisor/ans_pos"
 
 namespace se306p1 {
+/**
+ * The supervisor, which looks after all the robots.
+ */
 class Supervisor {
   /**
    * Describes the state of the supervisor.

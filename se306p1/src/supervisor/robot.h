@@ -15,6 +15,9 @@
 #include "../util/pose.h"
 
 namespace se306p1 {
+/**
+ * A representation of a robot in the supervisor.
+ */
 class Robot {
  private:
   ros::NodeHandle nh_; ///< ROS node handle.
