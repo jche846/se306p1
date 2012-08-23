@@ -6,8 +6,8 @@
 
 #define DEFAULT_MOVE_SPEED 1
 
-#define DEFAULT_X -4
-#define DEFAULT_Y -4
+#define DEFAULT_X -30
+#define DEFAULT_Y 10
 #define DEFAULT_THETA 0
 #define DEFAULT_DIAMETER 20
 

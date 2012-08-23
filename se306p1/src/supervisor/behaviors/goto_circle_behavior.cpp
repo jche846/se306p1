@@ -5,8 +5,8 @@
 #include "../supervisor.h"
 
 #define DEFAULT_MOVE_SPEED 1
-#define DEFAULT_X 4
-#define DEFAULT_Y 4
+#define DEFAULT_X 10
+#define DEFAULT_Y 10
 #define DEFAULT_THETA 0
 #define DEFAULT_DIAMETER 10.0
 
