@@ -297,7 +297,7 @@ bool RobotController::MoveTo(Vector2 point) {
     // Alternatively, if the robot has a Do queued up and it has passed the
     // goal position, we want to dispatch the Do command.
     if (this->IsDoNext()) {
-      ROS_INFO("R%" PRIu64 " | changed sign! %d %d", this->robot_id_, signChange, distance < this->errDist_);
+      ROS_INFO("R%" PRIu64 " | changed sign! %d %d %f %f", this->robot_id_, signChange, distance < this->errDist_, distance, this->errDist_);
     }
     return true;
   } else {
