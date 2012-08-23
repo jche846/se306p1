@@ -72,7 +72,6 @@ class SupervisorTest : public testing::Test {
     // we need to create a set of robots and check
     // that they get assigned to the correct supervisor fields
     //    i.e. to clusterHead and to nonClusterHeads
-
     for (int ID = 0 ; ID < 5 ; ID++ ) {
       super.robots_[ID] = std::shared_ptr<Robot>(new Robot(ID));
     }
@@ -87,10 +86,19 @@ class SupervisorTest : public testing::Test {
     
     //check that the cluster head is not the robot that started at the origin.
     ASSERT_NE(super.clusterHead_->id_,0);
-    
     ASSERT_EQ(super.clusterHead_->id_,1);
     // Add asserts to check taht the nonHeads contain the correct robots
-    
+    for (int ID = 2 ; ID < 5 ; ID++ ) {
+      std::map<uint64_t, std::shared_ptr<Robot>>::iterator it = super.robots_.find(2);
+      if(it != super.robots_.end())
+      {
+        //if the robot is in the map create a pass
+        ASSERT_EQ(1,1);
+      } else {
+        //create a failure
+        ASSERT_EQ(0,1);
+      }
+    }
   }
 }//namespace
 int main(int argc, char *argv[]) {
