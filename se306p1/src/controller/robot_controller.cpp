@@ -190,10 +190,11 @@ void RobotController::askPosition_callback(AskPosition msg) {
 void RobotController::baseScan_callback(sensor_msgs::LaserScan msg) {
   if (this->state_ == RobotState::SCANNING) {
     int barCount = 0;
-
+    bool foundSomething = false;
     for (int i = 0; i < 180; i++) {
       if (msg.ranges[i] != 5.0) {
         barCount++;
+        foundSomething = true;
 
         // Run over the current bar
         while (msg.ranges[i] != 5.0 && i < 180) {
@@ -201,8 +202,10 @@ void RobotController::baseScan_callback(sensor_msgs::LaserScan msg) {
         }
       }
     }
-
     this->scanResult_ = barCount;
+    if (!foundSomething) {
+      this->scanStep_ = ScanStep::INIT;
+    }
   }
 }
 
@@ -359,8 +362,6 @@ void RobotController::MoveTowardsGoal() {
  */
 void RobotController::WaitForScan() {
   if (this->scanStep_ == ScanStep::INIT) {
-    ROS_INFO("R%" PRIu64 " Starting Scanning", this->robot_id_);
-
     this->scanningStart_ = ros::Time::now().toSec();
     this->scanStep_ = ScanStep::SCANNING;
   }
