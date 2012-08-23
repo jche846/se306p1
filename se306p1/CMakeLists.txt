@@ -63,6 +63,8 @@ rosbuild_add_gtest(test_robot_controller
     test/robot_controller.cpp
     src/util/trig.cpp
     src/controller/robot_controller.cpp)
+rosbuild_add_gtest(test_supervisor
+    test/supervisor.cpp)
 rosbuild_add_rostest(test/supervisor.test)
 
 #target_link_libraries(example ${PROJECT_NAME})
