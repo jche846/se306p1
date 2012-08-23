@@ -138,7 +138,7 @@ if __name__ == '__main__':
         num_groups = int(sys.argv[2])
         x_range = int(sys.argv[3])
         y_range = int(sys.argv[4])
-        zeronode = bool(sys.argv[5])
+        zeronode = sys.argv[5] == 'True'
     else:
         sys.stderr.write("Not enough arguments supplied.")
         sys.exit(1)
