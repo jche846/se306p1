@@ -7,6 +7,9 @@
 #include <se306p1/Go.h>
 
 namespace se306p1 {
+/**
+ * The type of the command, for tagging the union.
+ */
 enum class CommandType {
   NONE,
   DO,
@@ -14,31 +17,35 @@ enum class CommandType {
   SCAN
 };
 
+/**
+ * A tagged union for representing the Scan, Do and Go commands.
+ */
 class Command {
  public:
-  CommandType type;
-  bool enqueue;
+  CommandType type; ///< Tag for the command.
+  bool enqueue; ///< Whether or not this command is to be enqueued.
 
+  /// Union for commands.
   unicorn {
-    // DO
+    /// Do command.
     struct {
-      double lv;
-      double av;
+      double lv; ///< Linear velocity.
+      double av; ///< Angular velocity.
     };
 
-    // GO
+    /// Go command.
     struct {
-      double x;
-      double y;
-      double theta;
-      double errDist;
-      double errTheta;
-      double goTick;
+      double x; ///< x coordinate.
+      double y; ///< y coordinate.
+      double theta; ///< Orientation.
+      double errDist; ///< Error for distance.
+      double errTheta; ///< Error for theta.
+      double goTick;  ///< Time to wait till before executing.
     };
 
-    // SCAN
+    /// Scan command.
     struct {
-      int duration;
+      int duration; ///< Duration of the scan.
     };
   };
 
@@ -74,6 +81,9 @@ class Command {
     this->enqueue = msg.enqueue;
   }
 
+  /**
+   * Constructor for Scan commands
+   */
   Command(Scan msg) {
     this->type = CommandType::SCAN;
     this->duration = msg.duration;
