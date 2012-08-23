@@ -145,9 +145,11 @@ class Supervisor {
   void ElectHead();
 
   /**
+   * Moves Robots to most optimal location
    * 
-   * 
-   * 
+   * Moves robots to a location from the list such that all the robots reach there destination in the smallest amout of time.
+   * This may mean robots move from valid positions to another position if that will make overall convergence faster.
+   * The implementation is not perfect but is a best effort atempt without exploring all possible combinations
    */
   void MoveNodesToDests(const std::vector<std::shared_ptr<Robot> > &nodes,
                         const std::vector<Pose> &poses);
