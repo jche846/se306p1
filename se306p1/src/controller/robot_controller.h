@@ -22,11 +22,10 @@
 #define ASK_POS_TOPIC "/supervisor/ask_pos"
 #define ANS_POS_TOPIC "/supervisor/ans_pos"
 
-/**
- * This header file defines the state variables and methods available to control
- * a robot.
- */
 namespace se306p1 {
+/**
+ * The robot's state.
+ */
 enum class RobotState {
   READY,
   DOING,
@@ -34,84 +33,106 @@ enum class RobotState {
   SCANNING
 };
 
+/**
+ * The robot's go states.
+ */
 enum class GoStep {
   AIMING,
   MOVING,
   ALIGNING
 };
 
+/**
+ * The robot's scan states.
+ */
 enum class ScanStep {
   INIT,
   SCANNING,
   FINISHED
 };
 
+/**
+ * The controller class for robots on Stage.
+ */
 class RobotController {
  private:
-  // Robot identification
+
+  /// Robot identification.
   uint64_t robot_id_;
 
-  // Scan Result
+  /// Result of the last scan.
   int scanResult_;
 
-  // Position
+  /// Position and orientation.
   Pose pose_;
 
-  // Where the robot is currently trying to end up after receiving a go.
+  /// The previous direction the robot was facing.
+  Vector2 prevDirection_;
+
+  /// Where the robot is currently trying to end up after receiving a go.
   Pose goal_;
 
-  // Movement fields
-  double lv_;  // Linear velocity
-  double av_;  // Angular velocity (counter clockwise)
+  // The current tolerances for the action.
+  double errDist_; ///< Distance tolerance.
+  double errTheta_; ///< Angular tolerance.
 
-  // Robot state
+  // Movement fields
+  double lv_;  ///< Linear velocity
+  double av_;  ///< Angular velocity (counter clockwise)
+
+  /// Robot state
   RobotState state_;
 
-  // Current step of Go command
+  /// Current step of Go command.
   GoStep goStep_;
 
-  // Current step of Scan command
+  /// Current step of Scan command.
   ScanStep scanStep_;
 
-  // Command queue
+  /// Command queue.
   std::deque<Command> commands_;
 
-  // ROS Node handler for pub/subbing to topics
+  /// ROS Node handler for pub/subbing to topics.
   ros::NodeHandle nh_;
 
   // Supervisor pub/subs
-  ros::Subscriber askPosSubscriber_;
-  ros::Subscriber scanSubscriber_;
-  ros::Subscriber doSubscriber_;
-  ros::Subscriber goSubscriber_;
-  ros::Publisher ansPosPublisher_;
-  ros::Publisher scanResultPublisher_;
+  ros::Subscriber askPosSubscriber_; ///< Subscriber for AskPosition.
+  ros::Subscriber scanSubscriber_; ///< Subscriber for Scan.
+  ros::Subscriber doSubscriber_; ///< Subscriber for Do.
+  ros::Subscriber goSubscriber_; ///< Subscriber for Go.
+  ros::Publisher ansPosPublisher_; ///< Publisher for AnswerPosition.
+  ros::Publisher scanResultPublisher_; ///< Publisher for ScanResult.
 
   // Stage pub/subs
-  ros::Subscriber clock_;
-  ros::Subscriber odom_;
-  ros::Subscriber baseScan_;
-  ros::Publisher twist_;
+  ros::Subscriber clock_; ///< Subscriber for the clock.
+  ros::Subscriber odom_; ///< Subscriber for the odometry.
+  ros::Subscriber baseScan_; ///< Subscriber for the laser scanner.
+  ros::Publisher twist_; ///< Publisher for moving the robot.
 
   // Count down clock for Scanning
-  int scanningDuration_;
-  double scanningStart_;
+  int scanningDuration_; ///< How long the robot is scanning for.
+  double scanningStart_; ///< When the scanning started.
 
  public:
+  /**
+   * Construct a robot controller with a given node handle and ID.
+   */
   RobotController(ros::NodeHandle &nh, uint64_t id);
   virtual ~RobotController();
   void clock_callback(rosgraph_msgs::Clock msg);
   void odom_callback(nav_msgs::Odometry msg);
-  void scan_callback(se306p1::Scan msg);
+  void scan_callback(Scan msg);
   void go_callback(Go msg);
   void do_callback(Do msg);
   void askPosition_callback(AskPosition msg);
   void baseScan_callback(sensor_msgs::LaserScan msg);
   void AnswerPosition();
   void PublishVelocity();
-  void Scan();
+  void WaitForScan();
+  bool RotateInto(double theta);
+  bool MoveTo(Vector2 point);
   void MoveTowardsGoal();
-  void SetScanning(se306p1::Scan msg);
+  void SetScanning(Scan msg);
   void SetGoing(Go msg);
   void SetDoing(Do msg);
   void ExecuteCommand(Command cmd);

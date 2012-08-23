@@ -39,6 +39,10 @@ rosbuild_add_executable(supervisor
   src/supervisor/behaviors/goto_circle_behavior.cpp
   src/supervisor/behaviors/goto_triangle_behavior.cpp
   src/supervisor/behaviors/goto_square_behavior.cpp
+  src/supervisor/behaviors/goto_pentagon_behavior.cpp
+  src/supervisor/behaviors/goto_hexagon_behavior.cpp
+  src/supervisor/behaviors/goto_heptagon_behavior.cpp
+  src/supervisor/behaviors/goto_octagon_behavior.cpp
   src/util/trig.cpp)
 set_target_properties(supervisor PROPERTIES COMPILE_DEFINITIONS SUPERVISOR_MAIN)
 

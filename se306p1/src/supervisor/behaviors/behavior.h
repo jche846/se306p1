@@ -8,6 +8,10 @@
 namespace se306p1 {
 class Supervisor;
 
+/**
+ * A behavior represents something the supervisor can request its child robots
+ * to perform.
+ */
 class Behavior {
 protected:
   /**

@@ -6,8 +6,15 @@
 #include "../../util/pose.h"
 
 namespace se306p1 {
+/**
+ * Instructs the robots to behave according to the rotate behavior (see alpha
+ * specifications).
+ */
 class RotateBehavior : public Behavior {
 public:
+  /**
+   * Create the rotate behavior.
+   */
   RotateBehavior(Supervisor &sup);
   virtual ~RotateBehavior();
 

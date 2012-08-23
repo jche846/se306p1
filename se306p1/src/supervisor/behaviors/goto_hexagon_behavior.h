@@ -9,17 +9,17 @@ namespace se306p1 {
 /**
  * Policy implementation.
  */
-class SquarePolicy : public GotoPolicy {
+class HexagonPolicy : public GotoPolicy {
 public:
   /**
    * Behavior name.
    */
-  inline static std::string name() { return "square"; }
+  inline static std::string name() { return "hexagon"; }
 
   /**
    * Behavior ID.
    */
-  inline static uint64_t id() { return 4; }
+  inline static uint64_t id() { return 6; }
 
   /**
    * Hook to find robot poses.
@@ -28,7 +28,7 @@ public:
 };
 
 /**
- * Typedef to the GotoPolicyBehavior using the SquarePolicy.
+ * Typedef to the GotoPolicyBehavior using the HexagonPolicy.
  */
-typedef GotoPolicyBehavior<SquarePolicy> GotoSquareBehavior;
+typedef GotoPolicyBehavior<HexagonPolicy> GotoHexagonBehavior;
 }
