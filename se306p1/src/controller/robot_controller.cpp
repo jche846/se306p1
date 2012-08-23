@@ -325,30 +325,31 @@ void RobotController::MoveTowardsGoal() {
   
   double currTime = ros::Time::now().toSec();
   //ROS_INFO("this->goTick_: %f", this->goTick_);
+  if (this->goTick_ > 0){
+    ROS_INFO("R%" PRIu64 " | Moving towards goal!", this->robot_id_);
+  }
+  // If the robot is already at the position, we can skip aiming at it and
+  // moving to it.
+  if (offset.Length() < this->errDist_) {
+    this->goStep_ = GoStep::ALIGNING;
+  }
+
+  // Aim at the goal position.
+  if (this->goStep_ == GoStep::AIMING) {
+    if (/*this->IsDoNext() ||*/
+        this->RotateInto(
+          AngleBetweenPoints(this->pose_.position_, this->goal_.position_)
+        )) {
+      // If the robot is aiming at the goal position, go to the moving step.
+      this->goStep_ = GoStep::MOVING;
+    }
+  }
+  
   if (this->goTick_ > currTime) {
    this->lv_ = 0.0;
    this->av_ = 0.0;
   } else {
-    if (this->goTick_ > 0){
-      ROS_INFO("R%" PRIu64 " | Moving towards goal!", this->robot_id_);
-    }
-    // If the robot is already at the position, we can skip aiming at it and
-    // moving to it.
-    if (offset.Length() < this->errDist_) {
-      this->goStep_ = GoStep::ALIGNING;
-    }
-
-    // Aim at the goal position.
-    if (this->goStep_ == GoStep::AIMING) {
-      if (this->IsDoNext() ||
-          this->RotateInto(
-            AngleBetweenPoints(this->pose_.position_, this->goal_.position_)
-          )) {
-        // If the robot is aiming at the goal position, go to the moving step.
-        this->goStep_ = GoStep::MOVING;
-      }
-    }
-
+  
     // Move towards the goal position
     if (this->goStep_ == GoStep::MOVING) {
       if (this->MoveTo(this->goal_.position_)) {
