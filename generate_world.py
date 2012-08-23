@@ -89,7 +89,7 @@ def append_barcodes(barcodes, i, filename):
     ))
 
 
-def generate(num_robots, num_groups, x_range, y_range):
+def generate(num_robots, num_groups, x_range, y_range, zeronode):
     # Generate all the robot positions. No robot is allowed to be on the
     # origin.
     robot_positions = []
@@ -99,7 +99,8 @@ def generate(num_robots, num_groups, x_range, y_range):
             (x, y) = (random.randint(-x_range, x_range), random.randint(-y_range, y_range))
 
         robot_positions.append((x, y))
-
+    if zeronode:
+      robot_positions[num_groups] = (0, 0)
     # Sort them by distance from the origin
     robot_positions.sort(
         key=lambda pos: math.sqrt(pos[0] * pos[0] + pos[1] * pos[1]))
@@ -132,13 +133,14 @@ def generate(num_robots, num_groups, x_range, y_range):
     return HEADER + "\n".join(robots) + "\n".join(barcodes)
 
 if __name__ == '__main__':
-    if len(sys.argv) == 5:
+    if len(sys.argv) == 6:
         num_robots = int(sys.argv[1])
         num_groups = int(sys.argv[2])
         x_range = int(sys.argv[3])
         y_range = int(sys.argv[4])
+        zeronode = bool(sys.argv[5])
     else:
         sys.stderr.write("Not enough arguments supplied.")
         sys.exit(1)
 
-    print(generate(num_robots, num_groups, x_range, y_range))
+    print(generate(num_robots, num_groups, x_range, y_range, zeronode))

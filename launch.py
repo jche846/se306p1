@@ -12,10 +12,11 @@ if __name__ == '__main__':
     parser.add_argument('-ns', '--numsupervisors', type=int, default=4, help='The number of supervisors to spawn. The number of supervisors dictates the number of robot groups. The size of the groups will be equal to the number of robots divided by the number of supervisors. (default 4)')
     parser.add_argument('-x', '--xrange', type=int, default=40, help='The maximum distance away from the origin along the x axis to spawn robots. (default 40)')
     parser.add_argument('-y', '--yrange', type=int, default=40, help='The maximum distance away from the origin along the y axis to spawn robots. (default 40)')
+    parser.add_argument('-zn', '--zeronode', nargs='?', const=True, default=False, help='Should a node be placed on the origin')
 
     args = parser.parse_args()
     print(args)
-
+ 
     if args.numrobots % args.numsupervisors != 0:
         sys.stderr.write("{} does not divide evenly by {}. There must be an equal number of robots per group.\n".format(args.numrobots, args.numsupervisors))
         sys.exit(1)
@@ -23,8 +24,8 @@ if __name__ == '__main__':
     num_members = args.numrobots / args.numsupervisors
 
     # Generate 
-    os.system("./generate_world.py {} {} {} {} > se306p1.world".format(
-        args.numrobots, args.numsupervisors, args.xrange, args.yrange
+    os.system("./generate_world.py {} {} {} {} {} > se306p1.world".format(
+        args.numrobots, args.numsupervisors, args.xrange, args.yrange, args.zeronode
     ))
 
     # Launch stage
