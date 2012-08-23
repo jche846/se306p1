@@ -135,8 +135,10 @@ void Supervisor::WaitForReady() {
 }
 
 void Supervisor::Start() {
+  // init ros clock
   while (ros::Time::now().isZero());
 
+  // find all the robots in our swarm
   this->Discover(5);
   this->state_ = State::CONTROLLING;
 
@@ -145,6 +147,7 @@ void Supervisor::Start() {
     return;
   }
 
+  // setup all the nodes
   this->WaitForReady();
 
   this->dispatchIt_ = robots_.begin();
@@ -153,12 +156,15 @@ void Supervisor::Start() {
 
   ros::Rate r(100);
 
+  // queue all the messages for moving the nodes
   this->MoveNodesToDests(this->nonHeadRobots_, this->FindRobotDests());
 
   ROS_INFO("Supervisor %" PRId64 ": Spinning up.", this->sid_);
 
   this->state_ = State::LINEINGUP;
 
+
+  // start sending all the messages to get them in a line
   while (ros::ok()) {
     this->DispatchMessages();
 
@@ -170,6 +176,7 @@ void Supervisor::Start() {
           break;
         }
       }
+      // send the cluster head out to scan because all the other nodes are in a line
       if (execDone) {
 
         this->clusterHead_->Go(Pose(Vector2(-10 * static_cast<int>(this->sid_), 50), 0.0), true);
@@ -179,8 +186,8 @@ void Supervisor::Start() {
       }
 
     } else if(this->state_ == State::CONTROLLING) {
-
-      if (!this->clusterHead_->executing_ && !this->currentBehavior_->done_) {
+      // check the cluser head is back in line and execute the current behavior 
+      if (!this->clusterHead_->executing_ && !this->currentBehavior_->done_) { 
         this->currentBehavior_->Execute();
         this->currentBehavior_->done_ = true;
       }
@@ -261,14 +268,19 @@ std::vector<Pose> Supervisor::FindRobotDests() {
 void Supervisor::MoveNodesToDests(
     const std::vector<std::shared_ptr<Robot> > &nodesIn,
     const std::vector<Pose> &posesIn) {
+  // copy the arrays so they can be changed without affecting the input arrays
   std::vector<std::shared_ptr<Robot> > nodes = nodesIn;
   std::vector<Pose> poses = posesIn;
 
+  // loop while there is a pose with no robot at it
   while (poses.size()) {
     double longestDist = -1;
     int longestNodeIndex = 0;
     int longestPoseIndex = 0;
 
+    // find the robot that is furthest away from its closest pose
+    // 1. Find the distance from each robot to all poses.
+    // 2. Get the shortest distnace from that list of distances 
     for (size_t nodeIndex = 0; nodeIndex < nodes.size(); nodeIndex++) {
       double dist = std::numeric_limits<double>::max();
       int destIndex = 0;
