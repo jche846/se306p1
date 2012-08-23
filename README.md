@@ -7,7 +7,7 @@
 
 ### Getting the software:
 The easiest way to get the software is to clone a copy from github using  
-    git clone git@github.com:rfw/se306p1.git  
+````git clone git@github.com:rfw/se306p1.git````  
 Then navigate into the project directory using cd se306p1  
 You will now have a copy of all the code that is ready to be built.  
 
@@ -20,7 +20,7 @@ It will output if it was successful, then stop the roscore it started.
 ### Configure:  
 In the top folder there is a file called launch.config  
 it should contain a single line with two integers separated by a space:  
-    <number of robots in the system> <number of swarms to break into>  
+````<number of robots in the system> <number of swarms to break into>````  
 Configure the settings in this file and save.  
 
 ### Running:
