@@ -140,8 +140,8 @@ std::vector<Pose> FindRobotPoses (Vector2 center, double theta, double diameter,
   for (int i = 0; i < numSides ; i++) {
 
     // The two vertexes that we are positioning the robots between
-    Vector2 &vertex1 = poses[i].position_;
-    Vector2 &vertex2 = poses[(i+1) % numSides].position_;
+    Vector2 vertex1 = poses[i].position_;
+    Vector2 vertex2 = poses[(i+1) % numSides].position_;
 
     // The difference between these two vertexes so that we know where to place the robots
     double dx = vertex2.x_ - vertex1.x_;
