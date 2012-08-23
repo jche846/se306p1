@@ -1,6 +1,10 @@
 #include <gtest/gtest.h>
+
+#define private public
 #include"../src/supervisor/supervisor.h"
 #include"../src/supervisor/robot.h"
+#undef private
+
 #include "../src/util/command.h"
 #include "../src/util/vector2.h"
 #include "../src/util/pose.h"
@@ -28,18 +32,6 @@ class SupervisorTest : public testing::Test {
       
     }
   };
-
-  /**
-  * 
-  */
-  /*
-  TEST_F(SupervisorTest, testSwitchBehaviour) {
-    uint64_t id = 1;
-    SwitchBehavior(id);
-    super.currentBehavior_;
-  }
-  */
-  
   /**
   * Check that for a selection of 5 robots the cluster head is selected correctly.
   */
@@ -145,6 +137,35 @@ class SupervisorTest : public testing::Test {
         //create a failure
         ASSERT_EQ(0,1);
       }
+    }
+  }
+
+  TEST_F(SupervisorTest, FindRobotDests) {
+    // we need to create a set of robots and check
+    // that they get assigned to the correct supervisor fields
+    //    i.e. to clusterHead and to nonClusterHeads
+    for (int ID = 0 ; ID < 5 ; ID++ ) {
+      super.robots_[ID] = std::shared_ptr<Robot>(new Robot(ID));
+    }
+    super.robots_[0]->pose_ = Pose(Vector2(2.0, 2.0),35.0);
+    super.robots_[1]->pose_ = Pose(Vector2(2.0, 3.0),-45.0);
+    super.robots_[2]->pose_ = Pose(Vector2(-2.0, 5.0),10.0);
+    super.robots_[3]->pose_ = Pose(Vector2(-2.0, -5.0),135.0);
+    super.robots_[4]->pose_ = Pose(Vector2(-6.0, 3.0),-160.0);
+
+    //call elect head
+    super.ElectHead();
+    //Call FindRobotDests
+    std::vector<Pose> dests = super.FindRobotDests();
+    std::vector<Pose> check;
+    check.push_back(Pose(Vector2(2.0 + 1.48492424, 2.0 + 1.48492424),135.0));
+    check.push_back(Pose(Vector2(2.0 + 1.48492424 * 2.0, 2.0 + 1.48492424 * 2.0),135.0));
+    check.push_back(Pose(Vector2(2.0 + 1.48492424 * 3.0, 2.0 + 1.48492424 * 3.0),135.0));
+    check.push_back(Pose(Vector2(2.0 + 1.48492424 * 4.0, 2.0 + 1.48492424 * 4.0),135.0));
+    for(int ID = 0; ID<4; ID++){
+      ASSERT_NEAR(dests.at(ID).position_.x_,check.at(ID).position_.x_,0.0001);
+      ASSERT_NEAR(dests.at(ID).position_.y_,check.at(ID).position_.y_,0.0001);
+      ASSERT_NEAR(dests.at(ID).theta_,check.at(ID).theta_,0.0001);
     }
   }
 }//namespace
