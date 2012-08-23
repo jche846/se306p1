@@ -80,7 +80,7 @@ def append_barcodes(barcodes, i, filename):
   (
     name "{name}"
     bitmap "images/{image_file}"
-    size [ 6 4.5 0.5 ]
+    size [ 7.5 3.5 0.5 ]
     pose [ 60.0 {y}.0 0.0 0.0 ]
   )
 
@@ -89,14 +89,14 @@ def append_barcodes(barcodes, i, filename):
     ))
 
 
-def generate(num_robots, num_groups):
+def generate(num_robots, num_groups, x_range, y_range):
     # Generate all the robot positions. No robot is allowed to be on the
     # origin.
     robot_positions = []
     for i in range(num_robots):
         (x, y) = (0, 0)
         while (x, y) == (0, 0):
-            (x, y) = (random.randint(-40, 40), random.randint(-40, 40))
+            (x, y) = (random.randint(-x_range, x_range), random.randint(-y_range, y_range))
 
         robot_positions.append((x, y))
 
@@ -132,18 +132,13 @@ def generate(num_robots, num_groups):
     return HEADER + "\n".join(robots) + "\n".join(barcodes)
 
 if __name__ == '__main__':
-    if len(sys.argv) == 3:
+    if len(sys.argv) == 5:
         num_robots = int(sys.argv[1])
         num_groups = int(sys.argv[2])
-    elif len(sys.argv) == 1:
-        num_robots = 24
-        num_groups = 4
+        x_range = int(sys.argv[3])
+        y_range = int(sys.argv[4])
     else:
-        sys.stderr.write("usage: {} NUM_ROBOTS (default: 24) NUM_GROUPS (default: 6)\n".format(sys.argv[0]))
+        sys.stderr.write("Not enough arguments supplied.")
         sys.exit(1)
 
-    if num_robots % num_groups != 0:
-        sys.stderr.write("{} does not divide evenly by {}. There must be an equal number of robots per group.\n".format(num_robots, num_groups))
-        sys.exit(1)
-
-    print(generate(num_robots, num_groups))
+    print(generate(num_robots, num_groups, x_range, y_range))
