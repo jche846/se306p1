@@ -324,10 +324,6 @@ void RobotController::MoveTowardsGoal() {
   Vector2 offset = this->goal_.position_ - this->pose_.position_;
   
   double currTime = ros::Time::now().toSec();
-  //ROS_INFO("this->goTick_: %f", this->goTick_);
-  if (this->goTick_ > 0){
-    ROS_INFO("R%" PRIu64 " | Moving towards goal!", this->robot_id_);
-  }
   // If the robot is already at the position, we can skip aiming at it and
   // moving to it.
   if (offset.Length() < this->errDist_) {
