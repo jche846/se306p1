@@ -125,7 +125,7 @@ def generate(num_robots, num_groups, x_range, y_range):
 
     # Generate barcodes
     barcodes = []
-    for i, filename in enumerate(os.listdir("images")):
+    for i, filename in enumerate(sorted(os.listdir("images"))):
         append_barcodes(barcodes, i, filename)
 
     # Return the generated robots and barcodes with the header.
