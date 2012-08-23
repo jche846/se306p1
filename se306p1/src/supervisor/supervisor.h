@@ -135,6 +135,13 @@ class Supervisor {
    * Request positions of all robots to discover them.
    */
   void Discover(int timeout);
+
+  /**
+   * Waits for robots to become ready
+   *
+   * This method will block until all robots in the swarm are ready,
+   * It checks if there are robots not ready then calls ros::spinonce() and checks again
+   */
   void WaitForReady();
 
   /**
