@@ -3,6 +3,7 @@
 2. Getting the software
 3. Building
 4. Running
+5. Testing
 
 
 ## Prerequisites
@@ -24,3 +25,10 @@ Terminal 1: ````roscore````
 Terminal 2: ````./launch.py````  
 The launch script takes a number of arguments allowing you to configure the number of robots, the number of robot groups, and the distance of the robots from the origin. For usage information about the launch script, run:  
 ````./launch.py -h````
+
+## Testing
+In order to run the tests, complete the following steps:
+1. Run the setup.sh file in the project directory with `./setup.sh`. This will setup the ros package path in order for the tests to build.
+2. Navigate to the se306p1 subdirectory within the project directory.
+3. Run `make tests` to build the tests.
+4. Run `make test` to run the tests.
